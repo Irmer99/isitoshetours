@@ -66,7 +66,7 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
-            client: { '$ref': '#/components/schemas/Client' },
+            clientId: { '$ref': '#/components/schemas/Client' },
             itinerary: { type: 'string' },
             status: { type: 'string', enum: ['enquiry', 'confirmed', 'completed', 'cancelled'] },
             travelDate: { type: 'string', format: 'date' },
@@ -79,9 +79,9 @@ const options = {
         },
         BookingInput: {
           type: 'object',
-          required: ['client', 'itinerary', 'travelDate', 'participants', 'totalAmount'],
+          required: ['clientId', 'itinerary', 'travelDate', 'participants', 'totalAmount'],
           properties: {
-            client: { type: 'string', description: 'MongoDB ObjectId of the client' },
+            clientId: { type: 'string', description: 'MongoDB ObjectId of the client' },
             itinerary: { type: 'string' },
             itineraryTitle: { type: 'string' },
             travelDate: { type: 'string', format: 'date' },

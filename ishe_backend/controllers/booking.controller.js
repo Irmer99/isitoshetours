@@ -2,7 +2,7 @@ const Booking = require('../models/Booking');
 
 exports.create = async (req, res) => {
   const booking = await Booking.create(req.body);
-  const populated = await Booking.findById(booking._id).populate('client');
+  const populated = await Booking.findById(booking._id)    .populate('clientId');
   res.status(201).json(populated);
 };
 
@@ -17,13 +17,13 @@ exports.list = async (req, res) => {
   }
 
   const bookings = await Booking.find(filter)
-    .populate('client')
+    .populate('clientId')
     .sort({ createdAt: -1 });
   res.json(bookings);
 };
 
 exports.detail = async (req, res) => {
-  const booking = await Booking.findById(req.params.id).populate('client');
+  const booking = await Booking.findById(req.params.id).populate('clientId');
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
   res.json(booking);
 };
@@ -55,7 +55,7 @@ exports.updateStatus = async (req, res) => {
   booking.status = status;
   await booking.save();
 
-  const populated = await Booking.findById(booking._id).populate('client');
+  const populated = await Booking.findById(booking._id)    .populate('clientId');
   res.json(populated);
 };
 

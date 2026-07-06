@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
 const createBookingSchema = z.object({
-  client: z.string().length(24),
+  clientId: z.string().regex(/^[a-f0-9]{24}$/, 'Must be a valid client ObjectId'),
   itinerary: z.string().min(1),
   itineraryTitle: z.string().optional(),
   travelDate: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),

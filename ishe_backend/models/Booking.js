@@ -8,7 +8,7 @@ const statusHistorySchema = new mongoose.Schema({
 }, { _id: false });
 
 const bookingSchema = new mongoose.Schema({
-  client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
+  clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
   itinerary: { type: String, required: true },
   itineraryTitle: { type: String },
   status: {

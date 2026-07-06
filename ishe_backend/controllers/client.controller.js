@@ -32,8 +32,8 @@ exports.update = async (req, res) => {
 };
 
 exports.bookings = async (req, res) => {
-  const bookings = await Booking.find({ client: req.params.id })
-    .populate('client')
+  const bookings = await Booking.find({ clientId: req.params.id })
+    .populate('clientId')
     .sort({ createdAt: -1 });
   res.json(bookings);
 };
