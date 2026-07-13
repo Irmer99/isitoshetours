@@ -36,15 +36,4 @@ exports.refresh = async (req, res) => {
   }
 };
 
-exports.seed = async (req, res) => {
-  const existing = await Admin.findOne({ email: 'admin@ishetours.com' });
-  if (existing) return res.json({ message: 'Admin already exists' });
-
-  await Admin.create({
-    email: 'admin@ishetours.com',
-    password: 'admin123',
-    role: 'superadmin',
-  });
-
-  res.json({ message: 'Admin seeded: admin@ishetours.com / admin123' });
-};
+module.exports = { login: exports.login, refresh: exports.refresh };

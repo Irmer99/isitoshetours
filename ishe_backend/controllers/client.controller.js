@@ -2,6 +2,8 @@ const Client = require('../models/Client');
 const Booking = require('../models/Booking');
 
 exports.create = async (req, res) => {
+  const existing = await Client.findOne({ email: req.body.email });
+  if (existing) return res.json(existing);
   const client = await Client.create(req.body);
   res.status(201).json(client);
 };

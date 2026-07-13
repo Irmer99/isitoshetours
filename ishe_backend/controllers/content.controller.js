@@ -4,6 +4,11 @@ const Testimonial = require('../models/Testimonial');
 const Team = require('../models/Team');
 const SiteSettings = require('../models/SiteSettings');
 
+exports.createItinerary = async (req, res) => {
+  const itinerary = await Itinerary.create(req.body);
+  res.status(201).json(itinerary);
+};
+
 exports.getItineraries = async (req, res) => {
   const itineraries = await Itinerary.find().sort({ title: 1 });
   res.json(itineraries);
@@ -25,9 +30,25 @@ exports.updateItinerary = async (req, res) => {
   res.json(itinerary);
 };
 
+exports.createDestination = async (req, res) => {
+  const dest = await Destination.create(req.body);
+  res.status(201).json(dest);
+};
+
 exports.getDestinations = async (req, res) => {
   const destinations = await Destination.find().sort({ name: 1 });
   res.json(destinations);
+};
+
+exports.getDestinationBySlug = async (req, res) => {
+  const dest = await Destination.findOne({ slug: req.params.slug });
+  if (!dest) return res.status(404).json({ error: 'Destination not found' });
+  res.json(dest);
+};
+
+exports.getItinerariesByDestination = async (req, res) => {
+  const itineraries = await Itinerary.find({ destinations: req.params.slug }).sort({ title: 1 });
+  res.json(itineraries);
 };
 
 exports.updateDestination = async (req, res) => {

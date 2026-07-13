@@ -66,7 +66,7 @@ exports.conversion = async (req, res) => {
   data.forEach((d) => { map[d._id] = d.count; });
   const enquiries = map.enquiry || 0;
   const confirmed = map.confirmed || 0;
-  const rate = enquiries > 0 ? ((confirmed / enquiries) * 100).toFixed(1) : 0;
+  const rate = enquiries > 0 ? confirmed / enquiries : 0;
 
-  res.json({ enquiries, confirmed, completed: map.completed || 0, cancelled: map.cancelled || 0, conversionRate: `${rate}%` });
+  res.json({ enquiries, confirmed, completed: map.completed || 0, cancelled: map.cancelled || 0, rate });
 };
