@@ -53,7 +53,7 @@ export default function AdminLayout() {
             to="/admin"
             className="font-heading text-lg font-bold text-primary"
           >
-            Ishe Tours
+            Isitoshe Tours
           </Link>
           <button
             className="lg:hidden"

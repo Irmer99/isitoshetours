@@ -9,10 +9,10 @@ import apiClient from "~/lib/api-client";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Contact Us — Ishe Tours" },
+    { title: "Contact Us — Isitoshe Tours" },
     {
       name: "description",
-      content: "Get in touch with Ishe Tours.",
+      content: "Get in touch with Isitoshe Tours.",
     },
   ];
 }
@@ -31,17 +31,17 @@ const contactInfo = [
   {
     icon: MapPin,
     label: "Address",
-    value: "Marrakech, Morocco",
+    value: "Kyaliwajjala, Kampala, Uganda",
   },
   {
     icon: Phone,
     label: "Phone",
-    value: "+212 600-000000",
+    value: "+256 787 699744",
   },
   {
     icon: Mail,
     label: "Email",
-    value: "info@ishetours.com",
+    value: "info@isitoshetours.com",
   },
 ];
 
@@ -55,7 +55,7 @@ export default function Contact() {
           Contact Us
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Get in touch and let's plan your Moroccan adventure
+          Get in touch and let's plan your Ugandan adventure
         </p>
       </div>
 
@@ -98,7 +98,7 @@ export default function Contact() {
             </FieldRoot>
             <FieldRoot>
               <Label>Phone</Label>
-              <Input name="phone" required placeholder="+212 600-000000" />
+              <Input name="phone" required placeholder="+256 787 699744" />
             </FieldRoot>
             <Button
               type="submit"

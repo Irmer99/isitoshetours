@@ -11,7 +11,7 @@ import apiClient from "~/lib/api-client";
 import type { Discount } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Discounts — Ishe Tours Admin" }];
+  return [{ title: "Discounts — Isitoshe Tours Admin" }];
 }
 
 type DiscountForm = {
@@ -311,7 +311,7 @@ export default function DiscountManager() {
                 <p className="text-xs text-muted-foreground">
                   {d.type === "percent"
                     ? `${d.value}% off`
-                    : `MAD ${d.value} off`}{" "}
+                    : `UGX ${d.value} off`}{" "}
                   · {d.appliesTo} · Used {d.usedCount}
                   {d.usageLimit ? `/${d.usageLimit}` : ""}
                 </p>

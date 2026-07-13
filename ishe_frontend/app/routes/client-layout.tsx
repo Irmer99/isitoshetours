@@ -20,7 +20,7 @@ export default function ClientLayout() {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-sm">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link to="/" className="font-heading text-xl font-bold text-primary">
-            Ishe Tours
+            Isitoshe Tours
           </Link>
 
           <div className="hidden items-center gap-8 md:flex">
@@ -84,10 +84,10 @@ export default function ClientLayout() {
           <div className="grid gap-8 md:grid-cols-3">
             <div>
               <h3 className="font-heading text-lg font-bold text-primary">
-                Ishe Tours
+                Isitoshe Tours
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Discover Morocco with expertly curated tours and unforgettable experiences.
+                Discover Uganda with expertly curated safaris and unforgettable experiences.
               </p>
             </div>
             <div>
@@ -111,15 +111,15 @@ export default function ClientLayout() {
                 Contact
               </h4>
               <p className="text-sm text-muted-foreground">
-                Email: info@ishetours.com
+                Email: info@isitoshetours.com
               </p>
               <p className="text-sm text-muted-foreground">
-                Phone: +212 600-000000
+                Phone: +256 787 699744
               </p>
             </div>
           </div>
           <div className="mt-8 border-t border-border/50 pt-6 text-center text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Ishe Tours. All rights reserved.
+            &copy; {new Date().getFullYear()} Isitoshe Tours. All rights reserved.
           </div>
         </div>
       </footer>

@@ -12,7 +12,7 @@ import apiClient from "~/lib/api-client";
 import type { Client, Booking } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Clients — Ishe Tours Admin" }];
+  return [{ title: "Clients — Isitoshe Tours Admin" }];
 }
 
 export default function ClientTracker() {
@@ -185,7 +185,7 @@ export default function ClientTracker() {
                 required
                 value={form.phone}
                 onChange={(e) => { setForm({ ...form, phone: e.target.value }); setFieldErrors({ ...fieldErrors, phone: "" }); }}
-                placeholder="+212 600-000000"
+                placeholder="+256 787 699744"
                 className={fieldErrors.phone ? "border-destructive" : ""}
               />
               {fieldErrors.phone && <p className="text-xs text-destructive">{fieldErrors.phone}</p>}

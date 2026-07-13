@@ -22,7 +22,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 export function meta({ loaderData }: Route.MetaArgs) {
   return [
-    { title: `${loaderData?.itinerary?.title || "Itinerary"} — Ishe Tours` },
+    { title: `${loaderData?.itinerary?.title || "Itinerary"} — Isitoshe Tours` },
     {
       name: "description",
       content: loaderData?.itinerary?.subtitle || "",
@@ -59,9 +59,9 @@ export default function ItineraryDetail({
         notes: form.get("notes") || undefined,
       });
       setDialogOpen(false);
-      const phone = "+212600000000";
+      const phone = "+256787699744";
       const message = encodeURIComponent(
-        `Hi Ishe Tours! I submitted an enquiry for ${itinerary.title}.`
+        `Hi Isitoshe Tours! I submitted an enquiry for ${itinerary.title}.`
       );
       window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
     } catch {
@@ -234,7 +234,7 @@ export default function ItineraryDetail({
                     <Input
                       name="phone"
                       required
-                      placeholder="+212 600-000000"
+                      placeholder="+256 787 699744"
                     />
                   </FieldRoot>
                   <FieldRoot>

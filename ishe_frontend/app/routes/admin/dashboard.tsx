@@ -58,7 +58,7 @@ function useBookingsOverTime() {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Dashboard — Ishe Tours Admin" }];
+  return [{ title: "Dashboard — Isitoshe Tours Admin" }];
 }
 
 export default function Dashboard() {
@@ -89,7 +89,7 @@ export default function Dashboard() {
     {
       label: "Revenue (MTD)",
       value: overview?.totalRevenue
-        ? `MAD ${overview.totalRevenue.toLocaleString()}`
+        ? `UGX ${overview.totalRevenue.toLocaleString()}`
         : "-",
       icon: DollarSign,
       color: "text-primary",

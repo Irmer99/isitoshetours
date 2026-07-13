@@ -11,7 +11,7 @@ import apiClient from "~/lib/api-client";
 import type { Destination } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Destinations — Ishe Tours Admin" }];
+  return [{ title: "Destinations — Isitoshe Tours Admin" }];
 }
 
 export default function DestinationManager() {
@@ -168,7 +168,7 @@ export default function DestinationManager() {
               <Input
                 value={form.name}
                 onChange={(e) => { setForm({ ...form, name: e.target.value }); setFieldErrors({ ...fieldErrors, name: "" }); }}
-                placeholder="e.g. Atlas Mountains"
+                placeholder="e.g. Bwindi Impenetrable Forest"
                 className={fieldErrors.name ? "border-destructive" : ""}
               />
               {fieldErrors.name && <p className="text-xs text-destructive">{fieldErrors.name}</p>}
@@ -179,7 +179,7 @@ export default function DestinationManager() {
                 value={form.slug}
                 disabled={!creating}
                 onChange={(e) => { setForm({ ...form, slug: e.target.value }); setFieldErrors({ ...fieldErrors, slug: "" }); }}
-                placeholder="e.g. atlas-mountains"
+                placeholder="e.g. bwindi-impenetrable-forest"
                 className={fieldErrors.slug ? "border-destructive" : ""}
               />
               {fieldErrors.slug && <p className="text-xs text-destructive">{fieldErrors.slug}</p>}
@@ -201,7 +201,7 @@ export default function DestinationManager() {
                 onChange={(e) => setForm({ ...form, highlights: e.target.value })}
                 className="w-full border border-input bg-background p-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 resize-none"
                 rows={4}
-                placeholder="Stunning mountain views&#10;Traditional Berber villages&#10;Guided trekking"
+                placeholder="Mountain gorilla trekking&#10;Ancient rainforest&#10;Bird watching paradise"
               />
             </FieldRoot>
             <FieldRoot className="sm:col-span-2">

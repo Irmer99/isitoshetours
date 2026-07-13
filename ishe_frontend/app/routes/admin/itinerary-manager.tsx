@@ -12,7 +12,7 @@ import apiClient from "~/lib/api-client";
 import type { Itinerary, Destination } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Itineraries — Ishe Tours Admin" }];
+  return [{ title: "Itineraries — Isitoshe Tours Admin" }];
 }
 
 export default function ItineraryManager() {
@@ -26,7 +26,7 @@ export default function ItineraryManager() {
     difficulty: "moderate" as Itinerary["difficulty"],
     duration: "",
     pricingFrom: 0,
-    pricingCurrency: "MAD",
+    pricingCurrency: "UGX",
     destinations: [] as string[],
     images: [] as string[],
   });
@@ -96,7 +96,7 @@ export default function ItineraryManager() {
       difficulty: "moderate",
       duration: "",
       pricingFrom: 0,
-      pricingCurrency: "MAD",
+      pricingCurrency: "UGX",
       destinations: [],
       images: [],
     });
@@ -113,7 +113,7 @@ export default function ItineraryManager() {
       difficulty: it.difficulty,
       duration: it.duration || "",
       pricingFrom: it.pricing?.from || 0,
-      pricingCurrency: it.pricing?.currency || "MAD",
+      pricingCurrency: it.pricing?.currency || "UGX",
       destinations: it.destinations || [],
       images: it.images || [],
     });

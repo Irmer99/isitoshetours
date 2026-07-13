@@ -51,7 +51,7 @@ function useItineraries() {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Bookings — Ishe Tours Admin" }];
+  return [{ title: "Bookings — Isitoshe Tours Admin" }];
 }
 
 export default function BookingsList() {
@@ -264,7 +264,7 @@ export default function BookingsList() {
                     {fieldErrors.participants && <p className="text-xs text-destructive">{fieldErrors.participants}</p>}
                   </FieldRoot>
                   <FieldRoot>
-                    <Label>Total Amount (MAD)</Label>
+                    <Label>                    Total Amount (UGX)</Label>
                     <Input
                       type="number"
                       min={0}
@@ -400,7 +400,7 @@ export default function BookingsList() {
                     {new Date(b.travelDate).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 text-right font-medium">
-                    MAD {b.totalAmount.toLocaleString()}
+                    UGX {b.totalAmount.toLocaleString()}
                   </td>
                 </tr>
               ))

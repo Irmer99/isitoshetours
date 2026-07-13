@@ -254,7 +254,7 @@ export default function BookingDetail() {
               {fieldErrors.participants && <p className="text-xs text-destructive">{fieldErrors.participants}</p>}
             </FieldRoot>
             <FieldRoot>
-              <Label>Total Amount (MAD)</Label>
+              <Label>Total Amount (UGX)</Label>
               <Input
                 type="number"
                 min={0}
@@ -332,7 +332,7 @@ export default function BookingDetail() {
                 {booking.participants}
               </p>
               <p>
-                <span className="text-muted-foreground">Total Amount:</span> MAD{" "}
+                <span className="text-muted-foreground">Total Amount:</span> UGX{" "}
                 {booking.totalAmount.toLocaleString()}
               </p>
               <p>

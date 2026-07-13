@@ -10,7 +10,7 @@ import apiClient from "~/lib/api-client";
 import type { SiteSettings } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Settings — Ishe Tours Admin" }];
+  return [{ title: "Settings — Isitoshe Tours Admin" }];
 }
 
 export default function SettingsManager() {

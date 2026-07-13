@@ -12,7 +12,7 @@ export async function loader() {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Destinations — Ishe Tours" }];
+  return [{ title: "Destinations — Isitoshe Tours" }];
 }
 
 export default function Destinations({ loaderData }: Route.ComponentProps) {
@@ -26,7 +26,7 @@ export default function Destinations({ loaderData }: Route.ComponentProps) {
             Destinations
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Explore the stunning locations our tours visit across Morocco.
+            Explore the stunning locations our tours visit across Uganda.
           </p>
         </div>
 

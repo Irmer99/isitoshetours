@@ -22,7 +22,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Itineraries — Ishe Tours" },
+    { title: "Itineraries — Isitoshe Tours" },
     { name: "description", content: "Browse our curated tour itineraries." },
   ];
 }
@@ -51,7 +51,7 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
           Our Itineraries
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Find your perfect Moroccan adventure
+          Find your perfect Ugandan adventure
         </p>
       </div>
 

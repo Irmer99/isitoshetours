@@ -22,7 +22,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 export function meta({ loaderData }: Route.MetaArgs) {
   const name = loaderData?.destination?.name;
-  return [{ title: name ? `${name} — Ishe Tours` : "Destination — Ishe Tours" }];
+  return [{ title: name ? `${name} — Isitoshe Tours` : "Destination — Isitoshe Tours" }];
 }
 
 export default function DestinationDetail({ loaderData }: Route.ComponentProps) {

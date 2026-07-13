@@ -37,7 +37,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Admin Login — Ishe Tours" }];
+  return [{ title: "Admin Login — Isitoshe Tours" }];
 }
 
 export default function AdminLogin() {
@@ -62,7 +62,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-sm border border-border bg-card p-8">
         <div className="text-center">
           <h1 className="font-heading text-2xl font-bold text-foreground">
-            Ishe Tours
+            Isitoshe Tours
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">Admin Login</p>
         </div>
@@ -73,7 +73,7 @@ export default function AdminLogin() {
               name="email"
               type="email"
               required
-              placeholder="admin@ishetours.com"
+              placeholder="admin@isitoshetours.com"
             />
           </FieldRoot>
           <FieldRoot>
