@@ -65,17 +65,4 @@ router.post('/login', validateBody(loginSchema), asyncHandler(authController.log
  */
 router.post('/refresh', validateBody(refreshSchema), asyncHandler(authController.refresh));
 
-/**
- * @swagger
- * /auth/seed:
- *   post:
- *     tags: [Auth]
- *     summary: Seed default admin account
- *     description: Creates admin@ishetours.com / admin123 if it doesn't exist
- *     responses:
- *       200:
- *         description: Admin created or already exists
- */
-router.post('/seed', asyncHandler(authController.seed));
-
 module.exports = router;

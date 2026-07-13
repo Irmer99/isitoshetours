@@ -3,7 +3,7 @@ const bookingController = require('../controllers/booking.controller');
 const authMiddleware = require('../middleware/authMiddleware');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
-const { createBookingSchema, updateBookingStatusSchema } = require('../validators/booking.validator');
+const { createBookingSchema, updateBookingStatusSchema, updateBookingEditSchema } = require('../validators/booking.validator');
 
 const router = Router();
 
@@ -61,7 +61,7 @@ router.post('/', validateBody(createBookingSchema), asyncHandler(bookingControll
  *               items:
  *                 $ref: '#/components/schemas/Booking'
  */
-router.get('/', asyncHandler(bookingController.list));
+router.get('/', authMiddleware, asyncHandler(bookingController.list));
 
 /**
  * @swagger
@@ -84,7 +84,7 @@ router.get('/', asyncHandler(bookingController.list));
  *       404:
  *         description: Booking not found
  */
-router.get('/:id', asyncHandler(bookingController.detail));
+router.get('/:id', authMiddleware, asyncHandler(bookingController.detail));
 
 /**
  * @swagger
@@ -114,6 +114,61 @@ router.get('/:id', asyncHandler(bookingController.detail));
  *         description: Unauthorized
  */
 router.patch('/:id', authMiddleware, validateBody(updateBookingStatusSchema), asyncHandler(bookingController.updateStatus));
+
+/**
+ * @swagger
+ * /bookings/{id}/edit:
+ *   patch:
+ *     tags: [Bookings]
+ *     summary: Edit booking fields
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               itinerary: { type: string }
+ *               itineraryTitle: { type: string }
+ *               travelDate: { type: string, format: date }
+ *               participants: { type: integer, minimum: 1 }
+ *               totalAmount: { type: number, exclusiveMinimum: 0 }
+ *               notes: { type: string }
+ *     responses:
+ *       200:
+ *         description: Booking updated
+ *       404:
+ *         description: Booking not found
+ */
+router.patch('/:id/edit', authMiddleware, validateBody(updateBookingEditSchema), asyncHandler(bookingController.update));
+
+/**
+ * @swagger
+ * /bookings/{id}/archive:
+ *   patch:
+ *     tags: [Bookings]
+ *     summary: Archive a booking (soft delete)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Booking archived
+ *       404:
+ *         description: Booking not found
+ */
+router.patch('/:id/archive', authMiddleware, asyncHandler(bookingController.archive));
 
 /**
  * @swagger
@@ -164,6 +219,6 @@ router.delete('/:id', authMiddleware, asyncHandler(bookingController.remove));
  *                   changedBy: { type: object }
  *                   changedAt: { type: string, format: date-time }
  */
-router.get('/:id/history', asyncHandler(bookingController.history));
+router.get('/:id/history', authMiddleware, asyncHandler(bookingController.history));
 
 module.exports = router;

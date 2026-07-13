@@ -3,8 +3,11 @@ const contentController = require('../controllers/content.controller');
 const authMiddleware = require('../middleware/authMiddleware');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
+const upload = require('../middleware/upload');
 const {
+  createItinerarySchema,
   updateItinerarySchema,
+  createDestinationSchema,
   updateDestinationSchema,
   updateTestimonialSchema,
   updateTeamSchema,
@@ -29,6 +32,8 @@ const router = Router();
  *               items:
  *                 $ref: '#/components/schemas/Itinerary'
  */
+router.post('/itineraries', authMiddleware, validateBody(createItinerarySchema), asyncHandler(contentController.createItinerary));
+
 router.get('/itineraries', asyncHandler(contentController.getItineraries));
 
 /**
@@ -76,6 +81,32 @@ router.get('/itineraries/:slug', asyncHandler(contentController.getItinerary));
  */
 router.patch('/itineraries/:slug', authMiddleware, validateBody(updateItinerarySchema), asyncHandler(contentController.updateItinerary));
 
+router.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const url = `/uploads/${req.file.filename}`;
+  res.json({ url });
+});
+
+/**
+ * @swagger
+ * /content/destinations:
+ *   post:
+ *     tags: [Content]
+ *     summary: Create a destination (admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DestinationInput'
+ *     responses:
+ *       201:
+ *         description: Destination created
+ */
+router.post('/destinations', authMiddleware, validateBody(createDestinationSchema), asyncHandler(contentController.createDestination));
+
 /**
  * @swagger
  * /content/destinations:
@@ -93,6 +124,10 @@ router.patch('/itineraries/:slug', authMiddleware, validateBody(updateItineraryS
  *                 $ref: '#/components/schemas/Destination'
  */
 router.get('/destinations', asyncHandler(contentController.getDestinations));
+
+router.get('/destinations/:slug/itineraries', asyncHandler(contentController.getItinerariesByDestination));
+
+router.get('/destinations/:slug', asyncHandler(contentController.getDestinationBySlug));
 
 /**
  * @swagger
