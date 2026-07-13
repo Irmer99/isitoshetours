@@ -112,11 +112,6 @@ export default function DestinationDetail({ loaderData }: Route.ComponentProps) 
                         </p>
                         <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                           {it.duration && <span>{it.duration}</span>}
-                          {it.pricing?.from != null && (
-                            <span>
-                              From {it.pricing.currency} {it.pricing.from}
-                            </span>
-                          )}
                           <ArrowRight className="ml-auto size-3 opacity-0 transition-opacity group-hover:opacity-100" />
                         </div>
                       </Link>

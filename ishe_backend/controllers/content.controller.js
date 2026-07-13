@@ -10,7 +10,10 @@ exports.createItinerary = async (req, res) => {
 };
 
 exports.getItineraries = async (req, res) => {
-  const itineraries = await Itinerary.find().sort({ title: 1 });
+  const filter = {};
+  if (req.query.difficulty) filter.difficulty = req.query.difficulty;
+  if (req.query.search) filter.title = { $regex: req.query.search, $options: 'i' };
+  const itineraries = await Itinerary.find(filter).sort({ title: 1 });
   res.json(itineraries);
 };
 

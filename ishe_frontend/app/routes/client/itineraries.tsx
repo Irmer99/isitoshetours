@@ -112,11 +112,6 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
             <div className="p-4">
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">{it.difficulty}</Badge>
-                {it.pricing?.from != null && (
-                  <span className="text-sm font-semibold">
-                    From {it.pricing.currency} {it.pricing.from}
-                  </span>
-                )}
               </div>
               <h3 className="mt-3 font-heading text-lg font-semibold group-hover:text-primary transition-colors">
                 {it.title}

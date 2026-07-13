@@ -170,18 +170,9 @@ export default function ItineraryDetail({
 
         <div className="lg:col-span-1">
           <div className="sticky top-24 border border-border bg-card p-6">
-            {itinerary.pricing?.from != null && (
-              <div className="mb-4">
-                <p className="text-sm text-muted-foreground">From</p>
-                <p className="font-heading text-2xl font-bold text-primary">
-                  {itinerary.pricing.currency}{" "}
-                  {itinerary.pricing.from.toLocaleString()}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  per person
-                </p>
-              </div>
-            )}
+            <p className="mb-4 text-sm font-semibold text-primary">
+              Enquire for pricing
+            </p>
 
             <ul className="mb-6 space-y-2">
               <li className="flex items-center gap-2 text-sm">
