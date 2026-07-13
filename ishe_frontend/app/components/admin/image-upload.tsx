@@ -14,11 +14,11 @@ interface ImageUploadProps {
 function convertGoogleDriveUrl(url: string): string {
   const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (fileIdMatch) {
-    return `https://lh3.googleusercontent.com/d/${fileIdMatch[1]}`;
+    return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
   }
   const openIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (openIdMatch) {
-    return `https://lh3.googleusercontent.com/d/${openIdMatch[1]}`;
+    return `https://drive.google.com/uc?export=view&id=${openIdMatch[1]}`;
   }
   return url;
 }
