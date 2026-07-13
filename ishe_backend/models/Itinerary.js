@@ -22,6 +22,7 @@ const itinerarySchema = new mongoose.Schema({
   includes: { type: [String] },
   excludes: { type: [String] },
   images: { type: [String] },
+  destinations: { type: [String] },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Itinerary', itinerarySchema);

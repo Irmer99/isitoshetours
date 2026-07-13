@@ -22,6 +22,7 @@ const bookingSchema = new mongoose.Schema({
   discountCode: { type: String },
   discountApplied: { type: Number, default: 0 },
   notes: { type: String },
+  archived: { type: Boolean, default: false },
   statusHistory: [statusHistorySchema],
 }, { timestamps: true });
 

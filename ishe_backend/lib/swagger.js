@@ -158,6 +158,11 @@ const options = {
                 currency: { type: 'string' },
               },
             },
+            destinations: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of destination slugs this itinerary visits',
+            },
             days: {
               type: 'array',
               items: {
