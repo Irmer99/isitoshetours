@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+const logger = require('./logger');
 
 mongoose.connection.on('error', (err) => {
-  console.error('MongoDB runtime error:', err.message);
+  logger.error({ err }, 'MongoDB runtime error');
 });
 mongoose.connection.on('disconnected', () => {
-  console.warn('MongoDB disconnected');
+  logger.warn('MongoDB disconnected');
 });
 
 const connectDB = async () => {
@@ -14,19 +15,17 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
-    console.log('MongoDB connected');
+    logger.info('MongoDB connected');
   } catch (err) {
-    console.error('MongoDB connection error:', err.message);
-    console.log('Falling back to local MongoDB...');
+    logger.warn({ err }, 'Primary MongoDB connection failed, falling back to local');
     try {
       await mongoose.connect('mongodb://localhost:27017/ishe_tours', {
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
       });
-      console.log('Local MongoDB connected');
+      logger.info('Local MongoDB connected');
     } catch (fallbackErr) {
-      console.error('Local MongoDB also failed:', fallbackErr.message);
-      console.error('Server will continue without database — API routes will return errors');
+      logger.error({ err: fallbackErr }, 'Local MongoDB also failed — API routes will return errors');
     }
   }
 };

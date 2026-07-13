@@ -7,4 +7,6 @@ const clientSchema = new mongoose.Schema({
   notes: { type: String },
 }, { timestamps: true });
 
+clientSchema.index({ email: 1 }, { unique: true });
+
 module.exports = mongoose.model('Client', clientSchema);

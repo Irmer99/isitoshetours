@@ -9,7 +9,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/uploads': 'http://localhost:3000',
+      '/uploads': process.env.VITE_API_URL?.replace('/api', '') ?? 'http://localhost:3000',
     },
   },
 });
