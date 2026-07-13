@@ -3,6 +3,7 @@ const Destination = require('../models/Destination');
 const Testimonial = require('../models/Testimonial');
 const Team = require('../models/Team');
 const SiteSettings = require('../models/SiteSettings');
+const escapeRegex = require('../lib/escapeRegex');
 
 exports.createItinerary = async (req, res) => {
   const itinerary = await Itinerary.create(req.body);
@@ -12,7 +13,7 @@ exports.createItinerary = async (req, res) => {
 exports.getItineraries = async (req, res) => {
   const filter = {};
   if (req.query.difficulty) filter.difficulty = req.query.difficulty;
-  if (req.query.search) filter.title = { $regex: req.query.search, $options: 'i' };
+  if (req.query.search) filter.title = { $regex: escapeRegex(req.query.search), $options: 'i' };
   const itineraries = await Itinerary.find(filter).sort({ title: 1 });
   res.json(itineraries);
 };
@@ -55,7 +56,7 @@ exports.getItinerariesByDestination = async (req, res) => {
 };
 
 exports.updateDestination = async (req, res) => {
-  const dest = await Destination.findByIdAndUpdate(req.params.id, req.body, {
+  const dest = await Destination.findOneAndUpdate({ slug: req.params.id }, req.body, {
     new: true, runValidators: true,
   });
   if (!dest) return res.status(404).json({ error: 'Destination not found' });

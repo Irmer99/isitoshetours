@@ -7,10 +7,14 @@ exports.overview = async (req, res) => {
 
   const [
     thisMonth,
+    confirmedThisMonth,
+    enquiriesThisMonth,
     totals,
     topItineraries,
   ] = await Promise.all([
     Booking.countDocuments({ createdAt: { $gte: startOfMonth } }),
+    Booking.countDocuments({ createdAt: { $gte: startOfMonth }, status: 'confirmed' }),
+    Booking.countDocuments({ createdAt: { $gte: startOfMonth }, status: 'enquiry' }),
     Booking.aggregate([
       { $group: { _id: null, total: { $sum: '$totalAmount' }, count: { $sum: 1 } } },
     ]),
@@ -23,6 +27,8 @@ exports.overview = async (req, res) => {
 
   res.json({
     bookingsThisMonth: thisMonth,
+    confirmedThisMonth,
+    enquiriesThisMonth,
     totalBookings: totals[0]?.count || 0,
     totalRevenue: totals[0]?.total || 0,
     topItineraries,
