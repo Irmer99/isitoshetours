@@ -8,6 +8,9 @@ const createDiscountSchema = z.object({
   startDate: z.string().datetime({ offset: true }).or(z.string()),
   endDate: z.string().datetime({ offset: true }).or(z.string()),
   usageLimit: z.number().int().positive().optional(),
+}).refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
+  message: 'End date must be after start date',
+  path: ['endDate'],
 });
 
 const updateDiscountSchema = z.object({
@@ -19,6 +22,14 @@ const updateDiscountSchema = z.object({
   endDate: z.string().optional(),
   usageLimit: z.number().int().positive().optional().nullable(),
   active: z.boolean().optional(),
+}).refine((data) => {
+  if (data.startDate && data.endDate) {
+    return new Date(data.endDate) >= new Date(data.startDate);
+  }
+  return true;
+}, {
+  message: 'End date must be after start date',
+  path: ['endDate'],
 });
 
 const validateDiscountSchema = z.object({

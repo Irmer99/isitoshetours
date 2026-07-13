@@ -1,5 +1,28 @@
 const { z } = require('zod');
 
+const createItinerarySchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
+  subtitle: z.string().optional(),
+  difficulty: z.enum(['easy', 'moderate', 'hard']).default('moderate'),
+  duration: z.string().optional(),
+  pricing: z.object({
+    from: z.number().optional(),
+    currency: z.string().optional(),
+  }).optional(),
+  days: z.array(z.object({
+    day: z.number(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    meals: z.array(z.string()).optional(),
+    accommodation: z.string().optional(),
+  })).optional(),
+  includes: z.array(z.string()).optional(),
+  excludes: z.array(z.string()).optional(),
+  images: z.array(z.string()).optional(),
+  destinations: z.array(z.string()).optional(),
+});
+
 const updateItinerarySchema = z.object({
   title: z.string().min(1).optional(),
   subtitle: z.string().optional(),
@@ -19,6 +42,15 @@ const updateItinerarySchema = z.object({
   includes: z.array(z.string()).optional(),
   excludes: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
+  destinations: z.array(z.string()).optional(),
+});
+
+const createDestinationSchema = z.object({
+  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  highlights: z.array(z.string()).optional(),
 });
 
 const updateDestinationSchema = z.object({
@@ -51,7 +83,9 @@ const updateSiteSettingsSchema = z.object({
 });
 
 module.exports = {
+  createItinerarySchema,
   updateItinerarySchema,
+  createDestinationSchema,
   updateDestinationSchema,
   updateTestimonialSchema,
   updateTeamSchema,
