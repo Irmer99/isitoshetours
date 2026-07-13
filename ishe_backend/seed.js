@@ -7,16 +7,21 @@ async function seed() {
   await mongoose.connect(uri);
   console.log('Connected to MongoDB');
 
-  const existing = await Admin.findOne({ email: 'admin@ishetours.com' });
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+  const role = process.env.ADMIN_ROLE || 'admin';
+
+  if (!email || !password) {
+    console.error('ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env');
+    process.exit(1);
+  }
+
+  const existing = await Admin.findOne({ email });
   if (existing) {
     console.log(`Admin already exists: ${existing.email} (${existing.role})`);
   } else {
-    await Admin.create({
-      email: 'admin@ishetours.com',
-      password: 'admin123',
-      role: 'superadmin',
-    });
-    console.log('Admin created: admin@ishetours.com / admin123');
+    await Admin.create({ email, password, role });
+    console.log(`Admin created: ${email}`);
   }
 
   await mongoose.connection.close();
