@@ -1,3 +1,5 @@
 node_modules/
 .env
 progress.md
+.env.example
+nul
