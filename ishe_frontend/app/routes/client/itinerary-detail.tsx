@@ -9,6 +9,9 @@ import * as Dialog from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label, FieldRoot, ErrorMessage } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
+import { createClientSchema } from "~/schemas/clientSchema";
+import { validateWithSchema } from "~/lib/validate";
+import { SITE_CONTACT } from "~/lib/constants";
 import type { Itinerary } from "~/types";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -37,17 +40,27 @@ export default function ItineraryDetail({
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [enquiryError, setEnquiryError] = useState("");
 
   const handleEnquiry = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
+    setEnquiryError("");
     const form = new FormData(e.currentTarget);
+    const clientData = {
+      name: form.get("name") as string,
+      email: form.get("email") as string,
+      phone: form.get("phone") as string,
+    };
+    const validation = validateWithSchema(createClientSchema, clientData);
+    if (!validation.success) {
+      const firstError = Object.values(validation.errors)[0];
+      setEnquiryError(firstError || "Please fill in all required fields");
+      setSubmitting(false);
+      return;
+    }
     try {
-      const clientRes = await apiClient.post("/clients", {
-        name: form.get("name"),
-        email: form.get("email"),
-        phone: form.get("phone"),
-      });
+      const clientRes = await apiClient.post("/clients", clientData);
       const clientId = clientRes.data._id;
       await apiClient.post("/bookings", {
         clientId,
@@ -59,13 +72,16 @@ export default function ItineraryDetail({
         notes: form.get("notes") || undefined,
       });
       setDialogOpen(false);
-      const phone = "+256787699744";
       const message = encodeURIComponent(
         `Hi Isitoshe Tours! I submitted an enquiry for ${itinerary.title}.`
       );
-      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-    } catch {
-      // handle error
+      window.open(`https://wa.me/${SITE_CONTACT.phoneDigits}?text=${message}`, "_blank");
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response: { data: { error?: string } } }).response?.data?.error || "Failed to submit enquiry"
+          : "Failed to submit enquiry";
+      setEnquiryError(message);
     } finally {
       setSubmitting(false);
     }
@@ -92,6 +108,20 @@ export default function ItineraryDetail({
             <p className="mt-2 text-lg text-muted-foreground">
               {itinerary.subtitle}
             </p>
+          )}
+          {itinerary.images && itinerary.images.length > 0 && (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {itinerary.images.map((url, i) => (
+                <div key={i} className="overflow-hidden border border-border bg-muted">
+                  <img
+                    src={url}
+                    alt={`${itinerary.title} ${i + 1}`}
+                    loading="lazy"
+                    className="aspect-video w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           )}
           {itinerary.duration && (
             <p className="mt-1 text-sm text-muted-foreground">
@@ -132,6 +162,7 @@ export default function ItineraryDetail({
                         expandedDay === day.day ? null : day.day
                       )
                     }
+                    aria-expanded={expandedDay === day.day}
                     className="flex w-full items-center justify-between bg-muted px-4 py-3 text-left"
                   >
                     <span className="text-sm font-semibold">
@@ -203,6 +234,9 @@ export default function ItineraryDetail({
                 </Dialog.Description>
                 <Dialog.Close />
                 <form onSubmit={handleEnquiry} className="mt-4 space-y-4">
+                  {enquiryError && (
+                    <p className="text-sm text-destructive">{enquiryError}</p>
+                  )}
                   <FieldRoot>
                     <Label>Name</Label>
                     <Input
@@ -225,7 +259,7 @@ export default function ItineraryDetail({
                     <Input
                       name="phone"
                       required
-                      placeholder="+256 787 699744"
+                      placeholder={SITE_CONTACT.phone}
                     />
                   </FieldRoot>
                   <FieldRoot>

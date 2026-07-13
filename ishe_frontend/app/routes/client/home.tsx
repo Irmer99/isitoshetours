@@ -39,7 +39,7 @@ const highlights = [
 export default function Home() {
   return (
     <>
-      <section className="relative flex min-h-[80vh] items-center justify-center bg-primary">
+      <section className="relative flex min-h-[60vh] items-center justify-center bg-primary sm:min-h-[80vh]">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/95 to-primary/80" />
         <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
           <h1 className="font-heading text-4xl font-bold text-primary-foreground sm:text-5xl lg:text-6xl">

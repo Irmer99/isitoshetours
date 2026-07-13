@@ -8,6 +8,7 @@ import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
 import { ImageUpload } from "~/components/admin/image-upload";
 import apiClient from "~/lib/api-client";
+import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
 import type { Destination } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
@@ -45,19 +46,11 @@ export default function DestinationManager() {
       setFieldErrors({});
     },
     onError: (err: unknown) => {
-      const res = err && typeof err === "object" && "response" in err
-        ? (err as { response: { data: { error?: string; details?: string } } }).response?.data
-        : null;
+      const res = parseApiError(err);
       setFormError(res?.error || "Failed to save destination");
+      setFieldErrors({});
       if (res?.details) {
-        try {
-          const parsed = JSON.parse(res.details);
-          const errs: Record<string, string> = {};
-          parsed.forEach((e: { path?: string[]; message: string }) => {
-            if (e.path?.[0]) errs[e.path[0]] = e.message;
-          });
-          setFieldErrors(errs);
-        } catch { /* ignore */ }
+        setFieldErrors(parseFieldErrors(res.details));
       }
     },
   });
@@ -72,19 +65,11 @@ export default function DestinationManager() {
       setFieldErrors({});
     },
     onError: (err: unknown) => {
-      const res = err && typeof err === "object" && "response" in err
-        ? (err as { response: { data: { error?: string; details?: string } } }).response?.data
-        : null;
+      const res = parseApiError(err);
       setFormError(res?.error || "Failed to create destination");
+      setFieldErrors({});
       if (res?.details) {
-        try {
-          const parsed = JSON.parse(res.details);
-          const errs: Record<string, string> = {};
-          parsed.forEach((e: { path?: string[]; message: string }) => {
-            if (e.path?.[0]) errs[e.path[0]] = e.message;
-          });
-          setFieldErrors(errs);
-        } catch { /* ignore */ }
+        setFieldErrors(parseFieldErrors(res.details));
       }
     },
   });
@@ -128,7 +113,7 @@ export default function DestinationManager() {
     } else if (editingId) {
       const dest = destinations?.find((d) => d._id === editingId);
       if (dest) {
-        saveMutation.mutate({ slug: dest._id, body });
+        saveMutation.mutate({ slug: dest.slug, body });
       }
     }
   };

@@ -8,6 +8,8 @@ import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
+import { parseApiError, parseFieldErrors, getErrorMessage } from "~/lib/api-errors";
+import { CURRENCY } from "~/lib/constants";
 import type { Discount } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
@@ -50,20 +52,11 @@ export default function DiscountManager() {
   const [formError, setFormError] = useState("");
 
   const parseError = (err: unknown) => {
-    const res = err && typeof err === "object" && "response" in err
-      ? (err as { response: { data: { error?: string; details?: string } } }).response?.data
-      : null;
+    const res = parseApiError(err);
     setFormError(res?.error || "Operation failed");
     setFieldErrors({});
     if (res?.details) {
-      try {
-        const parsed = JSON.parse(res.details);
-        const errs: Record<string, string> = {};
-        parsed.forEach((e: { path?: string[]; message: string }) => {
-          if (e.path?.[0]) errs[e.path[0]] = e.message;
-        });
-        setFieldErrors(errs);
-      } catch { /* ignore */ }
+      setFieldErrors(parseFieldErrors(res.details));
     }
   };
 
@@ -105,12 +98,7 @@ export default function DiscountManager() {
       queryClient.invalidateQueries({ queryKey: ["discounts"] });
     },
     onError: (err: unknown) => {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response: { data: { error?: string } } }).response?.data
-              ?.error || "Failed to delete discount"
-          : "Failed to delete discount";
-      setFormError(msg);
+      setFormError(getErrorMessage(err, "Failed to delete discount"));
     },
   });
 
@@ -311,7 +299,7 @@ export default function DiscountManager() {
                 <p className="text-xs text-muted-foreground">
                   {d.type === "percent"
                     ? `${d.value}% off`
-                    : `UGX ${d.value} off`}{" "}
+                    : `${CURRENCY} ${d.value} off`}{" "}
                   · {d.appliesTo} · Used {d.usedCount}
                   {d.usageLimit ? `/${d.usageLimit}` : ""}
                 </p>

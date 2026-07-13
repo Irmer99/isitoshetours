@@ -15,7 +15,7 @@ import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/contexts/AuthContext";
 
 export async function clientLoader() {
   if (typeof window === "undefined") return null;
@@ -96,6 +96,7 @@ export default function AdminLayout() {
             className="lg:hidden"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open sidebar"
+            aria-expanded={sidebarOpen}
           >
             <Menu className="size-5" />
           </button>

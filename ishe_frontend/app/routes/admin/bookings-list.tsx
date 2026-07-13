@@ -10,14 +10,9 @@ import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
 import * as Dialog from "~/components/ui/dialog";
 import apiClient from "~/lib/api-client";
+import { statusColors, CURRENCY } from "~/lib/constants";
+import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
 import type { Booking, Client, Itinerary } from "~/types";
-
-const statusColors: Record<Booking["status"], "warning" | "success" | "secondary" | "destructive"> = {
-  enquiry: "warning",
-  confirmed: "success",
-  completed: "secondary",
-  cancelled: "destructive",
-};
 
 function useBookings(status: string, archived: boolean) {
   return useQuery({
@@ -105,20 +100,11 @@ export default function BookingsList() {
       setFieldErrors({});
     },
     onError: (err: unknown) => {
-      const res = err && typeof err === "object" && "response" in err
-        ? (err as { response: { data: { error?: string; details?: string } } }).response?.data
-        : null;
+      const res = parseApiError(err);
       setFormError(res?.error || "Failed to create booking");
       setFieldErrors({});
       if (res?.details) {
-        try {
-          const parsed = JSON.parse(res.details);
-          const errs: Record<string, string> = {};
-          parsed.forEach((e: { path?: string[]; message: string }) => {
-            if (e.path?.[0]) errs[e.path[0]] = e.message;
-          });
-          setFieldErrors(errs);
-        } catch { /* ignore */ }
+        setFieldErrors(parseFieldErrors(res.details));
       }
     },
   });
@@ -163,6 +149,7 @@ export default function BookingsList() {
     a.href = url;
     a.download = "bookings.csv";
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -264,7 +251,7 @@ export default function BookingsList() {
                     {fieldErrors.participants && <p className="text-xs text-destructive">{fieldErrors.participants}</p>}
                   </FieldRoot>
                   <FieldRoot>
-                    <Label>                    Total Amount (UGX)</Label>
+                    <Label>Total Amount ({CURRENCY})</Label>
                     <Input
                       type="number"
                       min={0}
@@ -400,7 +387,7 @@ export default function BookingsList() {
                     {new Date(b.travelDate).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 text-right font-medium">
-                    UGX {b.totalAmount.toLocaleString()}
+                    {CURRENCY} {b.totalAmount.toLocaleString()}
                   </td>
                 </tr>
               ))

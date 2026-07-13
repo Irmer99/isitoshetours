@@ -6,11 +6,13 @@ import {
   Users,
   DollarSign,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, LineChart, Line, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, LineChart, Line, CartesianGrid } from "recharts";
 
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "~/components/ui/chart";
 import apiClient from "~/lib/api-client";
+import { CURRENCY } from "~/lib/constants";
 import type { StatsOverview, ConversionRate } from "~/types";
 
 interface BookingsByRoute {
@@ -89,7 +91,7 @@ export default function Dashboard() {
     {
       label: "Revenue (MTD)",
       value: overview?.totalRevenue
-        ? `UGX ${overview.totalRevenue.toLocaleString()}`
+        ? `${CURRENCY} ${overview.totalRevenue.toLocaleString()}`
         : "-",
       icon: DollarSign,
       color: "text-primary",
@@ -107,6 +109,14 @@ export default function Dashboard() {
     bookings: t.count,
     revenue: t.revenue,
   })) ?? [];
+
+  const routeChartConfig = {
+    bookings: { label: "Bookings", color: "var(--color-primary)" },
+  } satisfies ChartConfig;
+
+  const timeChartConfig = {
+    bookings: { label: "Bookings", color: "var(--color-primary)" },
+  } satisfies ChartConfig;
 
   return (
     <div>
@@ -218,22 +228,15 @@ export default function Dashboard() {
             ) : routeChartData.length === 0 ? (
               <p className="text-sm text-muted-foreground">No data yet.</p>
             ) : (
-              <ResponsiveContainer width="100%" height={250}>
+              <ChartContainer config={routeChartConfig} className="h-[250px] w-full">
                 <BarChart data={routeChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--color-card)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 0,
-                      fontSize: 12,
-                    }}
-                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="bookings" fill="var(--color-primary)" radius={0} />
                 </BarChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             )}
           </CardContent>
         </Card>
@@ -250,19 +253,12 @@ export default function Dashboard() {
             ) : timeChartData.length === 0 ? (
               <p className="text-sm text-muted-foreground">No data yet.</p>
             ) : (
-              <ResponsiveContainer width="100%" height={250}>
+              <ChartContainer config={timeChartConfig} className="h-[250px] w-full">
                 <LineChart data={timeChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--color-card)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 0,
-                      fontSize: 12,
-                    }}
-                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
                   <Line
                     type="monotone"
                     dataKey="bookings"
@@ -271,7 +267,7 @@ export default function Dashboard() {
                     dot={false}
                   />
                 </LineChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             )}
           </CardContent>
         </Card>

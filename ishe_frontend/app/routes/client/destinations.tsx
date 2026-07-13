@@ -47,6 +47,9 @@ export default function Destinations({ loaderData }: Route.ComponentProps) {
                     <img
                       src={dest.images[0]}
                       alt={dest.name}
+                      loading="lazy"
+                      width={640}
+                      height={360}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>

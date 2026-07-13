@@ -5,9 +5,10 @@ import { LogIn, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Label, FieldRoot, ErrorMessage } from "~/components/ui/label";
+import { Label, FieldRoot } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
-import type { Admin, LoginResponse } from "~/types";
+import { useAuth } from "~/contexts/AuthContext";
+import type { LoginResponse } from "~/types";
 
 export async function clientLoader() {
   if (typeof window === "undefined") return null;
@@ -42,20 +43,20 @@ export function meta({}: Route.MetaArgs) {
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const actionData = useActionData<{
     token?: string;
-    admin?: Admin;
+    admin?: import("~/types").Admin;
     error?: string;
   }>();
 
   useEffect(() => {
     if (actionData?.token && actionData?.admin) {
-      localStorage.setItem("token", actionData.token);
-      localStorage.setItem("admin", JSON.stringify(actionData.admin));
+      setAuth(actionData.token, actionData.admin);
       navigate("/admin", { replace: true });
     }
-  }, [actionData, navigate]);
+  }, [actionData, navigate, setAuth]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">

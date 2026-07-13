@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { Route } from "./+types/itineraries";
 import { Link, useSearchParams } from "react-router";
 import { Search } from "lucide-react";
@@ -7,16 +8,8 @@ import { Badge } from "~/components/ui/badge";
 import apiClient from "~/lib/api-client";
 import type { Itinerary } from "~/types";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const url = new URL(request.url);
-  const search = url.searchParams.get("search") || "";
-  const difficulty = url.searchParams.get("difficulty") || "";
-  const params = new URLSearchParams();
-  if (search) params.set("search", search);
-  if (difficulty) params.set("difficulty", difficulty);
-  const res = await apiClient.get(
-    `/content/itineraries${params.toString() ? `?${params}` : ""}`
-  );
+export async function loader() {
+  const res = await apiClient.get(`/content/itineraries`);
   return { itineraries: res.data as Itinerary[] };
 }
 
@@ -34,6 +27,14 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
   const difficulty = searchParams.get("difficulty") || "";
+
+  const filtered = useMemo(() => {
+    return itineraries.filter((it) => {
+      if (difficulty && it.difficulty !== difficulty) return false;
+      if (search && !it.title.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [itineraries, search, difficulty]);
 
   const updateParam = (key: string, value: string) => {
     setSearchParams((prev) => {
@@ -62,6 +63,7 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
             name="search"
             type="text"
             placeholder="Search itineraries..."
+            aria-label="Search itineraries"
             value={search}
             onChange={(e) => updateParam("search", e.target.value)}
             className="w-full border border-input bg-background py-2 pl-10 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
@@ -87,12 +89,12 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
       </div>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {itineraries.length === 0 && (
+        {filtered.length === 0 && (
           <p className="col-span-full text-center text-muted-foreground">
             No itineraries found.
           </p>
         )}
-        {itineraries.map((it: Itinerary) => (
+        {filtered.map((it: Itinerary) => (
           <Link
             key={it._id}
             to={`/itineraries/${it.slug}`}
@@ -103,6 +105,9 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
                 <img
                   src={it.images[0]}
                   alt={it.title}
+                  loading="lazy"
+                  width={640}
+                  height={360}
                   className="size-full object-cover"
                 />
               ) : (

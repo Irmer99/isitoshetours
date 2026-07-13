@@ -1,5 +1,5 @@
 import type { Route } from "./+types/client-tracker";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, ChevronDown, ChevronUp, Plus, Pencil, Save, X } from "lucide-react";
 
@@ -9,6 +9,9 @@ import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
 import * as Dialog from "~/components/ui/dialog";
 import apiClient from "~/lib/api-client";
+import { createClientSchema } from "~/schemas/clientSchema";
+import { validateWithSchema } from "~/lib/validate";
+import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
 import type { Client, Booking } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
@@ -18,6 +21,8 @@ export function meta({}: Route.MetaArgs) {
 export default function ClientTracker() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -25,10 +30,10 @@ export default function ClientTracker() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const { data: clients, isLoading, isError } = useQuery({
-    queryKey: ["clients", search],
+    queryKey: ["clients", debouncedSearch],
     queryFn: () =>
       apiClient
-        .get<Client[]>(`/clients${search ? `?search=${search}` : ""}`)
+        .get<Client[]>(`/clients${debouncedSearch ? `?search=${debouncedSearch}` : ""}`)
         .then((r) => r.data),
   });
 
@@ -44,20 +49,11 @@ export default function ClientTracker() {
   const [formError, setFormError] = useState("");
 
   const parseError = (err: unknown) => {
-    const res = err && typeof err === "object" && "response" in err
-      ? (err as { response: { data: { error?: string; details?: string } } }).response?.data
-      : null;
+    const res = parseApiError(err);
     setFormError(res?.error || "Operation failed");
     setFieldErrors({});
     if (res?.details) {
-      try {
-        const parsed = JSON.parse(res.details);
-        const errs: Record<string, string> = {};
-        parsed.forEach((e: { path?: string[]; message: string }) => {
-          if (e.path?.[0]) errs[e.path[0]] = e.message;
-        });
-        setFieldErrors(errs);
-      } catch { /* ignore */ }
+      setFieldErrors(parseFieldErrors(res.details));
     }
   };
 
@@ -100,6 +96,14 @@ export default function ClientTracker() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const validation = validateWithSchema(createClientSchema, form);
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      setFormError("Please fix the errors below");
+      return;
+    }
+    setFieldErrors({});
+    setFormError("");
     if (editingClient) {
       updateMutation.mutate({ id: editingClient._id, body: form });
     } else {
@@ -226,8 +230,13 @@ export default function ClientTracker() {
         <input
           type="text"
           placeholder="Search by name, email, or phone..."
+          aria-label="Search clients"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            clearTimeout(debounceTimer.current);
+            debounceTimer.current = setTimeout(() => setDebouncedSearch(e.target.value), 300);
+          }}
           className="w-full border border-input bg-background py-2 pl-10 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       </div>
@@ -248,6 +257,7 @@ export default function ClientTracker() {
                     expandedId === client._id ? null : client._id
                   )
                 }
+                aria-expanded={expandedId === client._id}
                 className="flex w-full items-center justify-between px-4 py-3 text-left"
               >
                 <div>

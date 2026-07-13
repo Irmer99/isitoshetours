@@ -4,11 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Save, X } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
 import { ImageUpload } from "~/components/admin/image-upload";
 import apiClient from "~/lib/api-client";
+import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
+import { CURRENCY } from "~/lib/constants";
 import type { Itinerary, Destination } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
@@ -26,7 +27,7 @@ export default function ItineraryManager() {
     difficulty: "moderate" as Itinerary["difficulty"],
     duration: "",
     pricingFrom: 0,
-    pricingCurrency: "UGX",
+    pricingCurrency: CURRENCY,
     destinations: [] as string[],
     images: [] as string[],
   });
@@ -47,20 +48,11 @@ export default function ItineraryManager() {
   const [formError, setFormError] = useState("");
 
   const parseError = (err: unknown) => {
-    const res = err && typeof err === "object" && "response" in err
-      ? (err as { response: { data: { error?: string; details?: string } } }).response?.data
-      : null;
+    const res = parseApiError(err);
     setFormError(res?.error || "Operation failed");
     setFieldErrors({});
     if (res?.details) {
-      try {
-        const parsed = JSON.parse(res.details);
-        const errs: Record<string, string> = {};
-        parsed.forEach((e: { path?: string[]; message: string }) => {
-          if (e.path?.[0]) errs[e.path[0]] = e.message;
-        });
-        setFieldErrors(errs);
-      } catch { /* ignore */ }
+      setFieldErrors(parseFieldErrors(res.details));
     }
   };
 
@@ -96,7 +88,7 @@ export default function ItineraryManager() {
       difficulty: "moderate",
       duration: "",
       pricingFrom: 0,
-      pricingCurrency: "UGX",
+      pricingCurrency: CURRENCY,
       destinations: [],
       images: [],
     });
@@ -113,7 +105,7 @@ export default function ItineraryManager() {
       difficulty: it.difficulty,
       duration: it.duration || "",
       pricingFrom: it.pricing?.from || 0,
-      pricingCurrency: it.pricing?.currency || "UGX",
+      pricingCurrency: it.pricing?.currency || CURRENCY,
       destinations: it.destinations || [],
       images: it.images || [],
     });
@@ -339,8 +331,8 @@ export default function ItineraryManager() {
                 <p className="text-sm font-medium">{it.title}</p>
                 <p className="text-xs text-muted-foreground">
                   {it.slug} · {it.difficulty}
-{it.pricing?.from != null &&
-                      ` · From ${it.pricing.currency} ${it.pricing.from}`}
+                  {it.pricing?.from != null &&
+                    ` · From ${it.pricing.currency} ${it.pricing.from}`}
                 </p>
               </div>
               <div className="flex gap-2">

@@ -1,9 +1,11 @@
 import { Link, Outlet } from "react-router";
-import { Menu, X } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+import { SITE_CONTACT } from "~/lib/constants";
+import { useTheme } from "~/contexts/ThemeContext";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -14,6 +16,7 @@ const navLinks = [
 
 export default function ClientLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -38,12 +41,20 @@ export default function ClientLayout() {
                 Enquire Now
               </Button>
             </Link>
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle dark mode"
+              className="flex size-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {theme === "light" ? <Moon className="size-4" /> : <Sun className="size-4" />}
+            </button>
           </div>
 
           <button
             className="md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X className="size-6" /> : <Menu className="size-6" />}
           </button>
@@ -71,6 +82,14 @@ export default function ClientLayout() {
                 Enquire Now
               </Button>
             </Link>
+            <button
+              onClick={() => { toggleTheme(); setMobileOpen(false); }}
+              aria-label="Toggle dark mode"
+              className="flex items-center gap-2 py-2 text-sm font-semibold tracking-wider uppercase text-muted-foreground transition-colors hover:text-primary"
+            >
+              {theme === "light" ? <Moon className="size-4" /> : <Sun className="size-4" />}
+              {theme === "light" ? "Dark Mode" : "Light Mode"}
+            </button>
           </div>
         </div>
       </header>
@@ -111,10 +130,10 @@ export default function ClientLayout() {
                 Contact
               </h4>
               <p className="text-sm text-muted-foreground">
-                Email: info@isitoshetours.com
+                Email: {SITE_CONTACT.email}
               </p>
               <p className="text-sm text-muted-foreground">
-                Phone: +256 787 699744
+                Phone: {SITE_CONTACT.phone}
               </p>
             </div>
           </div>

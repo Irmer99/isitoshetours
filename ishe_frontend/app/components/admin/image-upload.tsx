@@ -25,6 +25,7 @@ function convertGoogleDriveUrl(url: string): string {
 
 export function ImageUpload({ images, onChange }: ImageUploadProps) {
   const [urlInput, setUrlInput] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => {
@@ -36,6 +37,7 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
     },
     onSuccess: (res) => {
       onChange([...images, res.data.url]);
+      setUploadError("");
     },
   });
 
@@ -54,6 +56,12 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError("File must be under 10MB");
+        e.target.value = "";
+        return;
+      }
+      setUploadError("");
       uploadMutation.mutate(file);
       e.target.value = "";
     }
@@ -76,7 +84,8 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
               <button
                 type="button"
                 onClick={() => removeImage(i)}
-                className="absolute top-1 right-1 bg-background/80 p-0.5 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Remove image ${i + 1}`}
+                className="absolute top-1 right-1 bg-background/80 p-0.5 text-destructive opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
               >
                 <X className="size-3" />
               </button>
@@ -115,7 +124,7 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
           <input
             type="file"
             accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/tiff,image/tif"
-            className="hidden"
+            className="sr-only"
             onChange={handleFileChange}
             disabled={uploadMutation.isPending}
           />
@@ -124,8 +133,8 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
       {uploadMutation.isPending && (
         <p className="text-xs text-muted-foreground">Uploading...</p>
       )}
-      {uploadMutation.isError && (
-        <p className="text-xs text-destructive">Upload failed. Try a different file.</p>
+      {(uploadMutation.isError || uploadError) && (
+        <p className="text-xs text-destructive">{uploadError || "Upload failed. Try a different file."}</p>
       )}
     </div>
   );

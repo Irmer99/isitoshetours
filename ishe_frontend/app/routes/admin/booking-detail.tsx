@@ -9,14 +9,9 @@ import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
+import { statusColors, CURRENCY } from "~/lib/constants";
+import { parseApiError, parseFieldErrors, getErrorMessage } from "~/lib/api-errors";
 import type { Booking } from "~/types";
-
-const statusColors: Record<Booking["status"], "warning" | "success" | "secondary" | "destructive"> = {
-  enquiry: "warning",
-  confirmed: "success",
-  completed: "secondary",
-  cancelled: "destructive",
-};
 
 const nextStatuses: Record<Booking["status"], Booking["status"][]> = {
   enquiry: ["confirmed", "cancelled"],
@@ -60,20 +55,11 @@ export default function BookingDetail() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const parseError = (err: unknown) => {
-    const res = err && typeof err === "object" && "response" in err
-      ? (err as { response: { data: { error?: string; details?: string } } }).response?.data
-      : null;
+    const res = parseApiError(err);
     setUpdateError(res?.error || "Operation failed");
     setFieldErrors({});
     if (res?.details) {
-      try {
-        const parsed = JSON.parse(res.details);
-        const errs: Record<string, string> = {};
-        parsed.forEach((e: { path?: string[]; message: string }) => {
-          if (e.path?.[0]) errs[e.path[0]] = e.message;
-        });
-        setFieldErrors(errs);
-      } catch { /* ignore */ }
+      setFieldErrors(parseFieldErrors(res.details));
     }
   };
 
@@ -117,12 +103,7 @@ export default function BookingDetail() {
       navigate("/admin/bookings");
     },
     onError: (err: unknown) => {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response: { data: { error?: string } } }).response?.data
-              ?.error || "Failed to archive booking"
-          : "Failed to archive booking";
-      setUpdateError(msg);
+      setUpdateError(getErrorMessage(err, "Failed to archive booking"));
       setArchiving(false);
     },
   });
@@ -254,7 +235,7 @@ export default function BookingDetail() {
               {fieldErrors.participants && <p className="text-xs text-destructive">{fieldErrors.participants}</p>}
             </FieldRoot>
             <FieldRoot>
-              <Label>Total Amount (UGX)</Label>
+              <Label>Total Amount ({CURRENCY})</Label>
               <Input
                 type="number"
                 min={0}
@@ -332,7 +313,7 @@ export default function BookingDetail() {
                 {booking.participants}
               </p>
               <p>
-                <span className="text-muted-foreground">Total Amount:</span> UGX{" "}
+                <span className="text-muted-foreground">Total Amount:</span> {CURRENCY}{" "}
                 {booking.totalAmount.toLocaleString()}
               </p>
               <p>

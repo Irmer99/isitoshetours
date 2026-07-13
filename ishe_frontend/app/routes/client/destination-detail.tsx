@@ -9,11 +9,10 @@ import type { Destination, Itinerary } from "~/types";
 export async function loader({ params }: Route.LoaderArgs) {
   try {
     const res = await apiClient.get<Destination>(`/content/destinations/${params.slug}`);
-    let itineraries: Itinerary[] = [];
-    try {
-      const itinRes = await apiClient.get<Itinerary[]>(`/content/destinations/${params.slug}/itineraries`);
-      itineraries = itinRes.data;
-    } catch { /* no itineraries */ }
+    const itinerariesResult = await Promise.allSettled([
+      apiClient.get<Itinerary[]>(`/content/destinations/${params.slug}/itineraries`),
+    ]);
+    const itineraries = itinerariesResult[0].status === "fulfilled" ? itinerariesResult[0].value.data : [];
     return { destination: res.data, itineraries };
   } catch {
     throw redirect("/destinations");
@@ -77,6 +76,9 @@ export default function DestinationDetail({ loaderData }: Route.ComponentProps) 
                       <img
                         src={url}
                         alt={`${destination.name} ${i + 1}`}
+                        loading="lazy"
+                        width={640}
+                        height={360}
                         className="aspect-video w-full object-cover"
                       />
                     </div>
