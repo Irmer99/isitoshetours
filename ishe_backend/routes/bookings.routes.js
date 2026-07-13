@@ -3,6 +3,7 @@ const bookingController = require('../controllers/booking.controller');
 const authMiddleware = require('../middleware/authMiddleware');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
+const { publicPostLimiter } = require('../middleware/rateLimit');
 const { createBookingSchema, updateBookingStatusSchema, updateBookingEditSchema } = require('../validators/booking.validator');
 
 const router = Router();
@@ -29,7 +30,7 @@ const router = Router();
  *       400:
  *         description: Validation error
  */
-router.post('/', validateBody(createBookingSchema), asyncHandler(bookingController.create));
+router.post('/', publicPostLimiter, validateBody(createBookingSchema), asyncHandler(bookingController.create));
 
 /**
  * @swagger

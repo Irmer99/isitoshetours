@@ -2,6 +2,7 @@ const { Router } = require('express');
 const authController = require('../controllers/auth.controller');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
+const { authLimiter } = require('../middleware/rateLimit');
 const { loginSchema, refreshSchema } = require('../validators/auth.validator');
 
 const router = Router();
@@ -36,7 +37,7 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/login', validateBody(loginSchema), asyncHandler(authController.login));
+router.post('/login', authLimiter, validateBody(loginSchema), asyncHandler(authController.login));
 
 /**
  * @swagger

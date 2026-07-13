@@ -3,6 +3,7 @@ const clientController = require('../controllers/client.controller');
 const authMiddleware = require('../middleware/authMiddleware');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
+const { publicPostLimiter } = require('../middleware/rateLimit');
 const { createClientSchema, updateClientSchema } = require('../validators/client.validator');
 
 const router = Router();
@@ -30,7 +31,7 @@ const router = Router();
  *       400:
  *         description: Validation error
  */
-router.post('/', validateBody(createClientSchema), asyncHandler(clientController.create));
+router.post('/', publicPostLimiter, validateBody(createClientSchema), asyncHandler(clientController.create));
 
 /**
  * @swagger
