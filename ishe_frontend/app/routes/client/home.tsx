@@ -1,6 +1,7 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
-import { ArrowRight, Compass, Mountain, Sun } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight, Compass, Mountain, Sun, ChevronDown } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 
@@ -14,6 +15,29 @@ export function meta({}: Route.MetaArgs) {
     },
   ];
 }
+
+const heroSlides = [
+  {
+    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1920&q=80",
+    tagline: "Uganda's Premier Tour Operator",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1920&q=80",
+    tagline: "Gorilla Trekking Adventures",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1535083252878-5e1c5a054011?w=1920&q=80",
+    tagline: "Safari Across the Savannah",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=1920&q=80",
+    tagline: "Discover Murchison Falls",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=1920&q=80",
+    tagline: "Unforgettable Wildlife Encounters",
+  },
+];
 
 const highlights = [
   {
@@ -36,39 +60,198 @@ const highlights = [
   },
 ];
 
+const faqs = [
+  {
+    question: "How much deposit is required to book a tour?",
+    answer:
+      "A minimum deposit of $150 USD per person is required to confirm your booking. The remaining balance is due 60 days before the tour start date. Bookings made within 60 days of departure require full payment upfront.",
+  },
+  {
+    question: "What is the cancellation policy?",
+    answer:
+      "Cancellation charges depend on when you cancel: 12+ weeks before departure you forfeit the deposit ($150 per person); 11–6 weeks is 25% of the total cost; 6–2 weeks is 50%; and within 2 weeks is 100% of the total tour cost.",
+  },
+  {
+    question: "Do I need travel insurance?",
+    answer:
+      "Yes, comprehensive travel insurance is mandatory for all travellers. It must cover trip cancellation, medical emergencies, emergency evacuation, and personal liability. Please arrange your insurance before the tour.",
+  },
+  {
+    question: "What health requirements should I be aware of?",
+    answer:
+      "Travellers must be in good physical and mental health. Some tours involve strenuous activities. Disclose any pre-existing medical conditions when booking so we can ensure the right itinerary for you.",
+  },
+  {
+    question: "What documents do I need for Uganda?",
+    answer:
+      "You need a valid passport with at least 6 months' validity from your entry date. Visa requirements vary by nationality — we can provide guidance on obtaining the correct visa for your trip.",
+  },
+  {
+    question: "Are tours affected by epidemics or natural disasters?",
+    answer:
+      "While we monitor all safety situations closely, Isitoshe Tours is not liable for disruptions caused by force majeure events including epidemics, pandemics, natural disasters, or political instability. We will work with you to reschedule where possible.",
+  },
+  {
+    question: "Are airport transfers included?",
+    answer:
+      "Airport transfers and in-tour transport are provided as specified in each itinerary. Changes to transfer times or pick-up locations requested by the traveller may incur additional charges.",
+  },
+  {
+    question: "What is included and excluded in the tour price?",
+    answer:
+      "Each itinerary clearly lists what is included and excluded. Typically, accommodation, transport, meals, and activities as listed are included. Personal shopping, optional activities, alcoholic beverages, and gratuities are generally excluded unless stated.",
+  },
+];
+
 export default function Home() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
+
   return (
     <>
-      <section className="relative flex min-h-[60vh] items-center justify-center bg-primary sm:min-h-[80vh]">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 to-primary/80" />
-        <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
-          <h1 className="font-heading text-4xl font-bold text-primary-foreground sm:text-5xl lg:text-6xl">
-            Discover the Beauty of Uganda
-          </h1>
-          <p className="mt-4 text-lg text-primary-foreground/80">
-            Expertly curated safaris through lush forests, vast savannahs, and stunning national parks.
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <Link to="/itineraries">
-              <Button variant="secondary" size="lg">
-                Explore Tours
-                <ArrowRight className="size-4" />
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                Contact Us
-              </Button>
-            </Link>
+      <section className="relative h-[60vh] min-h-[400px] overflow-hidden sm:h-[80vh]">
+        {heroSlides.map((slide, i) => (
+          <div
+            key={i}
+            className="absolute inset-0 transition-opacity duration-1000"
+            style={{ opacity: i === currentSlide ? 1 : 0 }}
+          >
+            <img
+              src={slide.image}
+              alt={slide.tagline}
+              className="size-full object-cover"
+              loading={i === 0 ? "eager" : "lazy"}
+            />
+            <div className="absolute inset-0 bg-black/40" />
           </div>
+        ))}
+
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="mx-auto max-w-3xl px-4 text-center">
+            <p className="mb-3 text-sm font-semibold tracking-widest uppercase text-white/80 sm:text-base">
+              {heroSlides[currentSlide].tagline}
+            </p>
+            <h1 className="font-heading text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
+              Discover the Beauty of Uganda
+            </h1>
+            <p className="mt-4 text-lg text-white/80">
+              Expertly curated safaris through lush forests, vast savannahs, and stunning national parks.
+            </p>
+            <div className="mt-8 flex items-center justify-center gap-4">
+              <Link to="/itineraries">
+                <Button variant="secondary" size="lg">
+                  Explore Tours
+                  <ArrowRight className="size-4" />
+                </Button>
+              </Link>
+              <Link to="/contact">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
+                  Contact Us
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 z-20 -translate-y-1/2 bg-black/40 p-2 text-white transition-colors hover:bg-black/60"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="size-6" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 z-20 -translate-y-1/2 bg-black/40 p-2 text-white transition-colors hover:bg-black/60"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="size-6" />
+        </button>
+
+        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentSlide(i)}
+              className={`size-2 transition-colors ${i === currentSlide ? "bg-white" : "bg-white/40"}`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
         </div>
       </section>
 
       <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div>
+              <h2 className="font-heading text-3xl font-bold text-foreground">
+                About Isitoshe Tours
+              </h2>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                Isitoshe Tours is a disability-inclusive tour operator based in Kyaliwajjala,
+                Kampala, Uganda. We specialise in curating unforgettable safari experiences
+                that showcase the best of Uganda&apos;s wildlife, landscapes, and culture.
+              </p>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                Our team of expert local guides is passionate about responsible tourism and
+                creating meaningful connections between travellers and the communities they visit.
+                Every tour is designed with care, ensuring accessibility, sustainability, and
+                genuine cultural exchange.
+              </p>
+              <div className="mt-6 flex items-center gap-4">
+                <Link to="/itineraries">
+                  <Button variant="default" size="lg">
+                    View Our Tours
+                    <ArrowRight className="size-4" />
+                  </Button>
+                </Link>
+                <Link to="/contact">
+                  <Button variant="outline" size="lg">
+                    Get in Touch
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="aspect-[4/5] bg-muted overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1521651201144-634f700b36ef?w=600&q=80"
+                  alt="Uganda landscape"
+                  loading="lazy"
+                  className="size-full object-cover"
+                />
+              </div>
+              <div className="aspect-[4/5] bg-muted overflow-hidden mt-8">
+                <img
+                  src="https://images.unsplash.com/photo-1504173010664-32509aeebb62?w=600&q=80"
+                  alt="Uganda wildlife"
+                  loading="lazy"
+                  className="size-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-muted py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="font-heading text-3xl font-bold text-foreground">
@@ -95,6 +278,45 @@ export default function Home() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="font-heading text-3xl font-bold text-foreground">
+              Frequently Asked Questions
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Everything you need to know before booking your safari
+            </p>
+          </div>
+          <div className="mt-12 space-y-2">
+            {faqs.map((faq, i) => (
+              <div key={i} className="border border-border bg-card">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/50"
+                  aria-expanded={openFaq === i}
+                >
+                  {faq.question}
+                  <ChevronDown
+                    className={`size-4 shrink-0 text-muted-foreground transition-transform ${openFaq === i ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link to="/terms" className="text-sm font-semibold text-primary hover:underline">
+              Read full Terms &amp; Conditions &rarr;
+            </Link>
           </div>
         </div>
       </section>

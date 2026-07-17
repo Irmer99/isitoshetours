@@ -11,6 +11,7 @@ const navLinks = [
   { to: "/", label: "Home" },
   { to: "/itineraries", label: "Itineraries" },
   { to: "/destinations", label: "Destinations" },
+  { to: "/blog", label: "Blog" },
   { to: "/contact", label: "Contact" },
 ];
 
@@ -123,6 +124,19 @@ export default function ClientLayout() {
                     {link.label}
                   </Link>
                 ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="mb-3 text-xs font-semibold tracking-widest uppercase text-foreground">
+                Legal
+              </h4>
+              <div className="flex flex-col gap-2">
+                <Link
+                  to="/terms"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Terms &amp; Conditions
+                </Link>
               </div>
             </div>
             <div>

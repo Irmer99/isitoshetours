@@ -16,12 +16,13 @@ ishe_frontend/
 ├── app/
 │   ├── components/
 │   │   ├── layout/           # (inline in client-layout.tsx)
-│   │   └── ui/               # Shadcn primitives (button, dialog, input, card, badge, chart, etc.)
+│   │   └── ui/               # Shadcn primitives (button, dialog, input, card, badge, chart, toast, etc.)
 │   ├── contexts/
 │   │   ├── AuthContext.tsx    # Shared auth state via React Context
 │   │   └── ThemeContext.tsx   # Dark/light mode with localStorage persistence
 │   ├── hooks/
-│   │   └── useAuth.ts        # Re-exports from AuthContext
+│   │   ├── useAuth.ts        # Re-exports from AuthContext
+│   │   └── useInactivityLogout.ts # Session timeout with activity tracking
 │   ├── lib/
 │   │   ├── api-client.ts     # Axios instance with JWT interceptors (env-based URL)
 │   │   ├── api-errors.ts     # Shared error parsing utilities
@@ -33,6 +34,8 @@ ishe_frontend/
 │   │   ├── client-layout.tsx # Public header, nav, footer, dark mode toggle
 │   │   ├── admin/
 │   │   │   ├── login.tsx
+│   │   │   ├── forgot-password.tsx
+│   │   │   ├── reset-password.tsx
 │   │   │   ├── dashboard.tsx
 │   │   │   ├── bookings-list.tsx
 │   │   │   ├── booking-detail.tsx
@@ -82,6 +85,8 @@ ishe_frontend/
 | Route | Component | Description |
 |-------|-----------|-------------|
 | `/admin/login` | AdminLogin | JWT auth gateway |
+| `/admin/forgot-password` | ForgotPassword | Email input for password reset |
+| `/admin/reset-password` | ResetPassword | New password form (token from URL) |
 | `/admin/dashboard` | Dashboard | Metrics, charts (ChartContainer), conversion rates |
 | `/admin/bookings` | BookingsList | Pipeline data table with status filter |
 | `/admin/bookings/:id` | BookingDetail | Status history, customer info, pipeline progression |
@@ -269,6 +274,14 @@ Internet → Nginx (SSL) → /uploads (static)
 - [x] JWT expiry — 14 days (configurable via JWT_EXPIRES_IN env)
 - [x] Forgot/reset password pages — public routes with forms
 - [x] Pagination — bookings and clients list endpoints now paginated (frontend updated)
+
+### Phase 13: Session Management ✅
+
+- [x] Inactivity auto-logout — 30-minute timeout, tracks mouse/key/click/scroll/touch activity
+- [x] Session expiry warning — 60-second toast notification with "Stay logged in" button
+- [x] `useInactivityLogout` hook — configurable timeout and warning duration
+- [x] `SessionToast` component — lightweight bottom-right toast for session warnings
+- [x] Integrated in `AdminLayout` — only active when `isAuthenticated` is true
 
 ---
 

@@ -140,6 +140,20 @@ export interface PaginatedResponse<T> {
   pages: number;
 }
 
+export interface Blog {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  content?: string;
+  coverImage?: string;
+  images?: string[];
+  tags?: string[];
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LoginResponse {
   token: string;
   admin: Admin;

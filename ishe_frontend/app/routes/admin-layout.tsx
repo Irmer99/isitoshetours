@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu,
   X,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -35,6 +36,7 @@ const sidebarLinks = [
   { to: "/admin/itineraries", label: "Itineraries", icon: Route },
   { to: "/admin/destinations", label: "Destinations", icon: MapPin },
   { to: "/admin/discounts", label: "Discounts", icon: Percent },
+  { to: "/admin/blogs", label: "Blogs", icon: BookOpen },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
