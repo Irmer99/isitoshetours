@@ -50,6 +50,9 @@ ishe_frontend/
 │   │       ├── itinerary-detail.tsx
 │   │       ├── destinations.tsx
 │   │       ├── destination-detail.tsx
+│   │       ├── blog.tsx
+│   │       ├── blog-detail.tsx
+│   │       ├── terms.tsx
 │   │       └── contact.tsx
 │   ├── schemas/
 │   │   ├── clientSchema.ts   # Zod schema for client enquiry forms
@@ -78,6 +81,9 @@ ishe_frontend/
 | `/itineraries/:slug` | ItineraryDetail | Day-by-day stepper, enquiry modal, WhatsApp redirect |
 | `/destinations` | Destinations | Destination grid |
 | `/destinations/:slug` | DestinationDetail | Destination info, linked itineraries |
+| `/blog` | Blog | Blog post list with cards, tags, cover images |
+| `/blog/:slug` | BlogDetail | Full blog post content, SEO metadata |
+| `/terms` | Terms | Terms & Conditions page |
 | `/contact` | Contact | Company info, contact form |
 
 ### Admin Panel Views (Protected)
@@ -94,6 +100,8 @@ ishe_frontend/
 | `/admin/itineraries` | ItineraryManager | Multi-step package editor |
 | `/admin/destinations` | DestinationManager | Destination CRUD |
 | `/admin/discounts` | DiscountManager | Promo code CRUD |
+| `/admin/notifications` | Notifications | Enquiry notifications, unread badge, mark-as-read |
+| `/admin/blogs` | BlogManager | Blog CRUD with Tiptap editor |
 | `/admin/settings` | SettingsManager | Global site config editor |
 
 ---
@@ -282,6 +290,34 @@ Internet → Nginx (SSL) → /uploads (static)
 - [x] `useInactivityLogout` hook — configurable timeout and warning duration
 - [x] `SessionToast` component — lightweight bottom-right toast for session warnings
 - [x] Integrated in `AdminLayout` — only active when `isAuthenticated` is true
+
+### Phase 14: Blog System ✅
+
+- [x] `Blog` model — slug, title, excerpt, content, coverImage, images[], tags[], archived, timestamps
+- [x] Blog CRUD — `createBlog`, `getBlogs`, `getBlog`, `updateBlog`, `deleteBlog` in `content.controller.js`
+- [x] Blog routes — `GET/POST /content/blogs`, `GET/PATCH/DELETE /content/blogs/:slug`
+- [x] Admin blog manager — `blog-manager.tsx` with Tiptap rich-text editor, image upload, tag management
+- [x] Client blog list — `blog.tsx` with card grid, cover images, tags, lazy-loaded images
+- [x] Client blog detail — `blog-detail.tsx` with full content render, SEO metadata
+- [x] Blog types — `Blog` interface in `types/index.ts`
+- [x] Blog routes registered — `/blog`, `/blog/:slug` (client), `/admin/blogs` (admin)
+
+### Phase 15: Notifications ✅
+
+- [x] `Notification` model — type, title, message, read, link, meta, TTL index (90 days)
+- [x] Notification controller — `list`, `unreadCount`, `markRead`, `markAllRead`
+- [x] Notification routes — `GET /notifications`, `GET /notifications/unread-count`, `PATCH /notifications/:id/read`, `PATCH /notifications/read-all`
+- [x] Admin notifications page — `notifications.tsx` with unread filter, pagination, mark-as-read
+- [x] Sidebar badge — unread count indicator in admin layout with real-time polling (30s)
+- [x] Notification types — `Notification` interface in `types/index.ts`
+
+### Phase 16: Additional Pages ✅
+
+- [x] Terms & Conditions — `terms.tsx` with full legal content (booking, liability, insurance, etc.)
+- [x] Terms route — `/terms` (public)
+- [x] Terms link in footer — Quick Links section in `client-layout.tsx`
+- [x] Blog in navigation — Blog link in `client-layout.tsx` navLinks and footer
+- [x] Custom favicon — PNG favicon via `<link rel="icon">` in `root.tsx`
 
 ---
 
