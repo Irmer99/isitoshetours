@@ -17,7 +17,8 @@ services:
   frontend:
     build: ./ishe_frontend
     environment:
-      - VITE_API_URL=http://localhost/api
+      - PORT=5173
+      - VITE_API_URL=/api
     restart: unless-stopped
 
   backend:

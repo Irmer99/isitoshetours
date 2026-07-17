@@ -2,7 +2,7 @@ import axios from "axios";
 import { logger } from "./logger";
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:3000/api",
+  baseURL: typeof window !== "undefined" ? "/api" : "http://backend:3000/api",
   headers: { "Content-Type": "application/json" },
 });
 
