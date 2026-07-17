@@ -1,0 +1,45 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./uploads:/app/uploads:ro
+      - certbot-conf:/etc/letsencrypt:ro
+      - certbot-www:/var/www/certbot
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  frontend:
+    build: ./ishe_frontend
+    environment:
+      - VITE_API_URL=http://localhost/api
+    restart: unless-stopped
+
+  backend:
+    build: ./ishe_backend
+    env_file:
+      - ./ishe_backend/.env
+    environment:
+      - PORT=3000
+      - CORS_ORIGIN=http://localhost,https://localhost
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot-conf:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    profiles:
+      - ssl
+
+volumes:
+  certbot-conf:
+  certbot-www:

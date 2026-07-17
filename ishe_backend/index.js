@@ -10,6 +10,7 @@ const logger = require('./lib/logger');
 const errorHandler = require('./middleware/errorHandler');
 const swaggerSpecs = require('./lib/swagger');
 const { generalLimiter } = require('./middleware/rateLimit');
+const cache = require('./middleware/cache');
 
 const authMiddleware = require('./middleware/authMiddleware');
 const authRoutes = require('./routes/auth.routes');
@@ -18,16 +19,23 @@ const clientRoutes = require('./routes/clients.routes');
 const discountRoutes = require('./routes/discounts.routes');
 const statsRoutes = require('./routes/stats.routes');
 const contentRoutes = require('./routes/content.routes');
+const healthRoutes = require('./routes/health.routes');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+  : ['http://localhost:5173'];
+
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
+app.use(cors({ origin: corsOrigins }));
 app.use(pinoHttp({ logger }));
 app.use(express.json());
 app.use(generalLimiter);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
+
+app.use('/health', healthRoutes);
 
 app.use('/api-docs', authMiddleware, swaggerUi.serve, swaggerUi.setup(swaggerSpecs, { explorer: true }));
 
@@ -36,7 +44,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use('/api/stats', statsRoutes);
-app.use('/api/content', contentRoutes);
+app.use('/api/content', cache(300), contentRoutes);
 
 app.use(errorHandler);
 
