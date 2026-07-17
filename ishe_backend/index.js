@@ -21,6 +21,7 @@ const clientRoutes = require('./routes/clients.routes');
 const discountRoutes = require('./routes/discounts.routes');
 const statsRoutes = require('./routes/stats.routes');
 const contentRoutes = require('./routes/content.routes');
+const notificationRoutes = require('./routes/notifications.routes');
 const healthRoutes = require('./routes/health.routes');
 
 const app = express();
@@ -48,6 +49,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/content', cache(300), contentRoutes);
 
 app.use(errorHandler);

@@ -1,5 +1,6 @@
 const Client = require('../models/Client');
 const Booking = require('../models/Booking');
+const Notification = require('../models/Notification');
 const escapeRegex = require('../lib/escapeRegex');
 
 exports.create = async (req, res) => {
@@ -9,6 +10,15 @@ exports.create = async (req, res) => {
   const existing = await Client.findOne({ email: req.body.email });
   if (existing) return res.status(409).json({ error: 'Client with this email already exists', clientId: existing._id });
   const client = await Client.create(req.body);
+
+  await Notification.create({
+    type: 'enquiry',
+    title: 'New Enquiry',
+    message: `${client.name} submitted a contact enquiry.`,
+    link: `/admin/clients/${client._id}`,
+    meta: { clientId: client._id, email: client.email },
+  });
+
   res.status(201).json(client);
 };
 

@@ -158,3 +158,15 @@ export interface LoginResponse {
   token: string;
   admin: Admin;
 }
+
+export interface Notification {
+  _id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  link?: string;
+  meta?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}

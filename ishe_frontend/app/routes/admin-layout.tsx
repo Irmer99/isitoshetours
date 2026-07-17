@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   BookOpen,
+  Bell,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
@@ -19,6 +20,7 @@ import { SessionToast } from "~/components/ui/toast";
 import { cn } from "~/lib/utils";
 import { useAuth } from "~/contexts/AuthContext";
 import { useInactivityLogout } from "~/hooks/useInactivityLogout";
+import { useUnreadCount } from "~/routes/admin/notifications";
 
 export async function clientLoader() {
   if (typeof window === "undefined") {
@@ -33,6 +35,7 @@ export async function clientLoader() {
 
 const sidebarLinks = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/notifications", label: "Notifications", icon: Bell, showBadge: true },
   { to: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { to: "/admin/clients", label: "Clients", icon: Users },
   { to: "/admin/itineraries", label: "Itineraries", icon: Route },
@@ -76,6 +79,8 @@ export default function AdminLayout() {
     onLogout: logout,
   });
 
+  const { data: unreadCount = 0 } = useUnreadCount();
+
   return (
     <div className="flex min-h-screen bg-background">
       <a
@@ -118,6 +123,11 @@ export default function AdminLayout() {
             >
               <link.icon className="size-4" />
               {link.label}
+              {link.showBadge && unreadCount > 0 && (
+                <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           ))}
         </nav>

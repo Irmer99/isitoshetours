@@ -28,6 +28,7 @@ export default [
     route("itineraries", "routes/admin/itinerary-manager.tsx"),
     route("destinations", "routes/admin/destination-manager.tsx"),
     route("discounts", "routes/admin/discount-manager.tsx"),
+    route("notifications", "routes/admin/notifications.tsx"),
     route("blogs", "routes/admin/blog-manager.tsx"),
     route("settings", "routes/admin/settings-manager.tsx"),
   ]),

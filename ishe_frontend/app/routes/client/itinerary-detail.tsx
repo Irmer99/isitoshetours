@@ -60,29 +60,14 @@ export default function ItineraryDetail({
       return;
     }
     try {
-      let clientId: string;
       try {
-        const clientRes = await apiClient.post("/clients", clientData);
-        clientId = clientRes.data._id;
+        await apiClient.post("/clients", clientData);
       } catch (err: unknown) {
         const status = err && typeof err === "object" && "response" in err
           ? (err as { response: { status: number } }).response?.status
           : null;
-        if (status === 409) {
-          clientId = (err as { response: { data: { clientId: string } } }).response.data.clientId;
-        } else {
-          throw err;
-        }
+        if (status !== 409) throw err;
       }
-      await apiClient.post("/bookings", {
-        clientId,
-        itinerary: itinerary.slug,
-        itineraryTitle: itinerary.title,
-        travelDate: form.get("travelDate"),
-        participants: Number(form.get("participants")),
-        totalAmount: itinerary.pricing?.from || 0,
-        notes: form.get("notes") || undefined,
-      });
       setDialogOpen(false);
       const message = encodeURIComponent(
         `Hi Isitoshe Tours! I submitted an enquiry for ${itinerary.title}.`
@@ -274,20 +259,6 @@ export default function ItineraryDetail({
                       name="phone"
                       required
                       placeholder={SITE_CONTACT.phone}
-                    />
-                  </FieldRoot>
-                  <FieldRoot>
-                    <Label>Travel Date</Label>
-                    <Input name="travelDate" type="date" required />
-                  </FieldRoot>
-                  <FieldRoot>
-                    <Label>Participants</Label>
-                    <Input
-                      name="participants"
-                      type="number"
-                      min={1}
-                      defaultValue={1}
-                      required
                     />
                   </FieldRoot>
                   <FieldRoot>

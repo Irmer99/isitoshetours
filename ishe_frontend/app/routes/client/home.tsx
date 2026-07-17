@@ -26,7 +26,7 @@ const heroSlides = [
     tagline: "Gorilla Trekking Adventures",
   },
   {
-    image: "https://images.unsplash.com/photo-1535083252878-5e1c5a054011?w=1920&q=80",
+    image: "https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=1920&q=80",
     tagline: "Safari Across the Savannah",
   },
   {
