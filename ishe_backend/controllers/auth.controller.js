@@ -40,11 +40,15 @@ exports.refresh = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
+  console.log('[forgotPassword] Request for:', email);
   const admin = await Admin.findOne({ email: email.toLowerCase() });
 
   if (!admin) {
+    console.log('[forgotPassword] No admin found with email:', email);
     return res.json({ message: 'If an account exists, a reset email has been sent' });
   }
+
+  console.log('[forgotPassword] Admin found:', admin.email);
 
   await PasswordReset.deleteMany({ email: admin.email });
 
@@ -56,9 +60,10 @@ exports.forgotPassword = async (req, res) => {
   });
 
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/reset-password?token=${raw}`;
+  console.log('[forgotPassword] Reset URL:', resetUrl);
 
   try {
-    await sendMail({
+    const result = await sendMail({
       to: admin.email,
       subject: 'Password Reset — Isitoshe Tours',
       html: `
@@ -68,8 +73,9 @@ exports.forgotPassword = async (req, res) => {
         <p>If you didn't request this, you can safely ignore this email.</p>
       `,
     });
+    console.log('[forgotPassword] Email sent successfully:', result);
   } catch (err) {
-    // Log but don't fail — generic response prevents email enumeration
+    console.error('[forgotPassword] Failed to send email:', err);
   }
 
   res.json({ message: 'If an account exists, a reset email has been sent' });

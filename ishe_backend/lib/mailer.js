@@ -10,17 +10,21 @@ const getClient = () => {
 };
 
 const sendMail = async ({ to, subject, html }) => {
+  console.log('[mailer] sendMail called:', { to, subject });
   const client = getClient();
   if (!client) {
-    console.error('RESEND_API_KEY not set — email not sent');
+    console.error('[mailer] RESEND_API_KEY not set — email not sent');
     return null;
   }
-  return client.emails.send({
+  console.log('[mailer] Sending email via Resend...');
+  const result = await client.emails.send({
     from: process.env.SMTP_FROM || 'Isitoshe Tours <onboarding@resend.dev>',
     to,
     subject,
     html,
   });
+  console.log('[mailer] Email sent:', result);
+  return result;
 };
 
 module.exports = { sendMail };
