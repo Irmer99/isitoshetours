@@ -11,7 +11,7 @@ import { Label, FieldRoot, ErrorMessage } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
 import { createClientSchema } from "~/schemas/clientSchema";
 import { validateWithSchema } from "~/lib/validate";
-import { SITE_CONTACT } from "~/lib/constants";
+import { useSiteContact } from "~/hooks/useSiteContact";
 import type { Itinerary } from "~/types";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -37,6 +37,7 @@ export default function ItineraryDetail({
   loaderData,
 }: Route.ComponentProps) {
   const { itinerary } = loaderData;
+  const contact = useSiteContact();
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -72,7 +73,7 @@ export default function ItineraryDetail({
       const message = encodeURIComponent(
         `Hi Isitoshe Tours! I submitted an enquiry for ${itinerary.title}.`
       );
-      window.open(`https://wa.me/${SITE_CONTACT.phoneDigits}?text=${message}`, "_blank");
+      window.open(`https://wa.me/${contact.phoneDigits}?text=${message}`, "_blank");
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err
@@ -258,7 +259,7 @@ export default function ItineraryDetail({
                     <Input
                       name="phone"
                       required
-                      placeholder={SITE_CONTACT.phone}
+                      placeholder={contact.phone}
                     />
                   </FieldRoot>
                   <FieldRoot>

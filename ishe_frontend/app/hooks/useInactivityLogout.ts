@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { logger } from "~/lib/logger";
 
 const ACTIVITY_EVENTS = ["mousemove", "keydown", "click", "scroll", "touchstart"] as const;
 
@@ -32,12 +33,14 @@ export function useInactivityLogout({
     if (warningBefore > 0 && warningBefore < timeout) {
       warningRef.current = setTimeout(() => {
         setShowWarning(true);
+        logger.warn("Session expiry warning", { component: "useInactivityLogout", action: "warning" });
         warningCallbackRef.current?.();
       }, timeout - warningBefore);
     }
 
     timeoutRef.current = setTimeout(() => {
       setShowWarning(false);
+      logger.info("Inactivity logout triggered", { component: "useInactivityLogout", action: "logout" });
       logoutRef.current?.();
     }, timeout);
   }, [timeout, warningBefore]);

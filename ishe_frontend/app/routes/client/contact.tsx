@@ -8,7 +8,7 @@ import { Label, FieldRoot } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
 import { createClientSchema } from "~/schemas/clientSchema";
 import { validateWithSchema } from "~/lib/validate";
-import { SITE_CONTACT } from "~/lib/constants";
+import { useSiteContact } from "~/hooks/useSiteContact";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -43,28 +43,29 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
-const contactInfo = [
-  {
-    icon: MapPin,
-    label: "Address",
-    value: SITE_CONTACT.address,
-  },
-  {
-    icon: Phone,
-    label: "Phone",
-    value: SITE_CONTACT.phone,
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: SITE_CONTACT.email,
-  },
-];
-
 export default function Contact() {
   const fetcher = useFetcher();
+  const siteContact = useSiteContact();
   const fieldErrors = (fetcher.data as { fieldErrors?: Record<string, string> })?.fieldErrors ?? {};
   const formKey = fetcher.data?.success ? Date.now() : "form";
+
+  const contactInfo = [
+    {
+      icon: MapPin,
+      label: "Address",
+      value: siteContact.address,
+    },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: siteContact.phone,
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: siteContact.email,
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -123,7 +124,7 @@ export default function Contact() {
             </FieldRoot>
             <FieldRoot>
               <Label>Phone</Label>
-              <Input name="phone" required placeholder={SITE_CONTACT.phone} className={fieldErrors.phone ? "border-destructive" : ""} />
+              <Input name="phone" required placeholder={siteContact.phone} className={fieldErrors.phone ? "border-destructive" : ""} />
               {fieldErrors.phone && <p className="text-xs text-destructive">{fieldErrors.phone}</p>}
             </FieldRoot>
             <Button

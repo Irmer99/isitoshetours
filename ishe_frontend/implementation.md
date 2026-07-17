@@ -22,11 +22,13 @@ ishe_frontend/
 │   │   └── ThemeContext.tsx   # Dark/light mode with localStorage persistence
 │   ├── hooks/
 │   │   ├── useAuth.ts        # Re-exports from AuthContext
-│   │   └── useInactivityLogout.ts # Session timeout with activity tracking
+│   │   ├── useInactivityLogout.ts # Session timeout with activity tracking
+│   │   └── useSiteContact.ts # Dynamic contact info from SiteSettings (with fallback)
 │   ├── lib/
 │   │   ├── api-client.ts     # Axios instance with JWT interceptors (env-based URL)
 │   │   ├── api-errors.ts     # Shared error parsing utilities
 │   │   ├── constants.ts      # Shared constants (statusColors, CURRENCY, SITE_CONTACT)
+│   │   ├── logger.ts         # Structured console logger (debug suppressed in prod)
 │   │   ├── utils.ts          # Tailwind merge utility (`cn`)
 │   │   └── validate.ts       # Zod validation helper
 │   ├── routes/
@@ -133,8 +135,14 @@ No payment processing. Flow:
 
 ### 4. Dashboard Charts
 
-- Uses `ChartContainer`/`ChartTooltip`/`ChartTooltipContent` from `components/ui/chart.tsx`
+- Uses `ChartContainer`/`ChartTooltip`/`ChartTooltipContent`/`ChartLegend`/`ChartLegendContent` from `components/ui/chart.tsx`
 - `ChartConfig` objects define colors and labels for consistent theming
+
+### 5. Structured Logging
+
+- `lib/logger.ts` wraps `console.debug/info/warn/error` with component/action context
+- Debug level suppressed in production (`import.meta.env.DEV`)
+- Integrated in: API client error interceptor, AuthContext login/logout, inactivity logout hook
 
 ---
 
@@ -164,6 +172,25 @@ export function getErrorMessage(err: unknown): string { ... }
 export function validateWithSchema<T>(schema: ZodSchema<T>, data: unknown):
   | { success: true; data: T }
   | { success: false; errors: Record<string, string> };
+```
+
+### `lib/logger.ts`
+```typescript
+export const logger: {
+  debug: (message: string, context?: LogContext, extra?: unknown) => void;
+  info: (message: string, context?: LogContext, extra?: unknown) => void;
+  warn: (message: string, context?: LogContext, extra?: unknown) => void;
+  error: (message: string, context?: LogContext, extra?: unknown) => void;
+};
+// Debug suppressed in production (import.meta.env.DEV)
+```
+
+### `hooks/useSiteContact.ts`
+```typescript
+export function useSiteContact(): {
+  phone: string; phoneDigits: string; email: string; address: string;
+};
+// Fetches from /api/content/site-settings, falls back to SITE_CONTACT constant
 ```
 
 ---
@@ -319,12 +346,20 @@ Internet → Nginx (SSL) → /uploads (static)
 - [x] Blog in navigation — Blog link in `client-layout.tsx` navLinks and footer
 - [x] Custom favicon — PNG favicon via `<link rel="icon">` in `root.tsx`
 
+### Phase 17: Polish & API Docs ✅
+
+- [x] SiteSettings dynamic contact — `useSiteContact.ts` hook fetches phone/email/address from API, falls back to `SITE_CONTACT` constant
+- [x] `itinerary-detail.tsx` migrated to `useSiteContact` — no remaining hardcoded `SITE_CONTACT` imports in routes
+- [x] Dashboard chart legends — `ChartLegend`/`ChartLegendContent` wired into BarChart and LineChart
+- [x] Swagger `security: []` — all public endpoints (GET content, POST bookings/clients/discounts/validate, POST auth/*) annotated to opt out of global bearerAuth
+- [x] Frontend structured logging — `lib/logger.ts` with component/action context, integrated in `api-client.ts` (error interceptor), `AuthContext.tsx` (login/logout), `useInactivityLogout.ts` (warning/timeout)
+
 ---
 
 ## Remaining Items
 
-- [ ] Wire phone numbers to SiteSettings (dynamic from admin settings instead of hardcoded)
-- [ ] Wire `chart.tsx` Legend component (currently only Tooltip used)
-- [ ] Add Swagger auth optional access for public endpoints
-- [ ] Structured logging in frontend (currently only backend has pino)
+- [x] Wire phone numbers to SiteSettings (dynamic from admin settings instead of hardcoded)
+- [x] Wire `chart.tsx` Legend component (currently only Tooltip used)
+- [x] Add Swagger auth optional access for public endpoints
+- [x] Structured logging in frontend (currently only backend has pino)
 - [ ] Test infrastructure (user requested skip for now)

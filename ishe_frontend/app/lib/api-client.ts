@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logger } from "./logger";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:3000/api",
@@ -18,10 +19,17 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      localStorage.removeItem("admin");
-      window.location.href = "/admin/login";
+    const status = err.response?.status;
+    const url = err.config?.url ?? "unknown";
+    if (status === 401) {
+      logger.warn("Unauthorized — clearing session", { component: "api-client", action: "401 interceptor" });
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("admin");
+        window.location.href = "/admin/login";
+      }
+    } else {
+      logger.error(`API error ${status} on ${url}`, { component: "api-client" }, err.response?.data);
     }
     return Promise.reject(err);
   }

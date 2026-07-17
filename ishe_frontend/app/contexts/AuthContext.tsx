@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import apiClient from "~/lib/api-client";
+import { logger } from "~/lib/logger";
 import type { Admin, LoginResponse } from "~/types";
 
 interface AuthState {
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("admin", JSON.stringify(res.data.admin));
     setToken(res.data.token);
     setAdmin(res.data.admin);
+    logger.info("Login successful", { component: "AuthContext", action: "login" });
     return res.data;
   }, []);
 
@@ -53,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    logger.info("Logout", { component: "AuthContext", action: "logout" });
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
     setToken(null);

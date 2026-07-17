@@ -4,8 +4,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { SITE_CONTACT } from "~/lib/constants";
 import { useTheme } from "~/contexts/ThemeContext";
+import { useSiteContact } from "~/hooks/useSiteContact";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -18,6 +18,7 @@ const navLinks = [
 export default function ClientLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const siteContact = useSiteContact();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -181,10 +182,10 @@ export default function ClientLayout() {
                 Contact
               </h4>
               <p className="text-sm text-[#f5f5f0]">
-                Email: {SITE_CONTACT.email}
+                Email: {siteContact.email}
               </p>
               <p className="text-sm text-[#f5f5f0]">
-                Phone: {SITE_CONTACT.phone}
+                Phone: {siteContact.phone}
               </p>
             </div>
           </div>

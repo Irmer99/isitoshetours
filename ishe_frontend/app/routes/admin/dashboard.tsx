@@ -10,7 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, LineChart, Line, CartesianGrid } from "rec
 
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "~/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "~/components/ui/chart";
 import apiClient from "~/lib/api-client";
 import { CURRENCY } from "~/lib/constants";
 import type { StatsOverview, ConversionRate } from "~/types";
@@ -234,6 +234,7 @@ export default function Dashboard() {
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
                   <Bar dataKey="bookings" fill="var(--color-primary)" radius={0} />
                 </BarChart>
               </ChartContainer>
@@ -259,6 +260,7 @@ export default function Dashboard() {
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
                   <Line
                     type="monotone"
                     dataKey="bookings"
