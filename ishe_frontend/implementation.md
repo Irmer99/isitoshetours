@@ -223,15 +223,15 @@ export function validateWithSchema<T>(schema: ZodSchema<T>, data: unknown):
 - [x] Dark mode toggle with ThemeProvider + FOUC prevention
 - [x] All hardcoded `"UGX"` replaced with `CURRENCY` constant
 
-### Phase 10: Deployment Infrastructure 🔄
+### Phase 10: Deployment Infrastructure ✅
 Target: VPS (Hetzner/DigitalOcean), low traffic (< 100 visitors/day)
 
-- [ ] Backend Dockerfile — multi-stage Node build (mirrors frontend pattern)
-- [ ] Docker Compose — orchestrate frontend, backend, and nginx containers
-- [ ] Nginx config — reverse proxy: SSL termination (Let's Encrypt), serve frontend, proxy `/api` to backend, serve `/uploads` as static files
-- [ ] Health check endpoint — `GET /health` on backend for nginx upstream checks
-- [ ] CORS update — change from `localhost:5173` to production domain (env-driven)
-- [ ] HTTP caching headers — add `Cache-Control` on public content endpoints (itineraries, destinations, testimonials, team, site-settings) to reduce unnecessary MongoDB queries
+- [x] Backend Dockerfile — multi-stage Node 24 Alpine with tini
+- [x] Docker Compose — orchestrate frontend, backend, and nginx containers
+- [x] Nginx config — reverse proxy: SSL termination (Let's Encrypt), serve frontend, proxy `/api` to backend, serve `/uploads` as static files
+- [x] Health check endpoint — `GET /health` on backend for nginx upstream checks
+- [x] CORS update — env-driven, comma-separated multi-origin support
+- [x] HTTP caching headers — `Cache-Control` on `/api/content` routes (300s TTL)
 
 **Architecture:**
 ```
@@ -245,6 +245,30 @@ Internet → Nginx (SSL) → /uploads (static)
 - Redis — in-memory rate limiting works fine with one instance
 - CDN — low traffic, single server handles it
 - Kubernetes / orchestration — overkill for this scale
+
+### Phase 11: Security Hardening ✅
+
+- [x] RBAC middleware (`requireRole`) — enforced on admin CUD operations
+- [x] Admin existence check — authMiddleware verifies admin still exists in DB
+- [x] Discount brute-force rate limit — 10 attempts/15min per IP on `POST /api/discounts/validate`
+- [x] Client data leak fixed — public POST returns 409 + clientId only (no full record)
+- [x] Hard deletes → soft deletes on bookings and discounts
+- [x] Upload rate limiter — 30 uploads/min per authenticated admin
+- [x] Discount response sanitized — `discountApplied` removed from public schema
+- [x] SVG uploads removed — only JPEG/PNG/WebP/GIF allowed
+- [x] SiteSettings validation tightened — length limits, URL format checks, phone regex
+- [x] Booking history email leak fixed
+- [x] Stats range capped at 365 days max
+- [x] Refresh endpoint rate limited
+- [x] Error handler hides internals in production
+
+### Phase 12: Auth Features ✅
+
+- [x] Password recovery — email-based flow via Resend API (forgot-password, reset-password)
+- [x] Password change — admin settings page with current/new/confirm fields
+- [x] JWT expiry — 14 days (configurable via JWT_EXPIRES_IN env)
+- [x] Forgot/reset password pages — public routes with forms
+- [x] Pagination — bookings and clients list endpoints now paginated (frontend updated)
 
 ---
 

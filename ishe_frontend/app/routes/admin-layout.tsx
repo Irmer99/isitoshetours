@@ -14,8 +14,10 @@ import {
 import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
+import { SessionToast } from "~/components/ui/toast";
 import { cn } from "~/lib/utils";
 import { useAuth } from "~/contexts/AuthContext";
+import { useInactivityLogout } from "~/hooks/useInactivityLogout";
 
 export async function clientLoader() {
   if (typeof window === "undefined") return null;
@@ -37,8 +39,14 @@ const sidebarLinks = [
 ];
 
 export default function AdminLayout() {
-  const { admin, logout } = useAuth();
+  const { admin, logout, isAuthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const { showWarning, extendSession } = useInactivityLogout({
+    timeout: 30 * 60 * 1000,
+    warningBefore: 60 * 1000,
+    onLogout: logout,
+  });
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -114,6 +122,14 @@ export default function AdminLayout() {
         <div
           className="fixed inset-0 z-30 bg-black/40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {isAuthenticated && showWarning && (
+        <SessionToast
+          message="Your session will expire in 60 seconds."
+          onAction={extendSession}
+          actionLabel="Stay logged in"
         />
       )}
     </div>
