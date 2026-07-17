@@ -3,6 +3,7 @@ const Destination = require('../models/Destination');
 const Testimonial = require('../models/Testimonial');
 const Team = require('../models/Team');
 const SiteSettings = require('../models/SiteSettings');
+const Blog = require('../models/Blog');
 const escapeRegex = require('../lib/escapeRegex');
 
 exports.createItinerary = async (req, res) => {
@@ -104,4 +105,39 @@ exports.updateSiteSettings = async (req, res) => {
     { new: true, upsert: true }
   );
   res.json(settings);
+};
+
+exports.createBlog = async (req, res) => {
+  const blog = await Blog.create(req.body);
+  res.status(201).json(blog);
+};
+
+exports.getBlogs = async (req, res) => {
+  const filter = { archived: false };
+  if (req.query.tag) filter.tags = req.query.tag;
+  if (req.query.search) filter.title = { $regex: escapeRegex(req.query.search), $options: 'i' };
+  const blogs = await Blog.find(filter).sort({ createdAt: -1 });
+  res.json(blogs);
+};
+
+exports.getBlog = async (req, res) => {
+  const blog = await Blog.findOne({ slug: req.params.slug });
+  if (!blog) return res.status(404).json({ error: 'Blog post not found' });
+  res.json(blog);
+};
+
+exports.updateBlog = async (req, res) => {
+  const blog = await Blog.findOneAndUpdate(
+    { slug: req.params.slug },
+    req.body,
+    { new: true, runValidators: true }
+  );
+  if (!blog) return res.status(404).json({ error: 'Blog post not found' });
+  res.json(blog);
+};
+
+exports.deleteBlog = async (req, res) => {
+  const blog = await Blog.findOneAndDelete({ slug: req.params.slug });
+  if (!blog) return res.status(404).json({ error: 'Blog post not found' });
+  res.json({ message: 'Blog post deleted' });
 };

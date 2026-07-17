@@ -82,6 +82,26 @@ const updateSiteSettingsSchema = z.object({
   data: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(z.union([z.string(), z.number(), z.boolean()])), z.record(z.string())])),
 });
 
+const createBlogSchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
+  excerpt: z.string().optional(),
+  content: z.string().optional(),
+  coverImage: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+const updateBlogSchema = z.object({
+  title: z.string().min(1).optional(),
+  excerpt: z.string().optional(),
+  content: z.string().optional(),
+  coverImage: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  archived: z.boolean().optional(),
+});
+
 module.exports = {
   createItinerarySchema,
   updateItinerarySchema,
@@ -90,4 +110,6 @@ module.exports = {
   updateTestimonialSchema,
   updateTeamSchema,
   updateSiteSettingsSchema,
+  createBlogSchema,
+  updateBlogSchema,
 };

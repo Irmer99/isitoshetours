@@ -14,6 +14,8 @@ const {
   updateTestimonialSchema,
   updateTeamSchema,
   updateSiteSettingsSchema,
+  createBlogSchema,
+  updateBlogSchema,
 } = require('../validators/content.validator');
 
 const router = Router();
@@ -262,5 +264,15 @@ router.get('/site-settings', asyncHandler(contentController.getSiteSettings));
  *         description: Site settings updated
  */
 router.patch('/site-settings', authMiddleware, requireRole('superadmin'), validateBody(updateSiteSettingsSchema), asyncHandler(contentController.updateSiteSettings));
+
+router.get('/blogs', asyncHandler(contentController.getBlogs));
+
+router.get('/blogs/:slug', asyncHandler(contentController.getBlog));
+
+router.post('/blogs', authMiddleware, validateBody(createBlogSchema), asyncHandler(contentController.createBlog));
+
+router.patch('/blogs/:slug', authMiddleware, validateBody(updateBlogSchema), asyncHandler(contentController.updateBlog));
+
+router.delete('/blogs/:slug', authMiddleware, asyncHandler(contentController.deleteBlog));
 
 module.exports = router;

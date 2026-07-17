@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const Admin = require('../models/Admin');
 const PasswordReset = require('../models/PasswordReset');
 const { sendMail } = require('../lib/mailer');
@@ -63,6 +64,7 @@ exports.forgotPassword = async (req, res) => {
   console.log('[forgotPassword] Reset URL:', resetUrl);
 
   try {
+    const idempotencyKey = `reset-${admin.email}-${Date.now()}`;
     const result = await sendMail({
       to: admin.email,
       subject: 'Password Reset — Isitoshe Tours',
@@ -72,6 +74,7 @@ exports.forgotPassword = async (req, res) => {
         <p><a href="${resetUrl}">${resetUrl}</a></p>
         <p>If you didn't request this, you can safely ignore this email.</p>
       `,
+      idempotencyKey,
     });
     console.log('[forgotPassword] Email sent successfully:', result);
   } catch (err) {

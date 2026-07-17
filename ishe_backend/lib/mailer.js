@@ -9,7 +9,7 @@ const getClient = () => {
   return resend;
 };
 
-const sendMail = async ({ to, subject, html }) => {
+const sendMail = async ({ to, subject, html, idempotencyKey }) => {
   console.log('[mailer] sendMail called:', { to, subject });
   const client = getClient();
   if (!client) {
@@ -17,12 +17,15 @@ const sendMail = async ({ to, subject, html }) => {
     return null;
   }
   console.log('[mailer] Sending email via Resend...');
-  const result = await client.emails.send({
-    from: process.env.SMTP_FROM || 'Isitoshe Tours <onboarding@resend.dev>',
-    to,
-    subject,
-    html,
-  });
+  const result = await client.emails.send(
+    {
+      from: process.env.SMTP_FROM || 'Isitoshe Tours <onboarding@resend.dev>',
+      to,
+      subject,
+      html,
+    },
+    idempotencyKey ? { idempotencyKey } : undefined,
+  );
   console.log('[mailer] Email sent:', result);
   return result;
 };
