@@ -15,6 +15,8 @@ export default [
     route("contact", "routes/client/contact.tsx"),
   ]),
   route("admin/login", "routes/admin/login.tsx"),
+  route("admin/forgot-password", "routes/admin/forgot-password.tsx"),
+  route("admin/reset-password", "routes/admin/reset-password.tsx"),
   route("admin", "routes/admin-layout.tsx", [
     index("routes/admin/dashboard.tsx"),
     route("bookings", "routes/admin/bookings-list.tsx"),

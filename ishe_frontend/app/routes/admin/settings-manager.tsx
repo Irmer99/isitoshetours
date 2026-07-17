@@ -1,7 +1,7 @@
 import type { Route } from "./+types/settings-manager";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save } from "lucide-react";
+import { Save, Lock, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -35,6 +35,48 @@ export default function SettingsManager() {
   }, [settings]);
 
   const [saveError, setSaveError] = useState("");
+
+  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [pwError, setPwError] = useState("");
+  const [pwSuccess, setPwSuccess] = useState("");
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+
+  const pwMutation = useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      apiClient.patch("/auth/password", data),
+    onSuccess: () => {
+      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPwError("");
+      setPwSuccess("Password changed successfully");
+    },
+    onError: (err: unknown) => {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response: { data: { error?: string } } }).response?.data
+              ?.error || "Failed to change password"
+          : "Failed to change password";
+      setPwError(msg);
+      setPwSuccess("");
+    },
+  });
+
+  const handlePasswordChange = () => {
+    setPwError("");
+    setPwSuccess("");
+    if (pwForm.newPassword.length < 6) {
+      setPwError("New password must be at least 6 characters");
+      return;
+    }
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwError("New passwords do not match");
+      return;
+    }
+    pwMutation.mutate({
+      currentPassword: pwForm.currentPassword,
+      newPassword: pwForm.newPassword,
+    });
+  };
 
   const saveMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
@@ -98,6 +140,78 @@ export default function SettingsManager() {
           >
             <Save className="size-4" />
             Save Settings
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-8 border border-border bg-card p-6">
+        <div className="mb-4">
+          <h2 className="font-heading text-lg font-bold text-foreground">
+            Change Password
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Update your admin account password
+          </p>
+        </div>
+        <div className="space-y-4 max-w-sm">
+          <FieldRoot>
+            <Label>Current Password</Label>
+            <div className="relative">
+              <Input
+                type={showCurrentPw ? "text" : "password"}
+                value={pwForm.currentPassword}
+                onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })}
+                placeholder="Enter current password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPw(!showCurrentPw)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showCurrentPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </FieldRoot>
+          <FieldRoot>
+            <Label>New Password</Label>
+            <div className="relative">
+              <Input
+                type={showNewPw ? "text" : "password"}
+                value={pwForm.newPassword}
+                onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
+                placeholder="At least 6 characters"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPw(!showNewPw)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showNewPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </FieldRoot>
+          <FieldRoot>
+            <Label>Confirm New Password</Label>
+            <Input
+              type="password"
+              value={pwForm.confirmPassword}
+              onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
+              placeholder="Re-enter new password"
+            />
+          </FieldRoot>
+          {pwError && <p className="text-sm text-destructive">{pwError}</p>}
+          {pwSuccess && <p className="text-sm text-green-600">{pwSuccess}</p>}
+          <Button
+            variant="default"
+            onClick={handlePasswordChange}
+            disabled={pwMutation.isPending}
+          >
+            <Lock className="size-4" />
+            Change Password
           </Button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import type { Route } from "./+types/login";
 import { Form, useActionData, useNavigate, redirect } from "react-router";
 import { useEffect, useState } from "react";
 import { LogIn, Eye, EyeOff } from "lucide-react";
+import { Link } from "react-router";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -101,6 +102,14 @@ export default function AdminLogin() {
           {actionData?.error && (
             <p className="text-sm text-destructive">{actionData.error}</p>
           )}
+          <div className="text-right">
+            <Link
+              to="/admin/forgot-password"
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Button type="submit" variant="default" size="lg" className="w-full">
             <LogIn className="size-4" />
             Sign In
