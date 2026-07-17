@@ -27,4 +27,13 @@ apiClient.interceptors.response.use(
   }
 );
 
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === "token" && e.newValue === null) {
+      localStorage.removeItem("admin");
+      window.location.href = "/admin/login";
+    }
+  });
+}
+
 export default apiClient;

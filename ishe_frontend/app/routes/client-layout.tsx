@@ -151,8 +151,16 @@ export default function ClientLayout() {
               </p>
             </div>
           </div>
-          <div className="mt-8 border-t border-border/50 pt-6 text-center text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Isitoshe Tours. All rights reserved.
+          <div className="mt-8 border-t border-border/50 pt-6 flex items-center justify-between text-xs text-muted-foreground">
+            <span>&copy; {new Date().getFullYear()} Isitoshe Tours. All rights reserved.</span>
+            <a
+              href="https://pirmer-patricia.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              Built by A.Pirmer.P
+            </a>
           </div>
         </div>
       </footer>
