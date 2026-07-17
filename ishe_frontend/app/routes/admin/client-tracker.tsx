@@ -12,7 +12,7 @@ import apiClient from "~/lib/api-client";
 import { createClientSchema } from "~/schemas/clientSchema";
 import { validateWithSchema } from "~/lib/validate";
 import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
-import type { Client, Booking } from "~/types";
+import type { Client, Booking, PaginatedResponse } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Clients — Isitoshe Tours Admin" }];
@@ -33,8 +33,8 @@ export default function ClientTracker() {
     queryKey: ["clients", debouncedSearch],
     queryFn: () =>
       apiClient
-        .get<Client[]>(`/clients${debouncedSearch ? `?search=${debouncedSearch}` : ""}`)
-        .then((r) => r.data),
+        .get<PaginatedResponse<Client>>(`/clients${debouncedSearch ? `?search=${debouncedSearch}` : ""}`)
+        .then((r) => r.data.data),
   });
 
   const { data: clientBookings, isError: bookingsError } = useQuery({

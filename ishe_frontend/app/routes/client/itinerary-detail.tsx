@@ -60,8 +60,20 @@ export default function ItineraryDetail({
       return;
     }
     try {
-      const clientRes = await apiClient.post("/clients", clientData);
-      const clientId = clientRes.data._id;
+      let clientId: string;
+      try {
+        const clientRes = await apiClient.post("/clients", clientData);
+        clientId = clientRes.data._id;
+      } catch (err: unknown) {
+        const status = err && typeof err === "object" && "response" in err
+          ? (err as { response: { status: number } }).response?.status
+          : null;
+        if (status === 409) {
+          clientId = (err as { response: { data: { clientId: string } } }).response.data.clientId;
+        } else {
+          throw err;
+        }
+      }
       await apiClient.post("/bookings", {
         clientId,
         itinerary: itinerary.slug,

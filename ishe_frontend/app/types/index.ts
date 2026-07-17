@@ -132,6 +132,14 @@ export interface ConversionRate {
   confirmed: number;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
 export interface LoginResponse {
   token: string;
   admin: Admin;

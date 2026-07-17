@@ -12,7 +12,7 @@ import * as Dialog from "~/components/ui/dialog";
 import apiClient from "~/lib/api-client";
 import { statusColors, CURRENCY } from "~/lib/constants";
 import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
-import type { Booking, Client, Itinerary } from "~/types";
+import type { Booking, Client, Itinerary, PaginatedResponse } from "~/types";
 
 function useBookings(status: string, archived: boolean) {
   return useQuery({
@@ -23,8 +23,8 @@ function useBookings(status: string, archived: boolean) {
       if (archived) params.set("archived", "true");
       const qs = params.toString();
       return apiClient
-        .get<Booking[]>(`/bookings${qs ? `?${qs}` : ""}`)
-        .then((r) => r.data);
+        .get<PaginatedResponse<Booking>>(`/bookings${qs ? `?${qs}` : ""}`)
+        .then((r) => r.data.data);
     },
   });
 }
@@ -33,7 +33,7 @@ function useClients() {
   return useQuery({
     queryKey: ["clients-list"],
     queryFn: () =>
-      apiClient.get<Client[]>("/clients").then((r) => r.data),
+      apiClient.get<PaginatedResponse<Client>>("/clients").then((r) => r.data.data),
   });
 }
 
