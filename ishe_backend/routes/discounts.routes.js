@@ -1,8 +1,10 @@
 const { Router } = require('express');
 const discountController = require('../controllers/discount.controller');
 const authMiddleware = require('../middleware/authMiddleware');
+const requireRole = require('../middleware/requireRole');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
+const { publicPostLimiter } = require('../middleware/rateLimit');
 const { createDiscountSchema, updateDiscountSchema, validateDiscountSchema } = require('../validators/discount.validator');
 
 const router = Router();
@@ -49,7 +51,7 @@ router.get('/', authMiddleware, asyncHandler(discountController.list));
  *             schema:
  *               $ref: '#/components/schemas/Discount'
  */
-router.post('/', authMiddleware, validateBody(createDiscountSchema), asyncHandler(discountController.create));
+router.post('/', authMiddleware, requireRole('superadmin'), validateBody(createDiscountSchema), asyncHandler(discountController.create));
 
 /**
  * @swagger
@@ -75,7 +77,7 @@ router.post('/', authMiddleware, validateBody(createDiscountSchema), asyncHandle
  *       404:
  *         description: Discount not found
  */
-router.patch('/:id', authMiddleware, validateBody(updateDiscountSchema), asyncHandler(discountController.update));
+router.patch('/:id', authMiddleware, requireRole('superadmin'), validateBody(updateDiscountSchema), asyncHandler(discountController.update));
 
 /**
  * @swagger
@@ -96,7 +98,7 @@ router.patch('/:id', authMiddleware, validateBody(updateDiscountSchema), asyncHa
  *       404:
  *         description: Discount not found
  */
-router.delete('/:id', authMiddleware, asyncHandler(discountController.remove));
+router.delete('/:id', authMiddleware, requireRole('superadmin'), asyncHandler(discountController.remove));
 
 /**
  * @swagger
@@ -121,6 +123,6 @@ router.delete('/:id', authMiddleware, asyncHandler(discountController.remove));
  *       404:
  *         description: Invalid or expired code
  */
-router.post('/validate', validateBody(validateDiscountSchema), asyncHandler(discountController.validate));
+router.post('/validate', publicPostLimiter, validateBody(validateDiscountSchema), asyncHandler(discountController.validate));
 
 module.exports = router;

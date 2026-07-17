@@ -8,7 +8,6 @@ const createBookingSchema = z.object({
   participants: z.number().int().min(1),
   totalAmount: z.number().positive(),
   discountCode: z.string().optional(),
-  discountApplied: z.number().min(0).optional(),
   notes: z.string().optional(),
 });
 

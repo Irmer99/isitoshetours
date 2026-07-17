@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const bookingController = require('../controllers/booking.controller');
 const authMiddleware = require('../middleware/authMiddleware');
+const requireRole = require('../middleware/requireRole');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
 const { publicPostLimiter } = require('../middleware/rateLimit');
@@ -192,7 +193,7 @@ router.patch('/:id/archive', authMiddleware, asyncHandler(bookingController.arch
  *       404:
  *         description: Booking not found
  */
-router.delete('/:id', authMiddleware, asyncHandler(bookingController.remove));
+router.delete('/:id', authMiddleware, requireRole('superadmin'), asyncHandler(bookingController.remove));
 
 /**
  * @swagger

@@ -6,6 +6,7 @@ exports.create = async (req, res) => {
     const discount = await Discount.findOne({
       code: req.body.discountCode.toUpperCase(),
       active: true,
+      deleted: { $ne: true },
       startDate: { $lte: new Date() },
       endDate: { $gte: new Date() },
     });
@@ -16,6 +17,9 @@ exports.create = async (req, res) => {
       return res.status(400).json({ error: 'Discount usage limit reached' });
     }
     await Discount.findByIdAndUpdate(discount._id, { $inc: { usedCount: 1 } });
+    req.body.discountApplied = discount.type === 'percent'
+      ? req.body.totalAmount * (discount.value / 100)
+      : discount.value;
   }
 
   req.body.statusHistory = [{ from: 'enquiry', to: 'enquiry', changedAt: new Date() }];
@@ -26,7 +30,7 @@ exports.create = async (req, res) => {
 };
 
 exports.list = async (req, res) => {
-  const filter = {};
+  const filter = { deleted: { $ne: true } };
   if (req.query.status) filter.status = req.query.status;
   if (req.query.itinerary) filter.itinerary = req.query.itinerary;
   if (req.query.from || req.query.to) {
@@ -40,21 +44,29 @@ exports.list = async (req, res) => {
     filter.archived = { $ne: true };
   }
 
-  const bookings = await Booking.find(filter)
-    .populate('clientId')
-    .sort({ createdAt: -1 });
-  res.json(bookings);
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+  const skip = (page - 1) * limit;
+  const [bookings, total] = await Promise.all([
+    Booking.find(filter)
+      .populate('clientId')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Booking.countDocuments(filter),
+  ]);
+  res.json({ data: bookings, page, limit, total, pages: Math.ceil(total / limit) });
 };
 
 exports.detail = async (req, res) => {
-  const booking = await Booking.findById(req.params.id).populate('clientId');
+  const booking = await Booking.findOne({ _id: req.params.id, deleted: { $ne: true } }).populate('clientId');
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
   res.json(booking);
 };
 
 exports.updateStatus = async (req, res) => {
   const { status } = req.body;
-  const booking = await Booking.findById(req.params.id);
+  const booking = await Booking.findOne({ _id: req.params.id, deleted: { $ne: true } });
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
   const validTransitions = {
@@ -79,18 +91,22 @@ exports.updateStatus = async (req, res) => {
   booking.status = status;
   await booking.save();
 
-  const populated = await Booking.findById(booking._id)    .populate('clientId');
+  const populated = await Booking.findById(booking._id).populate('clientId');
   res.json(populated);
 };
 
 exports.remove = async (req, res) => {
-  const booking = await Booking.findByIdAndDelete(req.params.id);
+  const booking = await Booking.findOneAndUpdate(
+    { _id: req.params.id, deleted: { $ne: true } },
+    { deleted: true },
+    { new: true },
+  );
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
   res.json({ message: 'Booking deleted' });
 };
 
 exports.update = async (req, res) => {
-  const booking = await Booking.findById(req.params.id);
+  const booking = await Booking.findOne({ _id: req.params.id, deleted: { $ne: true } });
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
   const allowed = ['itinerary', 'itineraryTitle', 'travelDate', 'participants', 'totalAmount', 'notes'];
@@ -106,8 +122,8 @@ exports.update = async (req, res) => {
 };
 
 exports.archive = async (req, res) => {
-  const booking = await Booking.findByIdAndUpdate(
-    req.params.id,
+  const booking = await Booking.findOneAndUpdate(
+    { _id: req.params.id, deleted: { $ne: true } },
     { archived: true },
     { new: true },
   ).populate('clientId');
@@ -116,9 +132,14 @@ exports.archive = async (req, res) => {
 };
 
 exports.history = async (req, res) => {
-  const booking = await Booking.findById(req.params.id)
+  const booking = await Booking.findOne({ _id: req.params.id, deleted: { $ne: true } })
     .select('statusHistory')
     .populate('statusHistory.changedBy', 'email');
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
-  res.json(booking.statusHistory);
+  const sanitized = booking.statusHistory.map((entry) => ({
+    from: entry.from,
+    to: entry.to,
+    changedAt: entry.changedAt,
+  }));
+  res.json(sanitized);
 };

@@ -44,7 +44,7 @@ exports.bookingsByRoute = async (req, res) => {
 };
 
 exports.bookingsOverTime = async (req, res) => {
-  const range = parseInt(req.query.range) || 30;
+  const range = Math.min(365, Math.max(1, parseInt(req.query.range) || 30));
   const since = new Date();
   since.setDate(since.getDate() - range);
 

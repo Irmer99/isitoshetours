@@ -1,9 +1,11 @@
 const { Router } = require('express');
 const contentController = require('../controllers/content.controller');
 const authMiddleware = require('../middleware/authMiddleware');
+const requireRole = require('../middleware/requireRole');
 const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
 const upload = require('../middleware/upload');
+const { uploadLimiter } = require('../middleware/rateLimit');
 const {
   createItinerarySchema,
   updateItinerarySchema,
@@ -81,7 +83,7 @@ router.get('/itineraries/:slug', asyncHandler(contentController.getItinerary));
  */
 router.patch('/itineraries/:slug', authMiddleware, validateBody(updateItinerarySchema), asyncHandler(contentController.updateItinerary));
 
-router.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
+router.post('/upload', authMiddleware, uploadLimiter, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   const url = `/uploads/${req.file.filename}`;
   res.json({ url });
@@ -259,6 +261,6 @@ router.get('/site-settings', asyncHandler(contentController.getSiteSettings));
  *       200:
  *         description: Site settings updated
  */
-router.patch('/site-settings', authMiddleware, validateBody(updateSiteSettingsSchema), asyncHandler(contentController.updateSiteSettings));
+router.patch('/site-settings', authMiddleware, requireRole('superadmin'), validateBody(updateSiteSettingsSchema), asyncHandler(contentController.updateSiteSettings));
 
 module.exports = router;

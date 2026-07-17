@@ -10,6 +10,7 @@ const discountSchema = new mongoose.Schema({
   usageLimit: { type: Number, default: null },
   usedCount: { type: Number, default: 0 },
   active: { type: Boolean, default: true },
+  deleted: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Discount', discountSchema);

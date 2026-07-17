@@ -64,6 +64,6 @@ router.post('/login', authLimiter, validateBody(loginSchema), asyncHandler(authC
  *       401:
  *         description: Invalid or expired token
  */
-router.post('/refresh', validateBody(refreshSchema), asyncHandler(authController.refresh));
+router.post('/refresh', authLimiter, validateBody(refreshSchema), asyncHandler(authController.refresh));
 
 module.exports = router;
