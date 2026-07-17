@@ -168,7 +168,7 @@ export default function SettingsManager() {
                 type="button"
                 onClick={() => setShowCurrentPw(!showCurrentPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                tabIndex={-1}
+                aria-label={showCurrentPw ? "Hide current password" : "Show current password"}
               >
                 {showCurrentPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -188,7 +188,7 @@ export default function SettingsManager() {
                 type="button"
                 onClick={() => setShowNewPw(!showNewPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                tabIndex={-1}
+                aria-label={showNewPw ? "Hide new password" : "Show new password"}
               >
                 {showNewPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>

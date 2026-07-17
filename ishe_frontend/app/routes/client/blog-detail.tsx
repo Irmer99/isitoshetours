@@ -35,6 +35,9 @@ export default function BlogDetail({ loaderData }: Route.ComponentProps) {
           <img
             src={post.coverImage}
             alt={post.title}
+            loading="lazy"
+            width={1200}
+            height={675}
             className="size-full object-cover"
           />
         </div>

@@ -76,6 +76,7 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
               onClick={() => {
                 updateParam("difficulty", d === difficulty ? "" : d);
               }}
+              aria-pressed={difficulty === d}
               className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-colors ${
                 difficulty === d
                   ? "border-primary bg-primary text-primary-foreground"

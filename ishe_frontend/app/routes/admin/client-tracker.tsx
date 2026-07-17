@@ -273,6 +273,7 @@ export default function ClientTracker() {
                       openEdit(client);
                     }}
                     className="p-1 text-muted-foreground hover:text-foreground"
+                    aria-label="Edit client"
                   >
                     <Pencil className="size-3" />
                   </button>

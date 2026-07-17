@@ -1,6 +1,6 @@
 import { Link, Outlet } from "react-router";
 import { Menu, Moon, Sun, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -18,11 +18,41 @@ const navLinks = [
 export default function ClientLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeMobile();
+        menuButtonRef.current?.focus();
+      }
+    };
+    const handleFocusTrap = (e: FocusEvent) => {
+      if (!menuRef.current || menuRef.current.contains(e.target as Node)) return;
+      menuRef.current.querySelector<HTMLElement>("a, button")?.focus();
+    };
+    document.addEventListener("keydown", handleKey);
+    document.addEventListener("focusin", handleFocusTrap);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("focusin", handleFocusTrap);
+    };
+  }, [mobileOpen, closeMobile]);
 
   return (
     <div className="flex min-h-screen flex-col">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-sm">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <nav aria-label="Main navigation" className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link to="/" className="font-heading text-xl font-bold text-primary">
             Isitoshe Tours
           </Link>
@@ -52,16 +82,23 @@ export default function ClientLayout() {
           </div>
 
           <button
+            ref={menuButtonRef}
             className="md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
           >
             {mobileOpen ? <X className="size-6" /> : <Menu className="size-6" />}
           </button>
         </nav>
 
         <div
+          id="mobile-menu"
+          ref={menuRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
           className={cn(
             "overflow-hidden transition-all duration-300 md:hidden",
             mobileOpen ? "max-h-64" : "max-h-0"
@@ -95,7 +132,7 @@ export default function ClientLayout() {
         </div>
       </header>
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <Outlet />
       </main>
 

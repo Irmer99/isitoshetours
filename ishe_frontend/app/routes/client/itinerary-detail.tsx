@@ -129,6 +129,8 @@ export default function ItineraryDetail({
                     src={url}
                     alt={`${itinerary.title} ${i + 1}`}
                     loading="lazy"
+                    width={640}
+                    height={360}
                     className="aspect-video w-full object-cover"
                   />
                 </div>

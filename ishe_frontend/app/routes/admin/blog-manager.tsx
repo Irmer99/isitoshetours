@@ -39,29 +39,29 @@ function TipTapToolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
     `border border-input bg-background p-1.5 text-muted-foreground transition-colors hover:text-foreground ${active ? "text-primary" : ""}`;
   return (
     <div className="flex flex-wrap items-center gap-1 border border-input border-b-0 bg-muted/50 px-2 py-1.5">
-      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btn(editor.isActive("bold"))}>
+      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btn(editor.isActive("bold"))} aria-label="Bold">
         <Bold className="size-4" />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={btn(editor.isActive("italic"))}>
+      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={btn(editor.isActive("italic"))} aria-label="Italic">
         <Italic className="size-4" />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btn(editor.isActive("heading", { level: 2 }))}>
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btn(editor.isActive("heading", { level: 2 }))} aria-label="Heading 2">
         <Heading2 className="size-4" />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={btn(editor.isActive("bulletList"))}>
+      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={btn(editor.isActive("bulletList"))} aria-label="Bullet list">
         <List className="size-4" />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={btn(editor.isActive("orderedList"))}>
+      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={btn(editor.isActive("orderedList"))} aria-label="Ordered list">
         <ListOrdered className="size-4" />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btn(editor.isActive("blockquote"))}>
+      <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btn(editor.isActive("blockquote"))} aria-label="Blockquote">
         <Quote className="size-4" />
       </button>
       <div className="mx-1 h-4 w-px bg-border" />
-      <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className={btn(false)}>
+      <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className={btn(false)} aria-label="Undo">
         <Undo className="size-4" />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} className={btn(false)}>
+      <button type="button" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} className={btn(false)} aria-label="Redo">
         <Redo className="size-4" />
       </button>
     </div>
@@ -220,7 +220,7 @@ export default function BlogManager() {
             <h2 className="text-sm font-semibold tracking-wider uppercase">
               {creating ? "New Blog Post" : "Edit Blog Post"}
             </h2>
-            <button onClick={cancelForm} className="text-muted-foreground hover:text-foreground">
+            <button onClick={cancelForm} className="text-muted-foreground hover:text-foreground" aria-label="Close form">
               <X className="size-4" />
             </button>
           </div>

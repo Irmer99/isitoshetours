@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Compass, Mountain, Sun, ChevronDown } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -106,6 +106,8 @@ const faqs = [
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -116,22 +118,31 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 5000);
-    return () => clearInterval(timer);
-  }, [nextSlide]);
+    if (isPaused) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+    timerRef.current = setInterval(nextSlide, 5000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [nextSlide, isPaused]);
 
   return (
     <>
-      <section className="relative h-[60vh] min-h-[400px] overflow-hidden sm:h-[80vh]">
+      <section aria-label="Image carousel" aria-live="off" className="relative h-[60vh] min-h-[400px] overflow-hidden sm:h-[80vh]">
         {heroSlides.map((slide, i) => (
           <div
             key={i}
+            aria-hidden={i !== currentSlide}
             className="absolute inset-0 transition-opacity duration-1000"
             style={{ opacity: i === currentSlide ? 1 : 0 }}
           >
             <img
               src={slide.image}
               alt={slide.tagline}
+              width={1920}
+              height={1080}
               className="size-full object-cover"
               loading={i === 0 ? "eager" : "lazy"}
             />
@@ -185,7 +196,7 @@ export default function Home() {
           <ChevronRight className="size-6" />
         </button>
 
-        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
           {heroSlides.map((_, i) => (
             <button
               key={i}
@@ -194,6 +205,13 @@ export default function Home() {
               aria-label={`Go to slide ${i + 1}`}
             />
           ))}
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className="ml-2 bg-black/40 px-2 py-1 text-xs text-white transition-colors hover:bg-black/60"
+            aria-label={isPaused ? "Resume carousel" : "Pause carousel"}
+          >
+            {isPaused ? "▶" : "❚❚"}
+          </button>
         </div>
       </section>
 
@@ -235,6 +253,8 @@ export default function Home() {
                   src="https://images.unsplash.com/photo-1521651201144-634f700b36ef?w=600&q=80"
                   alt="Uganda landscape"
                   loading="lazy"
+                  width={600}
+                  height={750}
                   className="size-full object-cover"
                 />
               </div>
@@ -243,6 +263,8 @@ export default function Home() {
                   src="https://images.unsplash.com/photo-1504173010664-32509aeebb62?w=600&q=80"
                   alt="Uganda wildlife"
                   loading="lazy"
+                  width={600}
+                  height={750}
                   className="size-full object-cover"
                 />
               </div>

@@ -178,6 +178,7 @@ export default function ItineraryManager() {
             <button
               onClick={cancelForm}
               className="text-muted-foreground hover:text-foreground"
+              aria-label="Close form"
             >
               <X className="size-4" />
             </button>

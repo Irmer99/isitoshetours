@@ -298,6 +298,7 @@ export default function BookingsList() {
             <button
               key={s}
               onClick={() => { setStatusFilter(s); setShowArchived(false); }}
+              aria-pressed={statusFilter === s && !showArchived}
               className={`rounded-none border px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors ${
                 statusFilter === s && !showArchived
                   ? "border-primary bg-primary text-primary-foreground"
@@ -309,6 +310,7 @@ export default function BookingsList() {
           ))}
           <button
             onClick={() => { setShowArchived(true); setStatusFilter(""); }}
+            aria-pressed={showArchived}
             className={`rounded-none border px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors ${
               showArchived
                 ? "border-primary bg-primary text-primary-foreground"

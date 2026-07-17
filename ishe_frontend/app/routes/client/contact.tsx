@@ -136,16 +136,18 @@ export default function Contact() {
               <Send className="size-4" />
               {fetcher.state !== "idle" ? "Sending..." : "Send Message"}
             </Button>
-            {fetcher.data?.success && (
-              <p className="text-center text-sm text-success">
-                Message sent! We'll be in touch shortly.
-              </p>
-            )}
-            {fetcher.data?.error && (
-              <p className="text-center text-sm text-destructive">
-                {fetcher.data.error}
-              </p>
-            )}
+            <div aria-live="polite">
+              {fetcher.data?.success && (
+                <p className="text-center text-sm text-success">
+                  Message sent! We'll be in touch shortly.
+                </p>
+              )}
+              {fetcher.data?.error && (
+                <p className="text-center text-sm text-destructive">
+                  {fetcher.data.error}
+                </p>
+              )}
+            </div>
           </fetcher.Form>
         </div>
       </div>

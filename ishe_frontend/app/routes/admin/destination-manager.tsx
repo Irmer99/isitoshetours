@@ -140,6 +140,7 @@ export default function DestinationManager() {
             <button
               onClick={cancelForm}
               className="text-muted-foreground hover:text-foreground"
+              aria-label="Close form"
             >
               <X className="size-4" />
             </button>
