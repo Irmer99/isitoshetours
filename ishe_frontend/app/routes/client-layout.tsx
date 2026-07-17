@@ -99,19 +99,19 @@ export default function ClientLayout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-border/50 bg-muted">
+      <footer className="border-t border-white/20 bg-primary dark:bg-muted">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-8 md:grid-cols-3">
             <div>
-              <h3 className="font-heading text-lg font-bold text-primary">
+              <h3 className="font-heading text-lg font-bold text-white">
                 Isitoshe Tours
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-[#f5f5f0]">
                 Discover Uganda with expertly curated safaris and unforgettable experiences.
               </p>
             </div>
             <div>
-              <h4 className="mb-3 text-xs font-semibold tracking-widest uppercase text-foreground">
+              <h4 className="mb-3 text-xs font-semibold tracking-widest uppercase text-white">
                 Quick Links
               </h4>
               <div className="flex flex-col gap-2">
@@ -119,7 +119,7 @@ export default function ClientLayout() {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                    className="text-sm text-[#f5f5f0] transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -127,37 +127,37 @@ export default function ClientLayout() {
               </div>
             </div>
             <div>
-              <h4 className="mb-3 text-xs font-semibold tracking-widest uppercase text-foreground">
+              <h4 className="mb-3 text-xs font-semibold tracking-widest uppercase text-white">
                 Legal
               </h4>
               <div className="flex flex-col gap-2">
                 <Link
                   to="/terms"
-                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                  className="text-sm text-[#f5f5f0] transition-colors hover:text-white"
                 >
                   Terms &amp; Conditions
                 </Link>
               </div>
             </div>
             <div>
-              <h4 className="mb-3 text-xs font-semibold tracking-widest uppercase text-foreground">
+              <h4 className="mb-3 text-xs font-semibold tracking-widest uppercase text-white">
                 Contact
               </h4>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#f5f5f0]">
                 Email: {SITE_CONTACT.email}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#f5f5f0]">
                 Phone: {SITE_CONTACT.phone}
               </p>
             </div>
           </div>
-          <div className="mt-8 border-t border-border/50 pt-6 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="mt-8 border-t border-white/20 pt-6 flex items-center justify-between text-xs text-[#f5f5f0]">
             <span>&copy; {new Date().getFullYear()} Isitoshe Tours. All rights reserved.</span>
             <a
               href="https://pirmer-patricia.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
+              className="hover:text-white transition-colors"
             >
               Built by A.Pirmer.P
             </a>
