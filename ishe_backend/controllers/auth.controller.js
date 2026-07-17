@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const Admin = require('../models/Admin');
 const PasswordReset = require('../models/PasswordReset');
 const { sendMail } = require('../lib/mailer');
+const logger = require('../lib/logger');
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -41,15 +42,15 @@ exports.refresh = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
-  console.log('[forgotPassword] Request for:', email);
+  logger.info({ email }, '[forgotPassword] Request received');
   const admin = await Admin.findOne({ email: email.toLowerCase() });
 
   if (!admin) {
-    console.log('[forgotPassword] No admin found with email:', email);
+    logger.info({ email }, '[forgotPassword] No admin found');
     return res.json({ message: 'If an account exists, a reset email has been sent' });
   }
 
-  console.log('[forgotPassword] Admin found:', admin.email);
+  logger.info({ email: admin.email }, '[forgotPassword] Admin found');
 
   await PasswordReset.deleteMany({ email: admin.email });
 
@@ -61,7 +62,7 @@ exports.forgotPassword = async (req, res) => {
   });
 
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/reset-password?token=${raw}`;
-  console.log('[forgotPassword] Reset URL:', resetUrl);
+  logger.info('[forgotPassword] Reset URL generated');
 
   try {
     const idempotencyKey = `reset-${admin.email}-${Date.now()}`;
@@ -76,9 +77,9 @@ exports.forgotPassword = async (req, res) => {
       `,
       idempotencyKey,
     });
-    console.log('[forgotPassword] Email sent successfully:', result);
+    logger.info('[forgotPassword] Email sent successfully');
   } catch (err) {
-    console.error('[forgotPassword] Failed to send email:', err);
+    logger.error({ err: err.message }, '[forgotPassword] Failed to send email');
   }
 
   res.json({ message: 'If an account exists, a reset email has been sent' });

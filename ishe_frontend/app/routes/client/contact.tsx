@@ -101,6 +101,10 @@ export default function Contact() {
             Send us a Message
           </h2>
           <fetcher.Form key={formKey} method="post" className="mt-4 space-y-4">
+            <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, overflow: "hidden" }}>
+              <label htmlFor="website">Leave this empty</label>
+              <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+            </div>
             <FieldRoot>
               <Label>Name</Label>
               <Input name="name" required placeholder="Your full name" className={fieldErrors.name ? "border-destructive" : ""} />

@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/blog-detail";
+import DOMPurify from "dompurify";
 
 import apiClient from "~/lib/api-client";
 import type { Blog } from "~/types";
@@ -75,7 +76,7 @@ export default function BlogDetail({ loaderData }: Route.ComponentProps) {
       {post.content && (
         <div
           className="prose prose-neutral dark:prose-invert mt-8 max-w-none text-foreground"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
         />
       )}
     </article>

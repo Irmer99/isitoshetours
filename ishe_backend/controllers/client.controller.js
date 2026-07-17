@@ -3,6 +3,9 @@ const Booking = require('../models/Booking');
 const escapeRegex = require('../lib/escapeRegex');
 
 exports.create = async (req, res) => {
+  if (req.body.website) {
+    return res.status(201).json({ message: 'Enquiry received' });
+  }
   const existing = await Client.findOne({ email: req.body.email });
   if (existing) return res.status(409).json({ error: 'Client with this email already exists', clientId: existing._id });
   const client = await Client.create(req.body);

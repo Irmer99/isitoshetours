@@ -1,4 +1,5 @@
 const { Resend } = require('resend');
+const logger = require('./logger');
 
 let resend;
 
@@ -10,13 +11,13 @@ const getClient = () => {
 };
 
 const sendMail = async ({ to, subject, html, idempotencyKey }) => {
-  console.log('[mailer] sendMail called:', { to, subject });
+  logger.info({ to, subject }, '[mailer] sendMail called');
   const client = getClient();
   if (!client) {
-    console.error('[mailer] RESEND_API_KEY not set — email not sent');
+    logger.error('[mailer] RESEND_API_KEY not set — email not sent');
     return null;
   }
-  console.log('[mailer] Sending email via Resend...');
+  logger.info('[mailer] Sending email via Resend...');
   const result = await client.emails.send(
     {
       from: process.env.SMTP_FROM || 'Isitoshe Tours <onboarding@resend.dev>',
@@ -26,7 +27,7 @@ const sendMail = async ({ to, subject, html, idempotencyKey }) => {
     },
     idempotencyKey ? { idempotencyKey } : undefined,
   );
-  console.log('[mailer] Email sent:', result);
+  logger.info('[mailer] Email sent');
   return result;
 };
 

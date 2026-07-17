@@ -21,7 +21,9 @@ import { useAuth } from "~/contexts/AuthContext";
 import { useInactivityLogout } from "~/hooks/useInactivityLogout";
 
 export async function clientLoader() {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    throw redirect("/admin/login");
+  }
   const token = localStorage.getItem("token");
   if (!token) {
     throw redirect("/admin/login");

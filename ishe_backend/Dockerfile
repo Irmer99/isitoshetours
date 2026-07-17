@@ -8,7 +8,8 @@ RUN apk add --no-cache tini
 WORKDIR /app
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY . /app
-RUN mkdir -p uploads
+RUN mkdir -p uploads && chown -R node:node /app
+USER node
 EXPOSE 3000
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "index.js"]
