@@ -1,20 +1,22 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transport = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+let resend;
+
+const getClient = () => {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+};
 
 const sendMail = async ({ to, subject, html }) => {
-  if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-    console.error('SMTP_EMAIL and SMTP_PASSWORD must be set — email not sent');
+  const client = getClient();
+  if (!client) {
+    console.error('RESEND_API_KEY not set — email not sent');
     return null;
   }
-  return transport.sendMail({
-    from: `"Isitoshe Tours" <${process.env.SMTP_EMAIL}>`,
+  return client.emails.send({
+    from: process.env.SMTP_FROM || 'Isitoshe Tours <onboarding@resend.dev>',
     to,
     subject,
     html,
