@@ -354,6 +354,13 @@ Internet → Nginx (SSL) → /uploads (static)
 - [x] Swagger `security: []` — all public endpoints (GET content, POST bookings/clients/discounts/validate, POST auth/*) annotated to opt out of global bearerAuth
 - [x] Frontend structured logging — `lib/logger.ts` with component/action context, integrated in `api-client.ts` (error interceptor), `AuthContext.tsx` (login/logout), `useInactivityLogout.ts` (warning/timeout)
 
+### Phase 18: CI/CD Pipeline ✅
+
+- [x] GitHub Actions workflow — `.github/workflows/ci.yml` with 3 jobs: frontend (typecheck + build), backend (install + syntax check), docker (build both images)
+- [x] Node 24 caching — `actions/setup-node` with `cache-dependency-path` per service
+- [x] `deploy.sh` — SSH-based VPS deploy script (manual use, future CD opt-in)
+- [x] Triggered on push to `main` and PRs targeting `main`
+
 ---
 
 ## Remaining Items
@@ -362,4 +369,5 @@ Internet → Nginx (SSL) → /uploads (static)
 - [x] Wire `chart.tsx` Legend component (currently only Tooltip used)
 - [x] Add Swagger auth optional access for public endpoints
 - [x] Structured logging in frontend (currently only backend has pino)
+- [x] CI/CD pipeline — GitHub Actions + deploy script
 - [ ] Test infrastructure (user requested skip for now)
