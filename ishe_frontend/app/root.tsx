@@ -15,6 +15,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
+  { rel: "icon", type: "image/png", href: "/isitoshetours.png" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
