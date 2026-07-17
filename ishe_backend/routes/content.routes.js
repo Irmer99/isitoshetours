@@ -26,6 +26,7 @@ const router = Router();
  *   get:
  *     tags: [Content]
  *     summary: List all itineraries
+ *     security: []
  *     responses:
  *       200:
  *         description: List of itineraries
@@ -46,6 +47,7 @@ router.get('/itineraries', asyncHandler(contentController.getItineraries));
  *   get:
  *     tags: [Content]
  *     summary: Get itinerary by slug
+ *     security: []
  *     parameters:
  *       - in: path
  *         name: slug
@@ -117,6 +119,7 @@ router.post('/destinations', authMiddleware, validateBody(createDestinationSchem
  *   get:
  *     tags: [Content]
  *     summary: List all destinations
+ *     security: []
  *     responses:
  *       200:
  *         description: List of destinations
@@ -158,6 +161,7 @@ router.patch('/destinations/:id', authMiddleware, validateBody(updateDestination
  *   get:
  *     tags: [Content]
  *     summary: List active testimonials
+ *     security: []
  *     responses:
  *       200:
  *         description: List of testimonials
@@ -195,6 +199,7 @@ router.patch('/testimonials/:id', authMiddleware, validateBody(updateTestimonial
  *   get:
  *     tags: [Content]
  *     summary: List active team members
+ *     security: []
  *     responses:
  *       200:
  *         description: List of team members
@@ -232,6 +237,7 @@ router.patch('/team/:id', authMiddleware, validateBody(updateTeamSchema), asyncH
  *   get:
  *     tags: [Content]
  *     summary: Get site settings
+ *     security: []
  *     responses:
  *       200:
  *         description: Site settings

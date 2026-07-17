@@ -107,6 +107,7 @@ router.delete('/:id', authMiddleware, requireRole('superadmin'), asyncHandler(di
  *     tags: [Discounts]
  *     summary: Validate a discount code (public)
  *     description: Called by the booking form before submit
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

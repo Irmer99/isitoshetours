@@ -15,6 +15,7 @@ const router = Router();
  *     tags: [Clients]
  *     summary: Create a client
  *     description: Clients can be created directly or auto-created on first booking
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

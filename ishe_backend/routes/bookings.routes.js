@@ -15,6 +15,7 @@ const router = Router();
  *   post:
  *     tags: [Bookings]
  *     summary: Create a new booking
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

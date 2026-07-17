@@ -20,6 +20,7 @@ const router = Router();
  *   post:
  *     tags: [Auth]
  *     summary: Admin login
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -52,6 +53,7 @@ router.post('/login', authLimiter, validateBody(loginSchema), asyncHandler(authC
  *   post:
  *     tags: [Auth]
  *     summary: Refresh JWT token
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -79,6 +81,7 @@ router.post('/refresh', authLimiter, validateBody(refreshSchema), asyncHandler(a
  *   post:
  *     tags: [Auth]
  *     summary: Request password reset email
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -100,6 +103,7 @@ router.post('/forgot-password', authLimiter, validateBody(forgotPasswordSchema),
  *   post:
  *     tags: [Auth]
  *     summary: Reset password with token
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
