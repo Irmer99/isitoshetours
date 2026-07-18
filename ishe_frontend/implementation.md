@@ -70,6 +70,20 @@ ishe_frontend/
 └── vite.config.ts
 ```
 
+### Repo root (shared infrastructure)
+
+```
+ishe-tours/
+├── .github/workflows/ci.yml   # GitHub Actions CI (typecheck + build + docker)
+├── docker-compose.yml          # Production: frontend + backend + nginx + certbot
+├── docker-compose.dev.yml      # Dev override: swaps nginx config for HTTP-only
+├── deploy.sh                   # SSH-based VPS deploy script
+├── nginx.conf                  # Production nginx (SSL, rate limiting, security headers)
+├── nginx.dev.conf              # Dev nginx (HTTP only, no SSL, no bot blocking)
+├── ishe_backend/               # Express API (see ishe_backend/progress.md)
+└── ishe_frontend/              # React Router SSR SPA (this file)
+```
+
 ---
 
 ## Route Architecture
@@ -371,3 +385,72 @@ Internet → Nginx (SSL) → /uploads (static)
 - [x] Structured logging in frontend (currently only backend has pino)
 - [x] CI/CD pipeline — GitHub Actions + deploy script
 - [ ] Test infrastructure (user requested skip for now)
+
+---
+
+## Handover & Security Checklist
+
+### Credentials to rotate before production deployment
+
+| Credential | Current value | Action |
+|-----------|---------------|--------|
+| `MONGODB_URI` | Atlas connection string with dev password | Generate new DB user password in Atlas, update `.env` |
+| `JWT_SECRET` | Hardcoded hex string in `.env` | Regenerate with `openssl rand -hex 64`, update `.env` |
+| `ADMIN_EMAIL` | `pirmerpatricia99@gmail.com` | Change to production admin email |
+| `ADMIN_PASSWORD` | `changeme` | Set strong password before seeding |
+| `RESEND_API_KEY` | `***REMOVED***...` | Verify key is for production domain, not Resend sandbox |
+| `SMTP_FROM` | `onboarding@resend.dev` | Update to verified domain after `isitoshetours.com` DNS verification |
+
+### Git history audit
+
+- `.env` is currently gitignored — verify it was **never committed**:
+  ```bash
+  git log --all --diff-filter=A -- ishe_backend/.env
+  ```
+- If it was committed, use `git filter-repo` or BFG Repo Cleaner to purge it from history
+
+### Files with hardcoded values to clean
+
+| File | Line | Issue | Fix |
+|------|------|-------|-----|
+| `ishe_backend/test-email.js` | 8 | Hardcoded `pirmerpatricia99@gmail.com` | Use `process.env.ADMIN_EMAIL` |
+| `ishe_backend/progress.md` | 43, 160 | References dev email/password in seed docs | Update to placeholder values |
+
+### `.env.example` files — should contain only placeholders
+
+**`ishe_backend/.env.example`** — currently accurate, but add:
+- `NODE_ENV=development`
+- Document that `CORS_ORIGIN` accepts comma-separated values
+
+**`ishe_frontend/.env.example`** — update to reflect Docker SSR setup:
+```
+# Client-side (baked at build time, used by browser)
+# In Docker, this is set to /api (nginx proxies /api to backend)
+VITE_API_URL=http://localhost:3000/api
+
+# SSR server-side uses http://backend:3000/api automatically in Docker
+```
+
+### MongoDB Atlas checklist
+
+- [ ] Create a dedicated production database user (not the dev one)
+- [ ] Restrict Atlas IP access list to VPS IP only
+- [ ] Enable audit logging (optional but recommended)
+- [ ] Verify backup schedule is configured
+
+### Domain & email checklist
+
+- [ ] Verify `isitoshetours.com` domain in Resend for transactional email
+- [ ] Set up SPF/DKIM records for email deliverability
+- [ ] Update `SMTP_FROM` to use verified domain
+- [ ] Configure DNS A record for VPS IP
+- [ ] Set up Let's Encrypt certbot auto-renewal on VPS
+
+### Post-deploy verification
+
+- [ ] `GET /health` returns `{"status":"ok"}`
+- [ ] Frontend loads with SSR data (itineraries, destinations, etc.)
+- [ ] Admin login works with seeded credentials
+- [ ] Swagger docs accessible at `/api-docs/` (superadmin auth only)
+- [ ] File upload works (images appear in `/uploads/`)
+- [ ] Password reset email delivers successfully

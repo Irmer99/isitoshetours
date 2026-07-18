@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: ishe-backend
+    runtime: docker
+    dockerfilePath: ./ishe_backend/Dockerfile
+    dockerContext: ./ishe_backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 14d
+      - key: CORS_ORIGIN
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_ROLE
+        value: superadmin
+      - key: SMTP_EMAIL
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SMTP_FROM
+        value: "Isitoshe Tours <onboarding@resend.dev>"
+    healthCheckPath: /health
+    autoDeploy: true
+
+  - type: web
+    name: ishe-frontend
+    runtime: docker
+    dockerfilePath: ./ishe_frontend/Dockerfile
+    dockerContext: ./ishe_frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL
+        value: /api
+      - key: SSR_API_URL
+        sync: false
+    autoDeploy: true
