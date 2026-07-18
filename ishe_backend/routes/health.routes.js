@@ -1,17 +1,24 @@
 const { Router } = require('express');
-const mongoose = require('mongoose');
+const { getPrisma } = require('../lib/db');
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  const dbState = mongoose.connection.readyState;
-  const healthy = dbState === 1;
-
-  res.status(healthy ? 200 : 503).json({
-    status: healthy ? 'ok' : 'degraded',
-    db: healthy ? 'connected' : 'disconnected',
-    uptime: process.uptime(),
-  });
+router.get('/', async (req, res) => {
+  try {
+    const prisma = getPrisma();
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({
+      status: 'ok',
+      db: 'connected',
+      uptime: process.uptime(),
+    });
+  } catch {
+    res.status(503).json({
+      status: 'degraded',
+      db: 'disconnected',
+      uptime: process.uptime(),
+    });
+  }
 });
 
 module.exports = router;

@@ -3,3 +3,5 @@ node_modules/
 progress.md
 uploads/
 .env.example
+
+/lib/generated/prisma

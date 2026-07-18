@@ -1,143 +1,200 @@
-const Itinerary = require('../models/Itinerary');
-const Destination = require('../models/Destination');
-const Testimonial = require('../models/Testimonial');
-const Team = require('../models/Team');
-const SiteSettings = require('../models/SiteSettings');
-const Blog = require('../models/Blog');
-const escapeRegex = require('../lib/escapeRegex');
+const { getPrisma } = require('../lib/db');
 
 exports.createItinerary = async (req, res) => {
-  const itinerary = await Itinerary.create(req.body);
+  const prisma = getPrisma();
+  const { days, ...data } = req.body;
+  const itinerary = await prisma.itinerary.create({
+    data: {
+      ...data,
+      days: days ? { create: days } : undefined,
+    },
+    include: { days: { orderBy: { day: 'asc' } } },
+  });
   res.status(201).json(itinerary);
 };
 
 exports.getItineraries = async (req, res) => {
-  const filter = {};
-  if (req.query.difficulty) filter.difficulty = req.query.difficulty;
-  if (req.query.search) filter.title = { $regex: escapeRegex(req.query.search), $options: 'i' };
-  const itineraries = await Itinerary.find(filter).sort({ title: 1 });
+  const prisma = getPrisma();
+  const where = {};
+  if (req.query.difficulty) where.difficulty = req.query.difficulty;
+  if (req.query.search) where.title = { contains: req.query.search, mode: 'insensitive' };
+  const itineraries = await prisma.itinerary.findMany({
+    where,
+    include: { days: { orderBy: { day: 'asc' } } },
+    orderBy: { title: 'asc' },
+  });
   res.json(itineraries);
 };
 
 exports.getItinerary = async (req, res) => {
-  const itinerary = await Itinerary.findOne({ slug: req.params.slug });
+  const prisma = getPrisma();
+  const itinerary = await prisma.itinerary.findFirst({
+    where: { slug: req.params.slug },
+    include: { days: { orderBy: { day: 'asc' } } },
+  });
   if (!itinerary) return res.status(404).json({ error: 'Itinerary not found' });
   res.json(itinerary);
 };
 
 exports.updateItinerary = async (req, res) => {
-  const itinerary = await Itinerary.findOneAndUpdate(
-    { slug: req.params.slug },
-    req.body,
-    { new: true, runValidators: true }
-  );
-  if (!itinerary) return res.status(404).json({ error: 'Itinerary not found' });
+  const prisma = getPrisma();
+  const { days, ...data } = req.body;
+  const existing = await prisma.itinerary.findFirst({ where: { slug: req.params.slug } });
+  if (!existing) return res.status(404).json({ error: 'Itinerary not found' });
+
+  if (days) {
+    await prisma.itineraryDay.deleteMany({ where: { itineraryId: existing.id } });
+  }
+
+  const itinerary = await prisma.itinerary.update({
+    where: { id: existing.id },
+    data: {
+      ...data,
+      ...(days ? { days: { create: days } } : {}),
+    },
+    include: { days: { orderBy: { day: 'asc' } } },
+  });
   res.json(itinerary);
 };
 
 exports.createDestination = async (req, res) => {
-  const dest = await Destination.create(req.body);
+  const prisma = getPrisma();
+  const dest = await prisma.destination.create({ data: req.body });
   res.status(201).json(dest);
 };
 
 exports.getDestinations = async (req, res) => {
-  const destinations = await Destination.find().sort({ name: 1 });
+  const prisma = getPrisma();
+  const destinations = await prisma.destination.findMany({ orderBy: { name: 'asc' } });
   res.json(destinations);
 };
 
 exports.getDestinationBySlug = async (req, res) => {
-  const dest = await Destination.findOne({ slug: req.params.slug });
+  const prisma = getPrisma();
+  const dest = await prisma.destination.findFirst({ where: { slug: req.params.slug } });
   if (!dest) return res.status(404).json({ error: 'Destination not found' });
   res.json(dest);
 };
 
 exports.getItinerariesByDestination = async (req, res) => {
-  const itineraries = await Itinerary.find({ destinations: req.params.slug }).sort({ title: 1 });
+  const prisma = getPrisma();
+  const itineraries = await prisma.itinerary.findMany({
+    where: { destinations: { has: req.params.slug } },
+    include: { days: { orderBy: { day: 'asc' } } },
+    orderBy: { title: 'asc' },
+  });
   res.json(itineraries);
 };
 
 exports.updateDestination = async (req, res) => {
-  const dest = await Destination.findOneAndUpdate({ slug: req.params.id }, req.body, {
-    new: true, runValidators: true,
+  const prisma = getPrisma();
+  const existing = await prisma.destination.findFirst({ where: { slug: req.params.id } });
+  if (!existing) return res.status(404).json({ error: 'Destination not found' });
+  const dest = await prisma.destination.update({
+    where: { id: existing.id },
+    data: req.body,
   });
-  if (!dest) return res.status(404).json({ error: 'Destination not found' });
   res.json(dest);
 };
 
 exports.getTestimonials = async (req, res) => {
-  const testimonials = await Testimonial.find({ active: true }).sort({ order: 1 });
+  const prisma = getPrisma();
+  const testimonials = await prisma.testimonial.findMany({
+    where: { active: true },
+    orderBy: { order: 'asc' },
+  });
   res.json(testimonials);
 };
 
 exports.updateTestimonial = async (req, res) => {
-  const t = await Testimonial.findByIdAndUpdate(req.params.id, req.body, {
-    new: true, runValidators: true,
+  const prisma = getPrisma();
+  const t = await prisma.testimonial.update({
+    where: { id: req.params.id },
+    data: req.body,
   });
-  if (!t) return res.status(404).json({ error: 'Testimonial not found' });
   res.json(t);
 };
 
 exports.getTeam = async (req, res) => {
-  const team = await Team.find({ active: true }).sort({ order: 1 });
+  const prisma = getPrisma();
+  const team = await prisma.team.findMany({
+    where: { active: true },
+    orderBy: { order: 'asc' },
+  });
   res.json(team);
 };
 
 exports.updateTeamMember = async (req, res) => {
-  const member = await Team.findByIdAndUpdate(req.params.id, req.body, {
-    new: true, runValidators: true,
+  const prisma = getPrisma();
+  const member = await prisma.team.update({
+    where: { id: req.params.id },
+    data: req.body,
   });
-  if (!member) return res.status(404).json({ error: 'Team member not found' });
   res.json(member);
 };
 
 exports.getSiteSettings = async (req, res) => {
-  let settings = await SiteSettings.findOne({ key: 'site-settings' });
+  const prisma = getPrisma();
+  let settings = await prisma.siteSettings.findFirst({ where: { key: 'site-settings' } });
   if (!settings) {
-    settings = await SiteSettings.create({ key: 'site-settings', data: {} });
+    settings = await prisma.siteSettings.create({ data: { key: 'site-settings', data: {} } });
   }
   res.json(settings);
 };
 
 exports.updateSiteSettings = async (req, res) => {
-  let settings = await SiteSettings.findOneAndUpdate(
-    { key: 'site-settings' },
-    { data: req.body.data },
-    { new: true, upsert: true }
-  );
+  const prisma = getPrisma();
+  let settings = await prisma.siteSettings.findFirst({ where: { key: 'site-settings' } });
+  if (settings) {
+    settings = await prisma.siteSettings.update({
+      where: { id: settings.id },
+      data: { data: req.body.data },
+    });
+  } else {
+    settings = await prisma.siteSettings.create({
+      data: { key: 'site-settings', data: req.body.data },
+    });
+  }
   res.json(settings);
 };
 
 exports.createBlog = async (req, res) => {
-  const blog = await Blog.create(req.body);
+  const prisma = getPrisma();
+  const blog = await prisma.blog.create({ data: req.body });
   res.status(201).json(blog);
 };
 
 exports.getBlogs = async (req, res) => {
-  const filter = { archived: false };
-  if (req.query.tag) filter.tags = req.query.tag;
-  if (req.query.search) filter.title = { $regex: escapeRegex(req.query.search), $options: 'i' };
-  const blogs = await Blog.find(filter).sort({ createdAt: -1 });
+  const prisma = getPrisma();
+  const where = { archived: false };
+  if (req.query.tag) where.tags = { has: req.query.tag };
+  if (req.query.search) where.title = { contains: req.query.search, mode: 'insensitive' };
+  const blogs = await prisma.blog.findMany({ where, orderBy: { createdAt: 'desc' } });
   res.json(blogs);
 };
 
 exports.getBlog = async (req, res) => {
-  const blog = await Blog.findOne({ slug: req.params.slug });
+  const prisma = getPrisma();
+  const blog = await prisma.blog.findFirst({ where: { slug: req.params.slug } });
   if (!blog) return res.status(404).json({ error: 'Blog post not found' });
   res.json(blog);
 };
 
 exports.updateBlog = async (req, res) => {
-  const blog = await Blog.findOneAndUpdate(
-    { slug: req.params.slug },
-    req.body,
-    { new: true, runValidators: true }
-  );
-  if (!blog) return res.status(404).json({ error: 'Blog post not found' });
+  const prisma = getPrisma();
+  const existing = await prisma.blog.findFirst({ where: { slug: req.params.slug } });
+  if (!existing) return res.status(404).json({ error: 'Blog post not found' });
+  const blog = await prisma.blog.update({
+    where: { id: existing.id },
+    data: req.body,
+  });
   res.json(blog);
 };
 
 exports.deleteBlog = async (req, res) => {
-  const blog = await Blog.findOneAndDelete({ slug: req.params.slug });
-  if (!blog) return res.status(404).json({ error: 'Blog post not found' });
+  const prisma = getPrisma();
+  const existing = await prisma.blog.findFirst({ where: { slug: req.params.slug } });
+  if (!existing) return res.status(404).json({ error: 'Blog post not found' });
+  await prisma.blog.delete({ where: { id: existing.id } });
   res.json({ message: 'Blog post deleted' });
 };

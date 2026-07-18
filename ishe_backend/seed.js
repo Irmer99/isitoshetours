@@ -1,11 +1,13 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
-const Admin = require('./models/Admin');
+const bcrypt = require('bcryptjs');
+const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
 
 async function seed() {
-  const uri = process.env.MONGODB_URI //|| 'mongodb://localhost:27017/ishe_tours';
-  await mongoose.connect(uri);
-  console.log('Connected to MongoDB');
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+  const prisma = new PrismaClient({ adapter });
+  await prisma.$connect();
+  console.log('Connected to PostgreSQL');
 
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
@@ -16,15 +18,18 @@ async function seed() {
     process.exit(1);
   }
 
-  const existing = await Admin.findOne({ email });
+  const existing = await prisma.admin.findFirst({ where: { email } });
   if (existing) {
     console.log(`Admin already exists: ${existing.email} (${existing.role})`);
   } else {
-    await Admin.create({ email, password, role });
+    const hashedPassword = await bcrypt.hash(password, 12);
+    await prisma.admin.create({
+      data: { email, password: hashedPassword, role },
+    });
     console.log(`Admin created: ${email}`);
   }
 
-  await mongoose.connection.close();
+  await prisma.$disconnect();
   console.log('Done');
 }
 

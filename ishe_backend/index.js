@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
 const path = require('path');
 const pinoHttp = require('pino-http');
 const swaggerUi = require('swagger-ui-express');
@@ -36,7 +35,6 @@ app.use(helmet());
 app.use(cors({ origin: corsOrigins }));
 app.use(pinoHttp({ logger }));
 app.use(express.json({ limit: '1mb' }));
-app.use(mongoSanitize());
 app.use(generalLimiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
@@ -54,8 +52,8 @@ app.use('/api/content', cache(300), contentRoutes);
 
 app.use(errorHandler);
 
-connectDB();
-
-app.listen(port, () => {
-  logger.info({ port }, 'Server running');
+connectDB().then(() => {
+  app.listen(port, () => {
+    logger.info({ port }, 'Server running');
+  });
 });

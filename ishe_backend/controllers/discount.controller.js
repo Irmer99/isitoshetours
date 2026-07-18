@@ -1,44 +1,58 @@
-const Discount = require('../models/Discount');
+const { getPrisma } = require('../lib/db');
 
 exports.list = async (req, res) => {
-  const discounts = await Discount.find({ deleted: { $ne: true } }).sort({ createdAt: -1 });
+  const prisma = getPrisma();
+  const discounts = await prisma.discount.findMany({
+    where: { deleted: false },
+    orderBy: { createdAt: 'desc' },
+  });
   res.json(discounts);
 };
 
 exports.create = async (req, res) => {
-  const discount = await Discount.create(req.body);
+  const prisma = getPrisma();
+  const discount = await prisma.discount.create({ data: req.body });
   res.status(201).json(discount);
 };
 
 exports.update = async (req, res) => {
-  const discount = await Discount.findOneAndUpdate(
-    { _id: req.params.id, deleted: { $ne: true } },
-    req.body,
-    { new: true, runValidators: true },
-  );
-  if (!discount) return res.status(404).json({ error: 'Discount not found' });
+  const prisma = getPrisma();
+  const existing = await prisma.discount.findFirst({
+    where: { id: req.params.id, deleted: false },
+  });
+  if (!existing) return res.status(404).json({ error: 'Discount not found' });
+  const discount = await prisma.discount.update({
+    where: { id: existing.id },
+    data: req.body,
+  });
   res.json(discount);
 };
 
 exports.remove = async (req, res) => {
-  const discount = await Discount.findOneAndUpdate(
-    { _id: req.params.id, deleted: { $ne: true } },
-    { deleted: true },
-    { new: true },
-  );
-  if (!discount) return res.status(404).json({ error: 'Discount not found' });
+  const prisma = getPrisma();
+  const existing = await prisma.discount.findFirst({
+    where: { id: req.params.id, deleted: false },
+  });
+  if (!existing) return res.status(404).json({ error: 'Discount not found' });
+  await prisma.discount.update({
+    where: { id: existing.id },
+    data: { deleted: true },
+  });
   res.json({ message: 'Discount deleted' });
 };
 
 exports.validate = async (req, res) => {
+  const prisma = getPrisma();
   const { code, itineraryId } = req.body;
 
-  const discount = await Discount.findOne({
-    code: code.toUpperCase(),
-    active: true,
-    deleted: { $ne: true },
-    startDate: { $lte: new Date() },
-    endDate: { $gte: new Date() },
+  const discount = await prisma.discount.findFirst({
+    where: {
+      code: code.toUpperCase(),
+      active: true,
+      deleted: false,
+      startDate: { lte: new Date() },
+      endDate: { gte: new Date() },
+    },
   });
 
   if (!discount) {

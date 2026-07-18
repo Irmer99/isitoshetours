@@ -3,14 +3,18 @@ const logger = require('../lib/logger');
 const errorHandler = (err, req, res, next) => {
   logger.error({ err, url: req.url, method: req.method }, 'Unhandled error');
 
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({ error: 'Validation error' });
+  if (err.name === 'ZodError' || err.name === 'PrismaClientValidationError') {
+    return res.status(400).json({ error: 'Validation error', details: err.message });
   }
-  if (err.code === 11000) {
-    return res.status(409).json({ error: 'Duplicate key' });
+  if (err.code === 'P2002') {
+    const field = err.meta?.target?.[0] || 'field';
+    return res.status(409).json({ error: `Duplicate value for ${field}` });
   }
-  if (err.name === 'CastError') {
-    return res.status(400).json({ error: 'Invalid ID format' });
+  if (err.code === 'P2025') {
+    return res.status(404).json({ error: 'Record not found' });
+  }
+  if (err.code === 'P2003') {
+    return res.status(400).json({ error: 'Related record not found' });
   }
 
   const status = err.status || 500;

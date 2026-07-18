@@ -1,0 +1,248 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Admin ───────────────────────────────────────────────
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("admin") // "admin" | "superadmin"
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  changedBookings BookingStatusHistory[]
+
+  @@map("admins")
+}
+
+// ─── Blog ────────────────────────────────────────────────
+
+model Blog {
+  id         String   @id @default(uuid())
+  slug       String   @unique
+  title      String
+  excerpt    String?
+  content    String?
+  coverImage String?  @map("cover_image")
+  images     String[]
+  tags       String[]
+  archived   Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("blogs")
+}
+
+// ─── Client ──────────────────────────────────────────────
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bookings Booking[]
+
+  @@unique([email])
+  @@map("clients")
+}
+
+// ─── Itinerary ───────────────────────────────────────────
+
+model Itinerary {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  title        String
+  subtitle     String?
+  difficulty   String   @default("moderate") // "easy" | "moderate" | "hard"
+  duration     String?
+  pricingFrom  Float?   @map("pricing_from")
+  pricingCurrency String @default("MAD") @map("pricing_currency")
+  includes     String[]
+  excludes     String[]
+  images       String[]
+  destinations String[]
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  days ItineraryDay[]
+
+  @@map("itineraries")
+}
+
+model ItineraryDay {
+  id            String  @id @default(uuid())
+  itineraryId   String  @map("itinerary_id")
+  day           Int
+  title         String?
+  description   String?
+  meals         String[]
+  accommodation String?
+
+  itinerary Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+
+  @@unique([itineraryId, day])
+  @@map("itinerary_days")
+}
+
+// ─── Destination ─────────────────────────────────────────
+
+model Destination {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  images      String[]
+  highlights  String[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("destinations")
+}
+
+// ─── Discount ────────────────────────────────────────────
+
+model Discount {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  type        String    // "percent" | "flat"
+  value       Float
+  appliesTo   String    @map("applies_to")
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime  @map("end_date")
+  usageLimit  Int?      @map("usage_limit")
+  usedCount   Int       @default(0) @map("used_count")
+  active      Boolean   @default(true)
+  deleted     Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("discounts")
+}
+
+// ─── Booking ─────────────────────────────────────────────
+
+model Booking {
+  id               String   @id @default(uuid())
+  clientId         String   @map("client_id")
+  itinerary        String
+  itineraryTitle   String?  @map("itinerary_title")
+  status           String   @default("enquiry") // "enquiry" | "confirmed" | "completed" | "cancelled"
+  travelDate       DateTime @map("travel_date")
+  participants     Int
+  totalAmount      Float    @map("total_amount")
+  discountCode     String?  @map("discount_code")
+  discountApplied  Float    @default(0) @map("discount_applied")
+  notes            String?
+  archived         Boolean  @default(false)
+  deleted          Boolean  @default(false)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  client         Client                @relation(fields: [clientId], references: [id])
+  statusHistory  BookingStatusHistory[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([deleted])
+  @@map("bookings")
+}
+
+model BookingStatusHistory {
+  id         String   @id @default(uuid())
+  bookingId  String   @map("booking_id")
+  from       String
+  to         String
+  changedBy  String?  @map("changed_by")
+  changedAt  DateTime @default(now()) @map("changed_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  admin   Admin?  @relation(fields: [changedBy], references: [id])
+
+  @@map("booking_status_history")
+}
+
+// ─── Notification ────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  link      String?
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([type])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ─── PasswordReset ───────────────────────────────────────
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  email     String
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([expiresAt])
+  @@map("password_resets")
+}
+
+// ─── SiteSettings ────────────────────────────────────────
+
+model SiteSettings {
+  id        String   @id @default(uuid())
+  key       String   @unique @default("site-settings")
+  data      Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+// ─── Team ────────────────────────────────────────────────
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  bio       String?
+  photo     String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("team")
+}
+
+// ─── Testimonial ─────────────────────────────────────────
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  text      String
+  rating    Int?
+  avatar    String?
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("testimonials")
+}
