@@ -6,7 +6,7 @@ On Render, the app runs as **two separate Web Services** (no Nginx — Render ha
 
 | Service | What it runs | Port |
 |---|---|---|
-| `ishe-backend` | Express/Node.js API + MongoDB connection | 3000 |
+| `ishe-backend` | Express/Node.js API + PostgreSQL connection | 3000 |
 | `ishe-frontend` | React Router SSR (server + client) | 5173 |
 
 The frontend connects to the backend via the `SSR_API_URL` environment variable at runtime.
@@ -16,17 +16,16 @@ The frontend connects to the backend via the `SSR_API_URL` environment variable 
 ## Prerequisites
 
 1. A [Render account](https://render.com)
-2. A [MongoDB Atlas](https://cloud.mongodb.com) cluster (free M0 tier works)
+2. A PostgreSQL database (Render PostgreSQL, Supabase, or any PostgreSQL provider)
 3. Your code pushed to a Git repository (GitHub, GitLab, or Bitbucket)
 
 ---
 
-## Step 1 — Prepare MongoDB Atlas
+## Step 1 — Prepare PostgreSQL Database
 
-1. Go to **Atlas → Network Access → IP Whitelist**
-2. Click **"Add IP Address"**
-3. Enter `0.0.0.0/0` and confirm (allows Render's dynamic IPs)
-4. Make sure your cluster is **resumed** (M0 free tier auto-pauses after inactivity)
+1. Create a PostgreSQL database (if using Render, create a PostgreSQL service)
+2. Get your connection string in the format: `postgresql://user:password@host:port/dbname`
+3. The application will run migrations automatically on first startup
 
 ---
 
@@ -48,7 +47,7 @@ After the blueprint is applied, go to each service's **"Environment"** tab and s
 
 | Variable | Value |
 |---|---|
-| `MONGODB_URI` | Your full Atlas connection string (from `.env`) |
+| `DATABASE_URL` | Your PostgreSQL connection string |
 | `CORS_ORIGIN` | `https://ishe-frontend.onrender.com` (your frontend URL) |
 | `FRONTEND_URL` | `https://ishe-frontend.onrender.com` |
 | `ADMIN_EMAIL` | Your admin email |
@@ -71,7 +70,7 @@ After the blueprint is applied, go to each service's **"Environment"** tab and s
 
 ## Step 4 — Verify
 
-1. Check the **backend logs** — you should see `"Server running"` and `"MongoDB connected"`
+1. Check the **backend logs** — you should see `"Server running"` and database connection
 2. Check the **frontend logs** — you should see the server start
 3. Visit `https://ishe-frontend.onrender.com` — the site should load
 4. Test an API call: `https://ishe-backend.onrender.com/health`
@@ -112,10 +111,10 @@ Render's filesystem is **ephemeral** — uploaded files are lost on redeploy. Fo
 
 ## Troubleshooting
 
-### Backend won't connect to MongoDB
-- Verify `MONGODB_URI` is set correctly in Render environment
-- Verify Atlas whitelist includes `0.0.0.0/0`
-- Verify the Atlas cluster is **not paused** (resume it in the Atlas dashboard)
+### Backend won't connect to PostgreSQL
+- Verify `DATABASE_URL` is set correctly in Render environment
+- Verify the PostgreSQL service is running and accessible
+- Check that the connection string format is correct
 
 ### Frontend can't reach the backend
 - Verify `SSR_API_URL` is set to `https://ishe-backend.onrender.com/api`
@@ -132,8 +131,8 @@ Render's filesystem is **ephemeral** — uploaded files are lost on redeploy. Fo
 ## Costs
 
 - **Render Free Tier**: 750 hours/month (enough for one service). Two services need the paid tier ($7/mo each minimum) or a paid plan.
-- **MongoDB Atlas M0**: Free (512MB storage)
-- **Total for testing**: ~$14/mo (two Render Starter instances)
+- **PostgreSQL Database**: Varies by provider (Render PostgreSQL starts at $7/mo, Supabase has a free tier)
+- **Total for testing**: ~$14-21/mo (two Render Starter instances + database)
 
 ---
 

@@ -2,49 +2,54 @@ const { getPrisma } = require('../lib/db');
 
 exports.create = async (req, res) => {
   const prisma = getPrisma();
-  if (req.body.discountCode) {
-    const discount = await prisma.discount.findFirst({
-      where: {
-        code: req.body.discountCode.toUpperCase(),
-        active: true,
-        deleted: false,
-        startDate: { lte: new Date() },
-        endDate: { gte: new Date() },
-      },
-    });
-    if (!discount) {
-      return res.status(400).json({ error: 'Invalid or expired discount code' });
-    }
-    if (discount.usageLimit && discount.usedCount >= discount.usageLimit) {
-      return res.status(400).json({ error: 'Discount usage limit reached' });
-    }
-    await prisma.discount.update({
-      where: { id: discount.id },
-      data: { usedCount: { increment: 1 } },
-    });
-    req.body.discountApplied = discount.type === 'percent'
-      ? req.body.totalAmount * (discount.value / 100)
-      : discount.value;
-  }
+  let discountApplied = 0;
 
-  const booking = await prisma.booking.create({
-    data: {
-      clientId: req.body.clientId,
-      itinerary: req.body.itinerary,
-      itineraryTitle: req.body.itineraryTitle,
-      status: req.body.status || 'enquiry',
-      travelDate: new Date(req.body.travelDate),
-      participants: req.body.participants,
-      totalAmount: req.body.totalAmount,
-      discountCode: req.body.discountCode,
-      discountApplied: req.body.discountApplied || 0,
-      notes: req.body.notes,
-      statusHistory: {
-        create: [{ from: 'enquiry', to: 'enquiry', changedAt: new Date() }],
+  const booking = await prisma.$transaction(async (tx) => {
+    if (req.body.discountCode) {
+      const discount = await tx.discount.findFirst({
+        where: {
+          code: req.body.discountCode.toUpperCase(),
+          active: true,
+          deleted: false,
+          startDate: { lte: new Date() },
+          endDate: { gte: new Date() },
+        },
+      });
+      if (!discount) {
+        throw Object.assign(new Error('Invalid or expired discount code'), { status: 400 });
+      }
+      if (discount.usageLimit && discount.usedCount >= discount.usageLimit) {
+        throw Object.assign(new Error('Discount usage limit reached'), { status: 400 });
+      }
+      await tx.discount.update({
+        where: { id: discount.id },
+        data: { usedCount: { increment: 1 } },
+      });
+      discountApplied = discount.type === 'percent'
+        ? req.body.totalAmount * (discount.value / 100)
+        : discount.value;
+    }
+
+    return tx.booking.create({
+      data: {
+        clientId: req.body.clientId,
+        itinerary: req.body.itinerary,
+        itineraryTitle: req.body.itineraryTitle,
+        status: req.body.status || 'enquiry',
+        travelDate: new Date(req.body.travelDate),
+        participants: req.body.participants,
+        totalAmount: req.body.totalAmount,
+        discountCode: req.body.discountCode,
+        discountApplied,
+        notes: req.body.notes,
+        statusHistory: {
+          create: [{ from: 'enquiry', to: 'enquiry', changedAt: new Date() }],
+        },
       },
-    },
-    include: { client: true },
+      include: { client: true },
+    });
   });
+
   res.status(201).json(booking);
 };
 

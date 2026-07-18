@@ -30,7 +30,7 @@ const options = {
         Admin: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             email: { type: 'string' },
             role: { type: 'string', enum: ['admin', 'superadmin'] },
           },
@@ -45,7 +45,7 @@ const options = {
         Client: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             name: { type: 'string' },
             email: { type: 'string' },
             phone: { type: 'string' },
@@ -65,7 +65,7 @@ const options = {
         Booking: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             clientId: { '$ref': '#/components/schemas/Client' },
             itinerary: { type: 'string' },
             status: { type: 'string', enum: ['enquiry', 'confirmed', 'completed', 'cancelled'] },
@@ -81,7 +81,7 @@ const options = {
           type: 'object',
           required: ['clientId', 'itinerary', 'travelDate', 'participants', 'totalAmount'],
           properties: {
-            clientId: { type: 'string', description: 'MongoDB ObjectId of the client' },
+            clientId: { type: 'string', description: 'Client ID' },
             itinerary: { type: 'string' },
             itineraryTitle: { type: 'string' },
             travelDate: { type: 'string', format: 'date' },
@@ -102,7 +102,7 @@ const options = {
         Discount: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             code: { type: 'string' },
             type: { type: 'string', enum: ['percent', 'flat'] },
             value: { type: 'number' },
@@ -145,7 +145,7 @@ const options = {
         Itinerary: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             slug: { type: 'string' },
             title: { type: 'string' },
             subtitle: { type: 'string' },
@@ -181,7 +181,7 @@ const options = {
         Destination: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             slug: { type: 'string' },
             name: { type: 'string' },
             description: { type: 'string' },
@@ -191,7 +191,7 @@ const options = {
         Testimonial: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             name: { type: 'string' },
             text: { type: 'string' },
             rating: { type: 'integer' },
@@ -202,7 +202,7 @@ const options = {
         Team: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             name: { type: 'string' },
             role: { type: 'string' },
             bio: { type: 'string' },
@@ -213,7 +213,7 @@ const options = {
         SiteSettings: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
+            id: { type: 'string' },
             key: { type: 'string' },
             data: { type: 'object' },
           },
@@ -229,7 +229,7 @@ const options = {
               items: {
                 type: 'object',
                 properties: {
-                  _id: { type: 'string' },
+                  id: { type: 'string' },
                   count: { type: 'integer' },
                   revenue: { type: 'number' },
                 },

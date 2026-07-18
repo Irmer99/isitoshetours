@@ -7,14 +7,21 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node seed.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --forceExit --detectOpenHandles"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/__tests__/**/*.test.js"],
+    "verbose": true
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -23,7 +30,6 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.22.2",
-    "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",

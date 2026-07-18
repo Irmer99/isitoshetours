@@ -394,7 +394,7 @@ Internet → Nginx (SSL) → /uploads (static)
 
 | Credential | Current value | Action |
 |-----------|---------------|--------|
-| `MONGODB_URI` | Atlas connection string with dev password | Generate new DB user password in Atlas, update `.env` |
+| `DATABASE_URL` | PostgreSQL connection string | Verify connection string is for production database |
 | `JWT_SECRET` | Hardcoded hex string in `.env` | Regenerate with `openssl rand -hex 64`, update `.env` |
 | `ADMIN_EMAIL` | `pirmerpatricia99@gmail.com` | Change to production admin email |
 | `ADMIN_PASSWORD` | `changeme` | Set strong password before seeding |
@@ -431,11 +431,11 @@ VITE_API_URL=http://localhost:3000/api
 # SSR server-side uses http://backend:3000/api automatically in Docker
 ```
 
-### MongoDB Atlas checklist
+### PostgreSQL checklist
 
-- [ ] Create a dedicated production database user (not the dev one)
-- [ ] Restrict Atlas IP access list to VPS IP only
-- [ ] Enable audit logging (optional but recommended)
+- [ ] Verify production database connection string is correct
+- [ ] Ensure database user has appropriate permissions
+- [ ] Enable SSL mode for production connections
 - [ ] Verify backup schedule is configured
 
 ### Domain & email checklist
