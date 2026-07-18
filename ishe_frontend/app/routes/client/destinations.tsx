@@ -38,7 +38,7 @@ export default function Destinations({ loaderData }: Route.ComponentProps) {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {destinations.map((dest) => (
               <Link
-                key={dest._id}
+                key={dest.id}
                 to={`/destinations/${dest.slug}`}
                 className="group block border border-border bg-card transition-shadow hover:shadow-lg"
               >

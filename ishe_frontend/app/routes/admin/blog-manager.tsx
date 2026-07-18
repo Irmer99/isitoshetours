@@ -94,7 +94,7 @@ export default function BlogManager() {
   const { data: blogs, isLoading, isError } = useQuery({
     queryKey: ["blogs"],
     queryFn: () =>
-      apiClient.get<Blog[]>("/content/blogs").then((r) => r.data),
+      apiClient.get<Blog[]>("/content/blogs?includeArchived=true").then((r) => r.data),
   });
 
   const [formError, setFormError] = useState("");
@@ -172,7 +172,7 @@ export default function BlogManager() {
       tags: b.tags?.join(", ") || "",
     });
     if (editor) editor.commands.setContent(b.content || "");
-    setEditingId(b._id);
+    setEditingId(b.id);
     setCreating(false);
     setFieldErrors({});
   };
@@ -198,7 +198,7 @@ export default function BlogManager() {
       (body as Record<string, unknown>).slug = form.slug;
       createMutation.mutate(body);
     } else if (editingId) {
-      const blog = blogs?.find((b) => b._id === editingId);
+      const blog = blogs?.find((b) => b.id === editingId);
       if (blog) {
         saveMutation.mutate({ slug: blog.slug, body });
       }
@@ -318,7 +318,7 @@ export default function BlogManager() {
         ) : (
           blogs?.map((b) => (
             <div
-              key={b._id}
+              key={b.id}
               className="flex items-center justify-between border border-border bg-card px-4 py-3"
             >
               <div className="flex-1 min-w-0">

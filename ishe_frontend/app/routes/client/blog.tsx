@@ -36,7 +36,7 @@ export default function BlogList({ loaderData }: Route.ComponentProps) {
         )}
         {blogs.map((post) => (
           <Link
-            key={post._id}
+            key={post.id}
             to={`/blog/${post.slug}`}
             className="group border border-border bg-card transition-shadow hover:shadow-lg"
           >

@@ -112,7 +112,7 @@ export default function DiscountManager() {
 
   const startEdit = (d: Discount) => {
     setShowForm(false);
-    setEditingId(d._id);
+    setEditingId(d.id);
     setForm({
       code: d.code,
       type: d.type,
@@ -287,7 +287,7 @@ export default function DiscountManager() {
         ) : (
           discounts?.map((d) => (
             <div
-              key={d._id}
+              key={d.id}
               className="flex items-center justify-between border border-border bg-card px-4 py-3"
             >
               <div>
@@ -316,7 +316,7 @@ export default function DiscountManager() {
                 <Button
                   variant="ghost"
                   size="xs"
-                  onClick={() => deleteMutation.mutate(d._id)}
+                  onClick={() => deleteMutation.mutate(d.id)}
                   disabled={deleteMutation.isPending}
                   className="text-destructive hover:text-destructive"
                 >

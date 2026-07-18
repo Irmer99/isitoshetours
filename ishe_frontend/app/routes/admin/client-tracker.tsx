@@ -24,18 +24,26 @@ export default function ClientTracker() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", notes: "" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const { data: clients, isLoading, isError } = useQuery({
-    queryKey: ["clients", debouncedSearch],
-    queryFn: () =>
-      apiClient
-        .get<PaginatedResponse<Client>>(`/clients${debouncedSearch ? `?search=${debouncedSearch}` : ""}`)
-        .then((r) => r.data.data),
+  const { data: clientsPage, isLoading, isError } = useQuery({
+    queryKey: ["clients", debouncedSearch, page],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      params.set("page", String(page));
+      params.set("limit", "20");
+      return apiClient
+        .get<PaginatedResponse<Client>>(`/clients?${params.toString()}`)
+        .then((r) => r.data);
+    },
   });
+  const clients = clientsPage?.data;
+  const totalPages = clientsPage?.pages ?? 1;
 
   const { data: clientBookings, isError: bookingsError } = useQuery({
     queryKey: ["client-bookings", expandedId],
@@ -105,7 +113,7 @@ export default function ClientTracker() {
     setFieldErrors({});
     setFormError("");
     if (editingClient) {
-      updateMutation.mutate({ id: editingClient._id, body: form });
+      updateMutation.mutate({ id: editingClient.id, body: form });
     } else {
       createMutation.mutate(form);
     }
@@ -250,14 +258,14 @@ export default function ClientTracker() {
           <p className="text-sm text-muted-foreground">No clients found.</p>
         ) : (
           clients?.map((client) => (
-            <div key={client._id} className="border border-border bg-card">
+            <div key={client.id} className="border border-border bg-card">
               <button
                 onClick={() =>
                   setExpandedId(
-                    expandedId === client._id ? null : client._id
+                    expandedId === client.id ? null : client.id
                   )
                 }
-                aria-expanded={expandedId === client._id}
+                aria-expanded={expandedId === client.id}
                 className="flex w-full items-center justify-between px-4 py-3 text-left"
               >
                 <div>
@@ -277,14 +285,14 @@ export default function ClientTracker() {
                   >
                     <Pencil className="size-3" />
                   </button>
-                  {expandedId === client._id ? (
+                  {expandedId === client.id ? (
                     <ChevronUp className="size-4 text-muted-foreground" />
                   ) : (
                     <ChevronDown className="size-4 text-muted-foreground" />
                   )}
                 </div>
               </button>
-              {expandedId === client._id && (
+              {expandedId === client.id && (
                 <div className="border-t border-border px-4 py-3">
                   {bookingsError ? (
                     <p className="text-sm text-destructive">Failed to load bookings.</p>
@@ -292,7 +300,7 @@ export default function ClientTracker() {
                     <div className="space-y-2">
                       {clientBookings.map((b) => (
                         <div
-                          key={b._id}
+                          key={b.id}
                           className="flex items-center justify-between text-sm"
                         >
                           <span>
@@ -318,6 +326,31 @@ export default function ClientTracker() {
           ))
         )}
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

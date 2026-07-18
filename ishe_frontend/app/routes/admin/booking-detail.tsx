@@ -134,7 +134,7 @@ export default function BookingDetail() {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-foreground">
-            Booking #{booking._id.slice(-6)}
+            Booking #{booking.id.slice(-6)}
           </h1>
           <p className="text-sm text-muted-foreground">
             Created {new Date(booking.createdAt).toLocaleDateString()}

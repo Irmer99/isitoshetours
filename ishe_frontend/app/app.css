@@ -137,4 +137,7 @@
   html {
     @apply font-sans;
   }
+  p {
+    font-size: calc(1rem + 2px);
+  }
 }

@@ -89,7 +89,7 @@ export default function DestinationManager() {
       highlights: d.highlights?.join("\n") || "",
       images: d.images || [],
     });
-    setEditingId(d._id);
+    setEditingId(d.id);
     setCreating(false);
     setFieldErrors({});
   };
@@ -111,7 +111,7 @@ export default function DestinationManager() {
       (body as Record<string, unknown>).slug = form.slug;
       createMutation.mutate(body);
     } else if (editingId) {
-      const dest = destinations?.find((d) => d._id === editingId);
+      const dest = destinations?.find((d) => d.id === editingId);
       if (dest) {
         saveMutation.mutate({ slug: dest.slug, body });
       }
@@ -233,7 +233,7 @@ export default function DestinationManager() {
         ) : (
           destinations?.map((d) => (
             <div
-              key={d._id}
+              key={d.id}
               className="flex items-center justify-between border border-border bg-card px-4 py-3"
             >
               <div>

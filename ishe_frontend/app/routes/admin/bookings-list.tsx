@@ -14,17 +14,18 @@ import { statusColors, CURRENCY } from "~/lib/constants";
 import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
 import type { Booking, Client, Itinerary, PaginatedResponse } from "~/types";
 
-function useBookings(status: string, archived: boolean) {
+function useBookings(status: string, archived: boolean, page: number) {
   return useQuery({
-    queryKey: ["bookings", status, archived],
+    queryKey: ["bookings", status, archived, page],
     queryFn: () => {
       const params = new URLSearchParams();
       if (status) params.set("status", status);
       if (archived) params.set("archived", "true");
-      const qs = params.toString();
+      params.set("page", String(page));
+      params.set("limit", "20");
       return apiClient
-        .get<PaginatedResponse<Booking>>(`/bookings${qs ? `?${qs}` : ""}`)
-        .then((r) => r.data.data);
+        .get<PaginatedResponse<Booking>>(`/bookings?${params.toString()}`)
+        .then((r) => r.data);
     },
   });
 }
@@ -53,6 +54,7 @@ export default function BookingsList() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
@@ -65,7 +67,9 @@ export default function BookingsList() {
     notes: "",
   });
 
-  const { data: bookings, isLoading, isError } = useBookings(statusFilter, showArchived);
+  const { data: bookingsPage, isLoading, isError } = useBookings(statusFilter, showArchived, page);
+  const bookings = bookingsPage?.data;
+  const totalPages = bookingsPage?.pages ?? 1;
   const { data: clients } = useClients();
   const { data: itineraries } = useItineraries();
 
@@ -132,7 +136,7 @@ export default function BookingsList() {
       "Status", "Travel Date", "Participants", "Total",
     ];
     const rows = bookings.map((b) => [
-      b._id,
+      b.id,
       typeof b.clientId === "object" ? b.clientId.name : b.clientId,
       typeof b.clientId === "object" ? b.clientId.email : "",
       typeof b.clientId === "object" ? b.clientId.phone : "",
@@ -191,7 +195,7 @@ export default function BookingsList() {
                   >
                     <option value="">Select a client</option>
                     {clients?.map((c) => (
-                      <option key={c._id} value={c._id}>
+                      <option key={c.id} value={c.id}>
                         {c.name} ({c.email})
                       </option>
                     ))}
@@ -363,10 +367,10 @@ export default function BookingsList() {
               </tr>
             ) : (
               bookings?.map((b) => (
-                <tr key={b._id} className="border-t border-border hover:bg-muted/50">
+                <tr key={b.id} className="border-t border-border hover:bg-muted/50">
                   <td className="px-4 py-3">
                     <Link
-                      to={`/admin/bookings/${b._id}`}
+                      to={`/admin/bookings/${b.id}`}
                       className="font-medium text-primary hover:underline"
                     >
                       {typeof b.clientId === "object"
@@ -397,6 +401,31 @@ export default function BookingsList() {
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

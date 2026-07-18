@@ -7,7 +7,7 @@ export interface ItineraryDay {
 }
 
 export interface Itinerary {
-  _id: string;
+  id: string;
   slug: string;
   title: string;
   subtitle?: string;
@@ -27,7 +27,7 @@ export interface Itinerary {
 }
 
 export interface Booking {
-  _id: string;
+  id: string;
   clientId: string | Client;
   itinerary: string;
   itineraryTitle?: string;
@@ -39,7 +39,7 @@ export interface Booking {
   discountApplied?: number;
   notes?: string;
   archived?: boolean;
-  statusHistory: StatusHistoryEntry[];
+  statusHistory?: StatusHistoryEntry[];
   createdAt: string;
   updatedAt: string;
 }
@@ -52,7 +52,7 @@ export interface StatusHistoryEntry {
 }
 
 export interface Client {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -62,13 +62,13 @@ export interface Client {
 }
 
 export interface Admin {
-  _id: string;
+  id: string;
   email: string;
   role: "admin" | "superadmin";
 }
 
 export interface Discount {
-  _id: string;
+  id: string;
   code: string;
   type: "percent" | "flat";
   value: number;
@@ -83,7 +83,7 @@ export interface Discount {
 }
 
 export interface Testimonial {
-  _id: string;
+  id: string;
   name: string;
   text: string;
   rating?: number;
@@ -93,7 +93,7 @@ export interface Testimonial {
 }
 
 export interface Destination {
-  _id: string;
+  id: string;
   slug: string;
   name: string;
   description?: string;
@@ -102,7 +102,7 @@ export interface Destination {
 }
 
 export interface TeamMember {
-  _id: string;
+  id: string;
   name: string;
   role: string;
   bio?: string;
@@ -112,7 +112,7 @@ export interface TeamMember {
 }
 
 export interface SiteSettings {
-  _id: string;
+  id: string;
   key: string;
   data: Record<string, unknown>;
 }
@@ -141,7 +141,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface Blog {
-  _id: string;
+  id: string;
   slug: string;
   title: string;
   excerpt?: string;
@@ -160,7 +160,7 @@ export interface LoginResponse {
 }
 
 export interface Notification {
-  _id: string;
+  id: string;
   type: string;
   title: string;
   message: string;

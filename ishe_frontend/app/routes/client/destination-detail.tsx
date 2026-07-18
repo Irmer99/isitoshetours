@@ -105,7 +105,7 @@ export default function DestinationDetail({ loaderData }: Route.ComponentProps) 
                   <div className="mt-3 space-y-3">
                     {itineraries.map((it) => (
                       <Link
-                        key={it._id}
+                        key={it.id}
                         to={`/itineraries/${it.slug}`}
                         className="group block border border-border p-3 transition-colors hover:border-primary"
                       >

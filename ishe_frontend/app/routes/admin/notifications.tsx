@@ -71,7 +71,7 @@ export default function Notifications() {
   });
 
   const handleNotificationClick = (n: Notification) => {
-    if (!n.read) markRead.mutate(n._id);
+    if (!n.read) markRead.mutate(n.id);
   };
 
   return (
@@ -134,7 +134,7 @@ export default function Notifications() {
         ) : (
           <div className="divide-y divide-border">
             {notifications.map((n) => (
-              <div key={n._id} className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50">
+              <div key={n.id} className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50">
                 <div className="mt-0.5">
                   {n.read ? (
                     <MailOpen className="size-4 text-muted-foreground" />

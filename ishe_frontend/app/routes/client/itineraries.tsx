@@ -97,7 +97,7 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
         )}
         {filtered.map((it: Itinerary) => (
           <Link
-            key={it._id}
+            key={it.id}
             to={`/itineraries/${it.slug}`}
             className="group border border-border bg-card transition-shadow hover:shadow-lg"
           >

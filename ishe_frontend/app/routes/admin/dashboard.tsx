@@ -16,13 +16,13 @@ import { CURRENCY } from "~/lib/constants";
 import type { StatsOverview, ConversionRate } from "~/types";
 
 interface BookingsByRoute {
-  _id: string;
+  itinerary: string;
   count: number;
   revenue: number;
 }
 
 interface BookingsOverTime {
-  _id: string;
+  date: string;
   count: number;
   revenue: number;
 }
@@ -99,13 +99,13 @@ export default function Dashboard() {
   ];
 
   const routeChartData = byRoute?.map((r) => ({
-    name: r._id.length > 20 ? r._id.slice(0, 20) + "..." : r._id,
+    name: r.itinerary.length > 20 ? r.itinerary.slice(0, 20) + "..." : r.itinerary,
     bookings: r.count,
     revenue: r.revenue,
   })) ?? [];
 
   const timeChartData = overTime?.map((t) => ({
-    date: t._id,
+    date: t.date,
     bookings: t.count,
     revenue: t.revenue,
   })) ?? [];

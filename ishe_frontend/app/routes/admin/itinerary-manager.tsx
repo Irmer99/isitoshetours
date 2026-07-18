@@ -109,7 +109,7 @@ export default function ItineraryManager() {
       destinations: it.destinations || [],
       images: it.images || [],
     });
-    setEditingId(it._id);
+    setEditingId(it.id);
     setCreating(false);
     setFieldErrors({});
   };
@@ -137,7 +137,7 @@ export default function ItineraryManager() {
       });
       return;
     }
-    const itinerary = itineraries?.find((i) => i._id === editingId);
+    const itinerary = itineraries?.find((i) => i.id === editingId);
     if (!itinerary) return;
     saveMutation.mutate({
       slug: itinerary.slug,
@@ -260,7 +260,7 @@ export default function ItineraryManager() {
                   const checked = form.destinations.includes(d.slug);
                   return (
                     <label
-                      key={d._id}
+                      key={d.id}
                       className={`flex cursor-pointer items-center gap-1.5 border px-3 py-1.5 text-xs font-medium transition-colors ${
                         checked
                           ? "border-primary bg-primary/10 text-primary"
@@ -325,7 +325,7 @@ export default function ItineraryManager() {
         ) : (
           itineraries?.map((it) => (
             <div
-              key={it._id}
+              key={it.id}
               className="flex items-center justify-between border border-border bg-card px-4 py-3"
             >
               <div>
