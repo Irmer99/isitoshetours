@@ -138,7 +138,7 @@ router.get('/destinations/:slug', asyncHandler(contentController.getDestinationB
 
 /**
  * @swagger
- * /content/destinations/{id}:
+ * /content/destinations/{slug}:
  *   patch:
  *     tags: [Content]
  *     summary: Update a destination (admin only)
@@ -146,14 +146,14 @@ router.get('/destinations/:slug', asyncHandler(contentController.getDestinationB
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         required: true
  *         schema: { type: string }
  *     responses:
  *       200:
  *         description: Destination updated
  */
-router.patch('/destinations/:id', authMiddleware, validateBody(updateDestinationSchema), asyncHandler(contentController.updateDestination));
+router.patch('/destinations/:slug', authMiddleware, validateBody(updateDestinationSchema), asyncHandler(contentController.updateDestination));
 
 /**
  * @swagger

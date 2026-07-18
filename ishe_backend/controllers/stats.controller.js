@@ -16,7 +16,7 @@ exports.overview = async (req, res) => {
     prisma.booking.count({ where: { createdAt: { gte: startOfMonth }, status: 'confirmed' } }),
     prisma.booking.count({ where: { createdAt: { gte: startOfMonth }, status: 'enquiry' } }),
     prisma.$queryRaw`SELECT COUNT(*)::int as count, COALESCE(SUM("total_amount"), 0)::float as total FROM "bookings" WHERE deleted = false`,
-    prisma.$queryRaw`SELECT itinerary as "_id", COUNT(*)::int as count, SUM("total_amount")::float as revenue FROM "bookings" WHERE deleted = false GROUP BY itinerary ORDER BY count DESC LIMIT 10`,
+    prisma.$queryRaw`SELECT itinerary, COUNT(*)::int as count, SUM("total_amount")::float as revenue FROM "bookings" WHERE deleted = false GROUP BY itinerary ORDER BY count DESC LIMIT 10`,
   ]);
 
   res.json({
@@ -31,7 +31,7 @@ exports.overview = async (req, res) => {
 
 exports.bookingsByRoute = async (req, res) => {
   const prisma = getPrisma();
-  const data = await prisma.$queryRaw`SELECT itinerary as "_id", COUNT(*)::int as count, SUM("total_amount")::float as revenue FROM "bookings" WHERE deleted = false GROUP BY itinerary ORDER BY count DESC`;
+  const data = await prisma.$queryRaw`SELECT itinerary, COUNT(*)::int as count, SUM("total_amount")::float as revenue FROM "bookings" WHERE deleted = false GROUP BY itinerary ORDER BY count DESC`;
   res.json(data);
 };
 
@@ -41,16 +41,15 @@ exports.bookingsOverTime = async (req, res) => {
   const since = new Date();
   since.setDate(since.getDate() - range);
 
-  const data = await prisma.$queryRaw`SELECT DATE("created_at")::text as id, COUNT(*)::int as count, SUM("total_amount")::float as revenue FROM "bookings" WHERE deleted = false AND "created_at" >= ${since} GROUP BY DATE("created_at") ORDER BY id`;
+  const data = await prisma.$queryRaw`SELECT DATE("created_at")::text as "date", COUNT(*)::int as count, SUM("total_amount")::float as revenue FROM "bookings" WHERE deleted = false AND "created_at" >= ${since} GROUP BY DATE("created_at") ORDER BY "date"`;
   res.json(data);
 };
 
 exports.conversion = async (req, res) => {
-  const prisma = getPrisma();
-  const data = await prisma.$queryRaw`SELECT status as "_id", COUNT(*)::int as count FROM "bookings" WHERE deleted = false GROUP BY status`;
+  const data = await getPrisma().$queryRaw`SELECT status, COUNT(*)::int as count FROM "bookings" WHERE deleted = false GROUP BY status`;
 
   const map = {};
-  data.forEach((d) => { map[d._id] = d.count; });
+  data.forEach((d) => { map[d.status] = d.count; });
   const enquiries = map.enquiry || 0;
   const confirmed = map.confirmed || 0;
   const rate = enquiries > 0 ? confirmed / enquiries : 0;

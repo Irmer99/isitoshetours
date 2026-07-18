@@ -1,8 +1,31 @@
 const { getPrisma } = require('../lib/db');
 
+function formatItinerary(itinerary) {
+  if (!itinerary) return itinerary;
+  const { pricingFrom, pricingCurrency, ...rest } = itinerary;
+  return {
+    ...rest,
+    pricing: pricingFrom != null ? { from: pricingFrom, currency: pricingCurrency } : undefined,
+  };
+}
+
+function mapPricingInput(data) {
+  if (data.pricing && typeof data.pricing === 'object') {
+    const { pricing, ...rest } = data;
+    return {
+      ...rest,
+      pricingFrom: pricing.from ?? null,
+      pricingCurrency: pricing.currency ?? 'MAD',
+    };
+  }
+  const { pricing, ...rest } = data;
+  return rest;
+}
+
 exports.createItinerary = async (req, res) => {
   const prisma = getPrisma();
-  const { days, ...data } = req.body;
+  const { days, ...rawData } = req.body;
+  const data = mapPricingInput(rawData);
   const itinerary = await prisma.itinerary.create({
     data: {
       ...data,
@@ -10,7 +33,7 @@ exports.createItinerary = async (req, res) => {
     },
     include: { days: { orderBy: { day: 'asc' } } },
   });
-  res.status(201).json(itinerary);
+  res.status(201).json(formatItinerary(itinerary));
 };
 
 exports.getItineraries = async (req, res) => {
@@ -23,7 +46,7 @@ exports.getItineraries = async (req, res) => {
     include: { days: { orderBy: { day: 'asc' } } },
     orderBy: { title: 'asc' },
   });
-  res.json(itineraries);
+  res.json(itineraries.map(formatItinerary));
 };
 
 exports.getItinerary = async (req, res) => {
@@ -33,12 +56,13 @@ exports.getItinerary = async (req, res) => {
     include: { days: { orderBy: { day: 'asc' } } },
   });
   if (!itinerary) return res.status(404).json({ error: 'Itinerary not found' });
-  res.json(itinerary);
+  res.json(formatItinerary(itinerary));
 };
 
 exports.updateItinerary = async (req, res) => {
   const prisma = getPrisma();
-  const { days, ...data } = req.body;
+  const { days, ...rawData } = req.body;
+  const data = mapPricingInput(rawData);
   const existing = await prisma.itinerary.findFirst({ where: { slug: req.params.slug } });
   if (!existing) return res.status(404).json({ error: 'Itinerary not found' });
 
@@ -54,7 +78,7 @@ exports.updateItinerary = async (req, res) => {
     },
     include: { days: { orderBy: { day: 'asc' } } },
   });
-  res.json(itinerary);
+  res.json(formatItinerary(itinerary));
 };
 
 exports.createDestination = async (req, res) => {
@@ -83,12 +107,12 @@ exports.getItinerariesByDestination = async (req, res) => {
     include: { days: { orderBy: { day: 'asc' } } },
     orderBy: { title: 'asc' },
   });
-  res.json(itineraries);
+  res.json(itineraries.map(formatItinerary));
 };
 
 exports.updateDestination = async (req, res) => {
   const prisma = getPrisma();
-  const existing = await prisma.destination.findFirst({ where: { slug: req.params.id } });
+  const existing = await prisma.destination.findFirst({ where: { slug: req.params.slug } });
   if (!existing) return res.status(404).json({ error: 'Destination not found' });
   const dest = await prisma.destination.update({
     where: { id: existing.id },
@@ -166,7 +190,10 @@ exports.createBlog = async (req, res) => {
 
 exports.getBlogs = async (req, res) => {
   const prisma = getPrisma();
-  const where = { archived: false };
+  const where = {};
+  if (req.query.includeArchived !== 'true') {
+    where.archived = false;
+  }
   if (req.query.tag) where.tags = { has: req.query.tag };
   if (req.query.search) where.title = { contains: req.query.search, mode: 'insensitive' };
   const blogs = await prisma.blog.findMany({ where, orderBy: { createdAt: 'desc' } });

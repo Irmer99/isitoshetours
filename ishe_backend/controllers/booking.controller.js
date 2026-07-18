@@ -96,7 +96,7 @@ exports.detail = async (req, res) => {
 };
 
 exports.updateStatus = async (req, res) => {
-  const { status } = req.body;
+  const { status, comment } = req.body;
   const prisma = getPrisma();
   const booking = await prisma.booking.findFirst({
     where: { id: req.params.id, deleted: false },
@@ -125,6 +125,7 @@ exports.updateStatus = async (req, res) => {
           from: booking.status,
           to: status,
           changedBy: req.admin.id,
+          comment: comment || null,
         },
       },
     },
@@ -199,6 +200,7 @@ exports.history = async (req, res) => {
     from: entry.from,
     to: entry.to,
     changedAt: entry.changedAt,
+    comment: entry.comment || null,
   }));
   res.json(sanitized);
 };

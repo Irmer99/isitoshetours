@@ -163,6 +163,7 @@ model BookingStatusHistory {
   from       String
   to         String
   changedBy  String?  @map("changed_by")
+  comment    String?
   changedAt  DateTime @default(now()) @map("changed_at")
 
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)

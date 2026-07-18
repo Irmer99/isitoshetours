@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
 const createBookingSchema = z.object({
-  clientId: z.string().regex(/^[a-f0-9]{24}$/, 'Must be a valid client ObjectId'),
+  clientId: z.string().uuid(),
   itinerary: z.string().min(1),
   itineraryTitle: z.string().optional(),
   travelDate: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),
@@ -13,6 +13,7 @@ const createBookingSchema = z.object({
 
 const updateBookingStatusSchema = z.object({
   status: z.enum(['enquiry', 'confirmed', 'completed', 'cancelled']),
+  comment: z.string().optional(),
 });
 
 const updateBookingEditSchema = z.object({

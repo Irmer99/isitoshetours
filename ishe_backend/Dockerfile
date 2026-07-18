@@ -12,4 +12,4 @@ RUN mkdir -p uploads && chown -R node:node /app
 USER node
 EXPOSE 3000
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node index.js"]
