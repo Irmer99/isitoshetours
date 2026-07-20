@@ -16,9 +16,9 @@ services:
       - key: JWT_EXPIRES_IN
         value: 14d
       - key: CORS_ORIGIN
-        sync: false
+        value: https://isitoshetours-1.onrender.com
       - key: FRONTEND_URL
-        sync: false
+        value: https://isitoshetours-1.onrender.com
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
@@ -47,5 +47,5 @@ services:
       - key: VITE_API_URL
         value: /api
       - key: SSR_API_URL
-        sync: false
+        value: https://isitoshetours.onrender.com/api
     autoDeploy: true
