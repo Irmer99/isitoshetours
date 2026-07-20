@@ -1,0 +1,30 @@
+name: Deploy migrations
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ishe_backend/prisma/**'
+      - 'ishe_backend/package.json'
+      - 'ishe_backend/package-lock.json'
+
+concurrency:
+  group: prisma-migrate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ishe_backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ishe_backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
