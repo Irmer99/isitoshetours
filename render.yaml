@@ -20,9 +20,9 @@ services:
       - key: FRONTEND_URL
         value: https://isitoshetours-1.onrender.com
       - key: ADMIN_EMAIL
-        sync: false
+        value: admin@isitoshetours.com
       - key: ADMIN_PASSWORD
-        sync: false
+        value: changeme
       - key: ADMIN_ROLE
         value: superadmin
       - key: SMTP_EMAIL
