@@ -9,6 +9,7 @@ WORKDIR /app
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY . /app
 COPY docker-start.sh /app/docker-start.sh
+RUN npx prisma generate
 RUN mkdir -p uploads && chown -R node:node /app && chmod +x /app/docker-start.sh
 USER node
 EXPOSE 3000
