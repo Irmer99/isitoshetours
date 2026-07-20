@@ -5,7 +5,7 @@ const logger = require('./lib/logger');
 const port = process.env.PORT || 3000;
 
 connectDB().then(() => {
-  app.listen(port, () => {
+  app.listen(port, '0.0.0.0', () => {
     logger.info({ port }, 'Server running');
   });
 });

@@ -8,8 +8,9 @@ RUN apk add --no-cache tini
 WORKDIR /app
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY . /app
-RUN mkdir -p uploads && chown -R node:node /app
+COPY docker-start.sh /app/docker-start.sh
+RUN mkdir -p uploads && chown -R node:node /app && chmod +x /app/docker-start.sh
 USER node
 EXPOSE 3000
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "npx prisma migrate deploy && node index.js"]
+CMD ["/app/docker-start.sh"]
