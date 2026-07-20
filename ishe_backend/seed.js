@@ -18,6 +18,12 @@ async function seed() {
     process.exit(1);
   }
 
+  const strongRe = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+  if (!strongRe.test(password)) {
+    console.error('ADMIN_PASSWORD does not meet policy (8+ chars, upper, lower, number, special). Skipping seed.');
+    process.exit(1);
+  }
+
   const existing = await prisma.admin.findFirst({ where: { email } });
   if (existing) {
     console.log(`Admin already exists: ${existing.email} (${existing.role})`);

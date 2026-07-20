@@ -69,6 +69,7 @@ export default function AdminLogin() {
           <p className="mt-1 text-sm text-muted-foreground">Admin Login</p>
         </div>
         <Form method="post" className="mt-6 space-y-4">
+          <input type="text" name="website" className="absolute opacity-0 pointer-events-none h-0 w-0" tabIndex={-1} autoComplete="off" />
           <FieldRoot>
             <Label>Email</Label>
             <Input

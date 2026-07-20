@@ -6,6 +6,9 @@ const { sendMail } = require('../lib/mailer');
 const logger = require('../lib/logger');
 
 exports.login = async (req, res) => {
+  if (req.body.website) {
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
   const { email, password } = req.body;
   const prisma = getPrisma();
   const admin = await prisma.admin.findUnique({ where: { email } });
