@@ -101,8 +101,8 @@ export default function ResetPassword() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  minLength={6}
-                  placeholder="At least 6 characters"
+                  minLength={8}
+                  placeholder="8+ chars, upper, lower, number, special"
                   className="pr-10"
                 />
                 <button

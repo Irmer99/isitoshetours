@@ -64,8 +64,25 @@ export default function SettingsManager() {
   const handlePasswordChange = () => {
     setPwError("");
     setPwSuccess("");
-    if (pwForm.newPassword.length < 6) {
-      setPwError("New password must be at least 6 characters");
+    const pw = pwForm.newPassword;
+    if (pw.length < 8) {
+      setPwError("Password must be at least 8 characters");
+      return;
+    }
+    if (!/[A-Z]/.test(pw)) {
+      setPwError("Password must contain at least one uppercase letter");
+      return;
+    }
+    if (!/[a-z]/.test(pw)) {
+      setPwError("Password must contain at least one lowercase letter");
+      return;
+    }
+    if (!/[0-9]/.test(pw)) {
+      setPwError("Password must contain at least one number");
+      return;
+    }
+    if (!/[^A-Za-z0-9]/.test(pw)) {
+      setPwError("Password must contain at least one special character");
       return;
     }
     if (pwForm.newPassword !== pwForm.confirmPassword) {
@@ -181,7 +198,7 @@ export default function SettingsManager() {
                 type={showNewPw ? "text" : "password"}
                 value={pwForm.newPassword}
                 onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
-                placeholder="At least 6 characters"
+                placeholder="8+ chars, upper, lower, number, special"
                 className="pr-10"
               />
               <button
