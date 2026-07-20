@@ -2,7 +2,7 @@
 set -e
 
 echo "Running database migrations..."
-npx prisma migrate deploy --url "$DATABASE_URL"
+DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy
 
 echo "Starting server..."
 exec node index.js
