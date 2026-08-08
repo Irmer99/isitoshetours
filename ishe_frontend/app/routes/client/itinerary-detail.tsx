@@ -224,7 +224,7 @@ export default function ItineraryDetail({
               <Dialog.Trigger>
                 <Button variant="default" size="lg" className="w-full">
                   <Send className="size-4" />
-                  Enquire Now
+                  Request Quote
                 </Button>
               </Dialog.Trigger>
               <Dialog.Popup>
