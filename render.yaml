@@ -25,10 +25,6 @@ services:
         value: ***REMOVED***
       - key: ADMIN_ROLE
         value: superadmin
-      - key: SMTP_EMAIL
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: SMTP_FROM

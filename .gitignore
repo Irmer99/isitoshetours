@@ -3,4 +3,5 @@ node_modules/
 nul
 .claude
 .agents
+*.log
 
