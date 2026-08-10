@@ -22,7 +22,7 @@ services:
       - key: ADMIN_EMAIL
         value: admin@isitoshetours.com
       - key: ADMIN_PASSWORD
-        value: ***REMOVED***
+        sync: false
       - key: ADMIN_ROLE
         value: superadmin
       - key: RESEND_API_KEY
