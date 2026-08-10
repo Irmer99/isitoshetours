@@ -79,7 +79,23 @@ const updateTeamSchema = z.object({
 });
 
 const updateSiteSettingsSchema = z.object({
-  data: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(z.union([z.string(), z.number(), z.boolean()])), z.record(z.string())])),
+  data: z.record(
+    z.string(),
+    z.union([
+      z.string(),
+      z.number(),
+      z.boolean(),
+      z.null(),
+      z.array(z.union([z.string(), z.number(), z.boolean()])),
+      z.record(z.string()),
+      z.array(
+        z.object({
+          image: z.string().min(1),
+          tagline: z.string().min(1),
+        })
+      ).max(15),
+    ])
+  ),
 });
 
 const createBlogSchema = z.object({

@@ -1,9 +1,10 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Compass, Mountain, Sun, ChevronDown } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { useHomepageContent } from "~/hooks/useHomepageContent";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -15,29 +16,6 @@ export function meta({}: Route.MetaArgs) {
     },
   ];
 }
-
-const heroSlides = [
-  {
-    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1920&q=80",
-    tagline: "Uganda's Premier Tour Operator",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1920&q=80",
-    tagline: "Gorilla Trekking Adventures",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=1920&q=80",
-    tagline: "Safari Across the Savannah",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=1920&q=80",
-    tagline: "Discover Murchison Falls",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=1920&q=80",
-    tagline: "Unforgettable Wildlife Encounters",
-  },
-];
 
 const highlights = [
   {
@@ -104,13 +82,30 @@ const faqs = [
 ];
 
 export default function Home() {
+  const { heroSlides, aboutTitle, aboutParagraphs, aboutImages } = useHomepageContent();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  }, [heroSlides.length]);
 
-  const prevSlide = () =>
+  const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  }, [heroSlides.length]);
+
+  useEffect(() => {
+    if (isPaused) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+    timerRef.current = setInterval(nextSlide, 5000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [nextSlide, isPaused]);
 
   return (
     <>
@@ -189,6 +184,13 @@ export default function Home() {
               aria-label={`Go to slide ${i + 1}`}
             />
           ))}
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className="ml-2 bg-black/40 px-2 py-1 text-xs text-white transition-colors hover:bg-black/60"
+            aria-label={isPaused ? "Resume carousel" : "Pause carousel"}
+          >
+            {isPaused ? "▶" : "❚❚"}
+          </button>
         </div>
       </section>
 
@@ -197,19 +199,13 @@ export default function Home() {
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
               <h2 className="font-heading text-3xl font-bold text-foreground">
-                About Isitoshe Tours
+                {aboutTitle}
               </h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Isitoshe Tours is a disability-inclusive tour operator based in Kyaliwajjala,
-                Kampala, Uganda. We specialise in curating unforgettable safari experiences
-                that showcase the best of Uganda&apos;s wildlife, landscapes, and culture.
-              </p>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Our team of expert local guides is passionate about responsible tourism and
-                creating meaningful connections between travellers and the communities they visit.
-                Every tour is designed with care, ensuring accessibility, sustainability, and
-                genuine cultural exchange.
-              </p>
+              {aboutParagraphs.map((paragraph, i) => (
+                <p key={i} className="mt-4 text-muted-foreground leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
               <div className="mt-6 flex items-center gap-4">
                 <Link to="/itineraries">
                   <Button variant="default" size="lg">
@@ -225,26 +221,21 @@ export default function Home() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="aspect-[4/5] bg-muted overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1521651201144-634f700b36ef?w=600&q=80"
-                  alt="Uganda landscape"
-                  loading="lazy"
-                  width={600}
-                  height={750}
-                  className="size-full object-cover"
-                />
-              </div>
-              <div className="aspect-[4/5] bg-muted overflow-hidden mt-8">
-                <img
-                  src="https://images.unsplash.com/photo-1504173010664-32509aeebb62?w=600&q=80"
-                  alt="Uganda wildlife"
-                  loading="lazy"
-                  width={600}
-                  height={750}
-                  className="size-full object-cover"
-                />
-              </div>
+              {aboutImages.map((image, i) => (
+                <div
+                  key={i}
+                  className={`aspect-[4/5] bg-muted overflow-hidden ${i % 2 === 1 ? "mt-8" : ""}`}
+                >
+                  <img
+                    src={image}
+                    alt={`${aboutTitle} image ${i + 1}`}
+                    loading="lazy"
+                    width={600}
+                    height={750}
+                    className="size-full object-cover"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -117,6 +117,18 @@ export interface SiteSettings {
   data: Record<string, unknown>;
 }
 
+export interface HeroSlide {
+  image: string;
+  tagline: string;
+}
+
+export interface HomepageSettings {
+  heroSlides: HeroSlide[];
+  aboutTitle: string;
+  aboutParagraphs: string[];
+  aboutImages: string[];
+}
+
 export interface StatsOverview {
   totalBookings: number;
   bookingsThisMonth: number;

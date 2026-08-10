@@ -1,13 +1,18 @@
 import type { Route } from "./+types/settings-manager";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Lock, Eye, EyeOff } from "lucide-react";
+import { Save, Lock, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
-import type { SiteSettings } from "~/types";
+import type { SiteSettings, HomepageSettings, HeroSlide } from "~/types";
+import { HOMEPAGE_DEFAULTS, firstNonEmpty } from "~/hooks/useHomepageContent";
+
+const HOMEPAGE_KEYS = ["heroSlides", "aboutTitle", "aboutParagraphs", "aboutImages"];
+const textareaClass =
+  "flex w-full border bg-input px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 min-h-[80px]";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Settings — Isitoshe Tours Admin" }];
@@ -23,14 +28,36 @@ export default function SettingsManager() {
   });
 
   const [form, setForm] = useState<Record<string, string>>({});
+  const [homepage, setHomepage] = useState<HomepageSettings>({
+    heroSlides: HOMEPAGE_DEFAULTS.heroSlides,
+    aboutTitle: HOMEPAGE_DEFAULTS.aboutTitle,
+    aboutParagraphs: HOMEPAGE_DEFAULTS.aboutParagraphs,
+    aboutImages: HOMEPAGE_DEFAULTS.aboutImages,
+  });
 
   useEffect(() => {
     if (settings?.data) {
       const initial: Record<string, string> = {};
       for (const [key, value] of Object.entries(settings.data)) {
+        if (HOMEPAGE_KEYS.includes(key)) continue;
         initial[key] = String(value ?? "");
       }
       setForm(initial);
+      setHomepage({
+        heroSlides: firstNonEmpty<HeroSlide[]>(
+          settings.data.heroSlides,
+          HOMEPAGE_DEFAULTS.heroSlides
+        ),
+        aboutTitle: (settings.data.aboutTitle as string) || HOMEPAGE_DEFAULTS.aboutTitle,
+        aboutParagraphs: firstNonEmpty<string[]>(
+          settings.data.aboutParagraphs,
+          HOMEPAGE_DEFAULTS.aboutParagraphs
+        ),
+        aboutImages: firstNonEmpty<string[]>(
+          settings.data.aboutImages,
+          HOMEPAGE_DEFAULTS.aboutImages
+        ),
+      });
     }
   }, [settings]);
 
@@ -113,7 +140,85 @@ export default function SettingsManager() {
   });
 
   const handleSave = () => {
-    saveMutation.mutate(form);
+    saveMutation.mutate({
+      ...form,
+      heroSlides: homepage.heroSlides,
+      aboutTitle: homepage.aboutTitle,
+      aboutParagraphs: homepage.aboutParagraphs,
+      aboutImages: homepage.aboutImages,
+    });
+  };
+
+  const updateSlide = (index: number, patch: Partial<HeroSlide>) => {
+    setHomepage((prev) => ({
+      ...prev,
+      heroSlides: prev.heroSlides.map((slide, i) =>
+        i === index ? { ...slide, ...patch } : slide
+      ),
+    }));
+  };
+
+  const removeSlide = (index: number) => {
+    setHomepage((prev) => ({
+      ...prev,
+      heroSlides: prev.heroSlides.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addSlide = () => {
+    setHomepage((prev) => ({
+      ...prev,
+      heroSlides: [
+        ...prev.heroSlides,
+        { image: "", tagline: "" },
+      ].slice(0, 15),
+    }));
+  };
+
+  const updateParagraph = (index: number, value: string) => {
+    setHomepage((prev) => ({
+      ...prev,
+      aboutParagraphs: prev.aboutParagraphs.map((p, i) =>
+        i === index ? value : p
+      ),
+    }));
+  };
+
+  const removeParagraph = (index: number) => {
+    setHomepage((prev) => ({
+      ...prev,
+      aboutParagraphs: prev.aboutParagraphs.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addParagraph = () => {
+    setHomepage((prev) => ({
+      ...prev,
+      aboutParagraphs: [...prev.aboutParagraphs, ""],
+    }));
+  };
+
+  const updateAboutImage = (index: number, value: string) => {
+    setHomepage((prev) => ({
+      ...prev,
+      aboutImages: prev.aboutImages.map((img, i) =>
+        i === index ? value : img
+      ),
+    }));
+  };
+
+  const removeAboutImage = (index: number) => {
+    setHomepage((prev) => ({
+      ...prev,
+      aboutImages: prev.aboutImages.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addAboutImage = () => {
+    setHomepage((prev) => ({
+      ...prev,
+      aboutImages: [...prev.aboutImages, ""],
+    }));
   };
 
   if (isError) return <p className="text-destructive">Failed to load settings.</p>;
@@ -131,23 +236,152 @@ export default function SettingsManager() {
       </div>
 
       <div className="border border-border bg-card p-6">
+        <div className="mb-4">
+          <h2 className="font-heading text-lg font-bold text-foreground">
+            Homepage
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Manage the hero carousel and about section shown on the homepage
+          </p>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Hero Slides</Label>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={addSlide}
+                disabled={homepage.heroSlides.length >= 15}
+              >
+                <Plus />
+                Add Slide
+              </Button>
+            </div>
+            {homepage.heroSlides.map((slide, i) => (
+              <div
+                key={i}
+                className="space-y-3 border border-border bg-muted/30 p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <Label>Slide {i + 1}</Label>
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    onClick={() => removeSlide(i)}
+                    aria-label={`Remove slide ${i + 1}`}
+                  >
+                    <Trash2 />
+                  </Button>
+                </div>
+                <FieldRoot>
+                  <Label>Image URL</Label>
+                  <Input
+                    value={slide.image}
+                    onChange={(e) => updateSlide(i, { image: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </FieldRoot>
+                <FieldRoot>
+                  <Label>Tagline</Label>
+                  <Input
+                    value={slide.tagline}
+                    onChange={(e) => updateSlide(i, { tagline: e.target.value })}
+                    placeholder="Slide tagline"
+                  />
+                </FieldRoot>
+              </div>
+            ))}
+          </div>
+
+          <FieldRoot>
+            <Label>About Title</Label>
+            <Input
+              value={homepage.aboutTitle}
+              onChange={(e) =>
+                setHomepage({ ...homepage, aboutTitle: e.target.value })
+              }
+              placeholder="About section heading"
+            />
+          </FieldRoot>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>About Paragraphs</Label>
+              <Button variant="outline" size="xs" onClick={addParagraph}>
+                <Plus />
+                Add Paragraph
+              </Button>
+            </div>
+            {homepage.aboutParagraphs.map((paragraph, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <textarea
+                  className={textareaClass}
+                  value={paragraph}
+                  onChange={(e) => updateParagraph(i, e.target.value)}
+                  placeholder="Paragraph text"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon-sm"
+                  onClick={() => removeParagraph(i)}
+                  aria-label={`Remove paragraph ${i + 1}`}
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>About Images</Label>
+              <Button variant="outline" size="xs" onClick={addAboutImage}>
+                <Plus />
+                Add Image
+              </Button>
+            </div>
+            {homepage.aboutImages.map((image, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <Input
+                  value={image}
+                  onChange={(e) => updateAboutImage(i, e.target.value)}
+                  placeholder="https://..."
+                />
+                <Button
+                  variant="destructive"
+                  size="icon-sm"
+                  onClick={() => removeAboutImage(i)}
+                  aria-label={`Remove about image ${i + 1}`}
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 border border-border bg-card p-6">
         {saveError && (
           <p className="mb-4 text-sm text-destructive">{saveError}</p>
         )}
         <div className="space-y-4">
-          {Object.entries(form).map(([key, value]) => (
-            <FieldRoot key={key}>
-              <Label>
-                {key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}
-              </Label>
-              <Input
-                value={value}
-                onChange={(e) =>
-                  setForm({ ...form, [key]: e.target.value })
-                }
-              />
-            </FieldRoot>
-          ))}
+          {Object.entries(form)
+            .filter(([key]) => !HOMEPAGE_KEYS.includes(key))
+            .map(([key, value]) => (
+              <FieldRoot key={key}>
+                <Label>
+                  {key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}
+                </Label>
+                <Input
+                  value={value}
+                  onChange={(e) =>
+                    setForm({ ...form, [key]: e.target.value })
+                  }
+                />
+              </FieldRoot>
+            ))}
         </div>
         <div className="mt-6 flex justify-end">
           <Button
