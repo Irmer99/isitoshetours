@@ -24,6 +24,36 @@ describe('Error Handler', () => {
     expect(res.json).toHaveBeenCalledWith({ error: 'Duplicate value for email' });
   });
 
+  it('should fall back to generic field name for P2002 without meta', () => {
+    const err = { code: 'P2002', message: 'Unique constraint failed' };
+    const res = mockRes();
+    errorHandler(err, mockReq, res, mockNext);
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Duplicate value for field' });
+  });
+
+  it('should handle PrismaClientValidationError as 400', () => {
+    const err = {
+      name: 'PrismaClientValidationError',
+      message: 'Invalid field provided',
+    };
+    const res = mockRes();
+    errorHandler(err, mockReq, res, mockNext);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Validation error',
+      details: 'Invalid field provided',
+    });
+  });
+
+  it('should honour a custom error status (e.g. 429)', () => {
+    const err = { status: 429, message: 'Too many requests' };
+    const res = mockRes();
+    errorHandler(err, mockReq, res, mockNext);
+    expect(res.status).toHaveBeenCalledWith(429);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Too many requests' });
+  });
+
   it('should handle Prisma P2025 (record not found) as 404', () => {
     const err = {
       code: 'P2025',
@@ -54,7 +84,10 @@ describe('Error Handler', () => {
     const res = mockRes();
     errorHandler(err, mockReq, res, mockNext);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Validation error', details: 'Validation failed' });
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Validation error',
+      details: 'Validation failed',
+    });
   });
 
   it('should return 500 for unknown errors', () => {
@@ -70,7 +103,7 @@ describe('Error Handler', () => {
   it('should hide error details in production for 500 errors', () => {
     const originalEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = 'production';
-    
+
     const err = {
       message: 'Internal database error',
     };
@@ -78,7 +111,7 @@ describe('Error Handler', () => {
     errorHandler(err, mockReq, res, mockNext);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
-    
+
     process.env.NODE_ENV = originalEnv;
   });
 });

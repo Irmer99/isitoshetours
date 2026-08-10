@@ -1,25 +1,38 @@
 const { z } = require('zod');
 
+const urlSchema = z.string().url('Must be a valid URL');
+const optionalImageUrls = z.array(urlSchema).optional();
+const imageUrl = z.string().url('Must be a valid URL').optional();
+
 const createItinerarySchema = z.object({
   title: z.string().min(1),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
+  slug: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with dashes'),
   subtitle: z.string().optional(),
   difficulty: z.enum(['easy', 'moderate', 'hard']).default('moderate'),
   duration: z.string().optional(),
-  pricing: z.object({
-    from: z.number().optional(),
-    currency: z.string().optional(),
-  }).optional(),
-  days: z.array(z.object({
-    day: z.number(),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    meals: z.array(z.string()).optional(),
-    accommodation: z.string().optional(),
-  })).optional(),
+  pricing: z
+    .object({
+      from: z.number().optional(),
+      currency: z.string().optional(),
+    })
+    .optional(),
+  days: z
+    .array(
+      z.object({
+        day: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        meals: z.array(z.string()).optional(),
+        accommodation: z.string().optional(),
+      }),
+    )
+    .optional(),
   includes: z.array(z.string()).optional(),
   excludes: z.array(z.string()).optional(),
-  images: z.array(z.string()).optional(),
+  images: optionalImageUrls,
   destinations: z.array(z.string()).optional(),
 });
 
@@ -28,35 +41,44 @@ const updateItinerarySchema = z.object({
   subtitle: z.string().optional(),
   difficulty: z.enum(['easy', 'moderate', 'hard']).optional(),
   duration: z.string().optional(),
-  pricing: z.object({
-    from: z.number().optional(),
-    currency: z.string().optional(),
-  }).optional(),
-  days: z.array(z.object({
-    day: z.number(),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    meals: z.array(z.string()).optional(),
-    accommodation: z.string().optional(),
-  })).optional(),
+  pricing: z
+    .object({
+      from: z.number().optional(),
+      currency: z.string().optional(),
+    })
+    .optional(),
+  days: z
+    .array(
+      z.object({
+        day: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        meals: z.array(z.string()).optional(),
+        accommodation: z.string().optional(),
+      }),
+    )
+    .optional(),
   includes: z.array(z.string()).optional(),
   excludes: z.array(z.string()).optional(),
-  images: z.array(z.string()).optional(),
+  images: optionalImageUrls,
   destinations: z.array(z.string()).optional(),
 });
 
 const createDestinationSchema = z.object({
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
+  slug: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with dashes'),
   name: z.string().min(1),
   description: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  images: optionalImageUrls,
   highlights: z.array(z.string()).optional(),
 });
 
 const updateDestinationSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  images: optionalImageUrls,
   highlights: z.array(z.string()).optional(),
 });
 
@@ -78,33 +100,37 @@ const updateTeamSchema = z.object({
   active: z.boolean().optional(),
 });
 
-const updateSiteSettingsSchema = z.object({
-  data: z.record(
-    z.string(),
-    z.union([
-      z.string(),
-      z.number(),
-      z.boolean(),
-      z.null(),
-      z.array(z.union([z.string(), z.number(), z.boolean()])),
-      z.record(z.string()),
-      z.array(
+const homepageDataSchema = z
+  .object({
+    heroSlides: z
+      .array(
         z.object({
-          image: z.string().min(1),
+          image: z.string().url('Must be a valid URL'),
           tagline: z.string().min(1),
-        })
-      ).max(15),
-    ])
-  ),
+        }),
+      )
+      .max(15)
+      .optional(),
+    aboutTitle: z.string().optional(),
+    aboutParagraphs: z.array(z.string()).optional(),
+    aboutImages: z.array(z.string().url('Must be a valid URL')).optional(),
+  })
+  .passthrough();
+
+const updateSiteSettingsSchema = z.object({
+  data: z.record(z.string(), z.unknown()).and(homepageDataSchema),
 });
 
 const createBlogSchema = z.object({
   title: z.string().min(1),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
+  slug: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with dashes'),
   excerpt: z.string().optional(),
   content: z.string().optional(),
-  coverImage: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  coverImage: imageUrl,
+  images: optionalImageUrls,
   tags: z.array(z.string()).optional(),
 });
 
@@ -112,8 +138,8 @@ const updateBlogSchema = z.object({
   title: z.string().min(1).optional(),
   excerpt: z.string().optional(),
   content: z.string().optional(),
-  coverImage: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  coverImage: imageUrl,
+  images: optionalImageUrls,
   tags: z.array(z.string()).optional(),
   archived: z.boolean().optional(),
 });

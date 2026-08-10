@@ -9,9 +9,20 @@ exports.login = async (req, res) => {
   if (req.body.website) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
-  const { email, password } = req.body;
+  const email = String(req.body.email || '')
+    .trim()
+    .toLowerCase();
+  const { password } = req.body;
   const prisma = getPrisma();
-  const admin = await prisma.admin.findUnique({ where: { email } });
+
+  let admin;
+  try {
+    admin = await prisma.admin.findUnique({ where: { email } });
+  } catch (err) {
+    logger.error({ err: err.message }, '[login] Database query failed');
+    return res.status(503).json({ error: 'Service temporarily unavailable' });
+  }
+
   if (!admin || !(await bcrypt.compare(password, admin.password))) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
@@ -19,7 +30,7 @@ exports.login = async (req, res) => {
   const token = jwt.sign(
     { id: admin.id, email: admin.email, role: admin.role },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '14d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '14d' },
   );
 
   const { password: _, ...adminData } = admin;
@@ -37,7 +48,7 @@ exports.refresh = async (req, res) => {
     const newToken = jwt.sign(
       { id: admin.id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '14d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '14d' },
     );
 
     const { password: _, ...adminData } = admin;
