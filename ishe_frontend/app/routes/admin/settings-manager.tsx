@@ -6,6 +6,7 @@ import { Save, Lock, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
+import { ImageUpload } from "~/components/admin/image-upload";
 import apiClient from "~/lib/api-client";
 import type { SiteSettings, HomepageSettings, HeroSlide } from "~/types";
 import { HOMEPAGE_DEFAULTS, firstNonEmpty } from "~/hooks/useHomepageContent";
@@ -21,10 +22,13 @@ export function meta({}: Route.MetaArgs) {
 export default function SettingsManager() {
   const queryClient = useQueryClient();
 
-  const { data: settings, isLoading, isError } = useQuery({
+  const {
+    data: settings,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["site-settings"],
-    queryFn: () =>
-      apiClient.get<SiteSettings>("/content/site-settings").then((r) => r.data),
+    queryFn: () => apiClient.get<SiteSettings>("/content/site-settings").then((r) => r.data),
   });
 
   const [form, setForm] = useState<Record<string, string>>({});
@@ -63,7 +67,11 @@ export default function SettingsManager() {
 
   const [saveError, setSaveError] = useState("");
 
-  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [pwForm, setPwForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [pwError, setPwError] = useState("");
   const [pwSuccess, setPwSuccess] = useState("");
   const [showCurrentPw, setShowCurrentPw] = useState(false);
@@ -80,8 +88,8 @@ export default function SettingsManager() {
     onError: (err: unknown) => {
       const msg =
         err && typeof err === "object" && "response" in err
-          ? (err as { response: { data: { error?: string } } }).response?.data
-              ?.error || "Failed to change password"
+          ? (err as { response: { data: { error?: string } } }).response?.data?.error ||
+            "Failed to change password"
           : "Failed to change password";
       setPwError(msg);
       setPwSuccess("");
@@ -132,8 +140,8 @@ export default function SettingsManager() {
     onError: (err: unknown) => {
       const msg =
         err && typeof err === "object" && "response" in err
-          ? (err as { response: { data: { error?: string } } }).response?.data
-              ?.error || "Failed to save settings"
+          ? (err as { response: { data: { error?: string } } }).response?.data?.error ||
+            "Failed to save settings"
           : "Failed to save settings";
       setSaveError(msg);
     },
@@ -152,9 +160,7 @@ export default function SettingsManager() {
   const updateSlide = (index: number, patch: Partial<HeroSlide>) => {
     setHomepage((prev) => ({
       ...prev,
-      heroSlides: prev.heroSlides.map((slide, i) =>
-        i === index ? { ...slide, ...patch } : slide
-      ),
+      heroSlides: prev.heroSlides.map((slide, i) => (i === index ? { ...slide, ...patch } : slide)),
     }));
   };
 
@@ -168,19 +174,14 @@ export default function SettingsManager() {
   const addSlide = () => {
     setHomepage((prev) => ({
       ...prev,
-      heroSlides: [
-        ...prev.heroSlides,
-        { image: "", tagline: "" },
-      ].slice(0, 15),
+      heroSlides: [...prev.heroSlides, { image: "", tagline: "" }].slice(0, 15),
     }));
   };
 
   const updateParagraph = (index: number, value: string) => {
     setHomepage((prev) => ({
       ...prev,
-      aboutParagraphs: prev.aboutParagraphs.map((p, i) =>
-        i === index ? value : p
-      ),
+      aboutParagraphs: prev.aboutParagraphs.map((p, i) => (i === index ? value : p)),
     }));
   };
 
@@ -198,48 +199,19 @@ export default function SettingsManager() {
     }));
   };
 
-  const updateAboutImage = (index: number, value: string) => {
-    setHomepage((prev) => ({
-      ...prev,
-      aboutImages: prev.aboutImages.map((img, i) =>
-        i === index ? value : img
-      ),
-    }));
-  };
-
-  const removeAboutImage = (index: number) => {
-    setHomepage((prev) => ({
-      ...prev,
-      aboutImages: prev.aboutImages.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addAboutImage = () => {
-    setHomepage((prev) => ({
-      ...prev,
-      aboutImages: [...prev.aboutImages, ""],
-    }));
-  };
-
   if (isError) return <p className="text-destructive">Failed to load settings.</p>;
   if (isLoading) return <p className="text-muted-foreground">Loading...</p>;
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="font-heading text-2xl font-bold text-foreground">
-          Site Settings
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Configure global site settings
-        </p>
+        <h1 className="font-heading text-2xl font-bold text-foreground">Site Settings</h1>
+        <p className="text-sm text-muted-foreground">Configure global site settings</p>
       </div>
 
       <div className="border border-border bg-card p-6">
         <div className="mb-4">
-          <h2 className="font-heading text-lg font-bold text-foreground">
-            Homepage
-          </h2>
+          <h2 className="font-heading text-lg font-bold text-foreground">Homepage</h2>
           <p className="text-sm text-muted-foreground">
             Manage the hero carousel and about section shown on the homepage
           </p>
@@ -247,7 +219,9 @@ export default function SettingsManager() {
         <div className="space-y-8">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>Hero Slides</Label>
+              <FieldRoot>
+                <Label>Hero Slides</Label>
+              </FieldRoot>
               <Button
                 variant="outline"
                 size="xs"
@@ -259,12 +233,11 @@ export default function SettingsManager() {
               </Button>
             </div>
             {homepage.heroSlides.map((slide, i) => (
-              <div
-                key={i}
-                className="space-y-3 border border-border bg-muted/30 p-4"
-              >
+              <div key={i} className="space-y-3 border border-border bg-muted/30 p-4">
                 <div className="flex items-center justify-between">
-                  <Label>Slide {i + 1}</Label>
+                  <FieldRoot>
+                    <Label>Slide {i + 1}</Label>
+                  </FieldRoot>
                   <Button
                     variant="destructive"
                     size="icon-sm"
@@ -275,11 +248,10 @@ export default function SettingsManager() {
                   </Button>
                 </div>
                 <FieldRoot>
-                  <Label>Image URL</Label>
-                  <Input
-                    value={slide.image}
-                    onChange={(e) => updateSlide(i, { image: e.target.value })}
-                    placeholder="https://..."
+                  <Label>Image</Label>
+                  <ImageUpload
+                    images={slide.image ? [slide.image] : []}
+                    onChange={(imgs) => updateSlide(i, { image: imgs[0] || "" })}
                   />
                 </FieldRoot>
                 <FieldRoot>
@@ -298,16 +270,16 @@ export default function SettingsManager() {
             <Label>About Title</Label>
             <Input
               value={homepage.aboutTitle}
-              onChange={(e) =>
-                setHomepage({ ...homepage, aboutTitle: e.target.value })
-              }
+              onChange={(e) => setHomepage({ ...homepage, aboutTitle: e.target.value })}
               placeholder="About section heading"
             />
           </FieldRoot>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>About Paragraphs</Label>
+              <FieldRoot>
+                <Label>About Paragraphs</Label>
+              </FieldRoot>
               <Button variant="outline" size="xs" onClick={addParagraph}>
                 <Plus />
                 Add Paragraph
@@ -335,37 +307,21 @@ export default function SettingsManager() {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>About Images</Label>
-              <Button variant="outline" size="xs" onClick={addAboutImage}>
-                <Plus />
-                Add Image
-              </Button>
+              <FieldRoot>
+                <Label>About Images</Label>
+              </FieldRoot>
+              <span className="text-xs text-muted-foreground">Paste URLs or upload images</span>
             </div>
-            {homepage.aboutImages.map((image, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <Input
-                  value={image}
-                  onChange={(e) => updateAboutImage(i, e.target.value)}
-                  placeholder="https://..."
-                />
-                <Button
-                  variant="destructive"
-                  size="icon-sm"
-                  onClick={() => removeAboutImage(i)}
-                  aria-label={`Remove about image ${i + 1}`}
-                >
-                  <Trash2 />
-                </Button>
-              </div>
-            ))}
+            <ImageUpload
+              images={homepage.aboutImages}
+              onChange={(imgs) => setHomepage({ ...homepage, aboutImages: imgs })}
+            />
           </div>
         </div>
       </div>
 
       <div className="mt-8 border border-border bg-card p-6">
-        {saveError && (
-          <p className="mb-4 text-sm text-destructive">{saveError}</p>
-        )}
+        {saveError && <p className="mb-4 text-sm text-destructive">{saveError}</p>}
         <div className="space-y-4">
           {Object.entries(form)
             .filter(([key]) => !HOMEPAGE_KEYS.includes(key))
@@ -376,19 +332,13 @@ export default function SettingsManager() {
                 </Label>
                 <Input
                   value={value}
-                  onChange={(e) =>
-                    setForm({ ...form, [key]: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                 />
               </FieldRoot>
             ))}
         </div>
         <div className="mt-6 flex justify-end">
-          <Button
-            variant="default"
-            onClick={handleSave}
-            disabled={saveMutation.isPending}
-          >
+          <Button variant="default" onClick={handleSave} disabled={saveMutation.isPending}>
             <Save className="size-4" />
             Save Settings
           </Button>
@@ -397,12 +347,8 @@ export default function SettingsManager() {
 
       <div className="mt-8 border border-border bg-card p-6">
         <div className="mb-4">
-          <h2 className="font-heading text-lg font-bold text-foreground">
-            Change Password
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Update your admin account password
-          </p>
+          <h2 className="font-heading text-lg font-bold text-foreground">Change Password</h2>
+          <p className="text-sm text-muted-foreground">Update your admin account password</p>
         </div>
         <div className="space-y-4 max-w-sm">
           <FieldRoot>
@@ -456,11 +402,7 @@ export default function SettingsManager() {
           </FieldRoot>
           {pwError && <p className="text-sm text-destructive">{pwError}</p>}
           {pwSuccess && <p className="text-sm text-green-600">{pwSuccess}</p>}
-          <Button
-            variant="default"
-            onClick={handlePasswordChange}
-            disabled={pwMutation.isPending}
-          >
+          <Button variant="default" onClick={handlePasswordChange} disabled={pwMutation.isPending}>
             <Lock className="size-4" />
             Change Password
           </Button>

@@ -33,9 +33,23 @@ export function meta({ loaderData }: Route.MetaArgs) {
   ];
 }
 
-export default function ItineraryDetail({
-  loaderData,
-}: Route.ComponentProps) {
+const tripJsonLd = (itinerary: Itinerary) => ({
+  "@context": "https://schema.org",
+  "@type": "TouristTrip",
+  name: itinerary.title,
+  description: itinerary.subtitle || undefined,
+  image: itinerary.images?.[0],
+  itinerary: {
+    "@type": "ItemList",
+    itemListElement: (itinerary.days || []).map((day, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: day.title || `Day ${day.day}`,
+    })),
+  },
+});
+
+export default function ItineraryDetail({ loaderData }: Route.ComponentProps) {
   const { itinerary } = loaderData;
   const contact = useSiteContact();
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
@@ -64,9 +78,10 @@ export default function ItineraryDetail({
       try {
         await apiClient.post("/clients", clientData);
       } catch (err: unknown) {
-        const status = err && typeof err === "object" && "response" in err
-          ? (err as { response: { status: number } }).response?.status
-          : null;
+        const status =
+          err && typeof err === "object" && "response" in err
+            ? (err as { response: { status: number } }).response?.status
+            : null;
         if (status !== 409) throw err;
       }
       setDialogOpen(false);
@@ -77,7 +92,8 @@ export default function ItineraryDetail({
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err
-          ? (err as { response: { data: { error?: string } } }).response?.data?.error || "Failed to submit enquiry"
+          ? (err as { response: { data: { error?: string } } }).response?.data?.error ||
+            "Failed to submit enquiry"
           : "Failed to submit enquiry";
       setEnquiryError(message);
     } finally {
@@ -87,13 +103,20 @@ export default function ItineraryDetail({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(tripJsonLd(itinerary)) }}
+      />
       <div className="grid gap-12 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <div className="flex flex-wrap gap-1.5">
             <Badge variant="secondary">{itinerary.difficulty}</Badge>
             {itinerary.destinations?.map((d) => (
               <Link key={d} to={`/destinations/${d}`}>
-                <Badge variant="outline" className="hover:bg-primary/10 hover:text-primary transition-colors">
+                <Badge
+                  variant="outline"
+                  className="hover:bg-primary/10 hover:text-primary transition-colors"
+                >
                   {d.replace(/-/g, " ")}
                 </Badge>
               </Link>
@@ -103,9 +126,7 @@ export default function ItineraryDetail({
             {itinerary.title}
           </h1>
           {itinerary.subtitle && (
-            <p className="mt-2 text-lg text-muted-foreground">
-              {itinerary.subtitle}
-            </p>
+            <p className="mt-2 text-lg text-muted-foreground">{itinerary.subtitle}</p>
           )}
           {itinerary.images && itinerary.images.length > 0 && (
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -124,22 +145,15 @@ export default function ItineraryDetail({
             </div>
           )}
           {itinerary.duration && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              Duration: {itinerary.duration}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Duration: {itinerary.duration}</p>
           )}
 
           {itinerary.includes && itinerary.includes.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold tracking-wider uppercase">
-                Includes
-              </h3>
+              <h3 className="text-sm font-semibold tracking-wider uppercase">Includes</h3>
               <ul className="mt-2 grid gap-1 sm:grid-cols-2">
                 {itinerary.includes.map((item: string) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-2 text-sm text-muted-foreground"
-                  >
+                  <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Check className="size-3.5 text-primary" />
                     {item}
                   </li>
@@ -152,21 +166,15 @@ export default function ItineraryDetail({
             <h2 className="font-heading text-xl font-bold">Itinerary</h2>
             <div className="mt-4 space-y-2">
               {itinerary.days?.map((day: Itinerary["days"][number]) => (
-                <div
-                  key={day.day}
-                  className="border border-border"
-                >
+                <div key={day.day} className="border border-border">
                   <button
-                    onClick={() =>
-                      setExpandedDay(
-                        expandedDay === day.day ? null : day.day
-                      )
-                    }
+                    onClick={() => setExpandedDay(expandedDay === day.day ? null : day.day)}
                     aria-expanded={expandedDay === day.day}
                     className="flex w-full items-center justify-between bg-muted px-4 py-3 text-left"
                   >
                     <span className="text-sm font-semibold">
-                      Day {day.day}{day.title ? `: ${day.title}` : ""}
+                      Day {day.day}
+                      {day.title ? `: ${day.title}` : ""}
                     </span>
                     {expandedDay === day.day ? (
                       <ChevronUp className="size-4" />
@@ -177,9 +185,7 @@ export default function ItineraryDetail({
                   {expandedDay === day.day && (
                     <div className="px-4 py-3">
                       {day.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {day.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{day.description}</p>
                       )}
                       {day.meals && day.meals.length > 0 && (
                         <p className="mt-2 text-xs text-muted-foreground">
@@ -201,9 +207,7 @@ export default function ItineraryDetail({
 
         <div className="lg:col-span-1">
           <div className="sticky top-24 border border-border bg-card p-6">
-            <p className="mb-4 text-sm font-semibold text-primary">
-              Enquire for pricing
-            </p>
+            <p className="mb-4 text-sm font-semibold text-primary">Enquire for pricing</p>
 
             <ul className="mb-6 space-y-2">
               <li className="flex items-center gap-2 text-sm">
@@ -234,33 +238,18 @@ export default function ItineraryDetail({
                 </Dialog.Description>
                 <Dialog.Close />
                 <form onSubmit={handleEnquiry} className="mt-4 space-y-4">
-                  {enquiryError && (
-                    <p className="text-sm text-destructive">{enquiryError}</p>
-                  )}
+                  {enquiryError && <p className="text-sm text-destructive">{enquiryError}</p>}
                   <FieldRoot>
                     <Label>Name</Label>
-                    <Input
-                      name="name"
-                      required
-                      placeholder="Your full name"
-                    />
+                    <Input name="name" required placeholder="Your full name" />
                   </FieldRoot>
                   <FieldRoot>
                     <Label>Email</Label>
-                    <Input
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="your@email.com"
-                    />
+                    <Input name="email" type="email" required placeholder="your@email.com" />
                   </FieldRoot>
                   <FieldRoot>
                     <Label>Phone</Label>
-                    <Input
-                      name="phone"
-                      required
-                      placeholder={contact.phone}
-                    />
+                    <Input name="phone" required placeholder={contact.phone} />
                   </FieldRoot>
                   <FieldRoot>
                     <Label>Notes (Optional)</Label>

@@ -34,6 +34,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Isitoshe Tours — Uganda Safaris &amp; Disability-Inclusive Tours</title>
+        <meta
+          name="description"
+          content="Isitoshe Tours is a disability-inclusive Ugandan tour operator offering curated safari itineraries, gorilla trekking, and unforgettable wildlife experiences."
+        />
         <Meta />
         <Links />
       </head>
@@ -72,9 +77,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error";
     details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
+      error.status === 404 ? "The requested page could not be found." : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;

@@ -1,7 +1,15 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Compass, Mountain, Sun, ChevronDown } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Mountain,
+  Sun,
+  ChevronDown,
+} from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { useHomepageContent } from "~/hooks/useHomepageContent";
@@ -11,24 +19,38 @@ export function meta({}: Route.MetaArgs) {
     { title: "Isitoshe Tours — Discover Uganda" },
     {
       name: "description",
-      content:
-        "Explore Uganda with expertly curated safaris and unforgettable experiences.",
+      content: "Explore Uganda with expertly curated safaris and unforgettable experiences.",
     },
   ];
 }
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TravelAgency",
+  name: "Isitoshe Tours",
+  url: "https://isitoshetours.com",
+  email: "info@isitoshetours.com",
+  telephone: "+256787699744",
+  description:
+    "Disability-inclusive Ugandan tour operator offering curated safari itineraries, gorilla trekking, and unforgettable wildlife experiences.",
+  areaServed: "Uganda",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Kyaliwajjala, Kampala",
+    addressCountry: "UG",
+  },
+};
 
 const highlights = [
   {
     icon: Compass,
     title: "Curated Routes",
-    description:
-      "Hand-picked itineraries designed to show you the best of Uganda.",
+    description: "Hand-picked itineraries designed to show you the best of Uganda.",
   },
   {
     icon: Mountain,
     title: "Adventure Awaits",
-    description:
-      "From Bwindi Impenetrable Forest to Murchison Falls, explore diverse landscapes.",
+    description: "From Bwindi Impenetrable Forest to Murchison Falls, explore diverse landscapes.",
   },
   {
     icon: Sun,
@@ -109,7 +131,15 @@ export default function Home() {
 
   return (
     <>
-      <section aria-label="Image carousel" aria-live="off" className="relative h-[60vh] min-h-[400px] overflow-hidden sm:h-[80vh]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <section
+        aria-label="Image carousel"
+        aria-live="off"
+        className="relative h-[60vh] min-h-[400px] overflow-hidden sm:h-[80vh]"
+      >
         {heroSlides.map((slide, i) => (
           <div
             key={i}
@@ -138,7 +168,8 @@ export default function Home() {
               Discover the Beauty of Uganda
             </h1>
             <p className="mt-4 text-lg text-white/80">
-              Expertly curated safaris through lush forests, vast savannahs, and stunning national parks.
+              Expertly curated safaris through lush forests, vast savannahs, and stunning national
+              parks.
             </p>
             <div className="mt-8 flex items-center justify-center gap-4">
               <Link to="/itineraries">
@@ -198,9 +229,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <h2 className="font-heading text-3xl font-bold text-foreground">
-                {aboutTitle}
-              </h2>
+              <h2 className="font-heading text-3xl font-bold text-foreground">{aboutTitle}</h2>
               {aboutParagraphs.map((paragraph, i) => (
                 <p key={i} className="mt-4 text-muted-foreground leading-relaxed">
                   {paragraph}
@@ -248,7 +277,8 @@ export default function Home() {
               Why Travel with Isitoshe Tours?
             </h2>
             <p className="mt-2 text-muted-foreground">
-              Disability-inclusive, eco-friendly tours with expert local guides and unforgettable memories.
+              Disability-inclusive, eco-friendly tours with expert local guides and unforgettable
+              memories.
             </p>
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
@@ -260,12 +290,8 @@ export default function Home() {
                 <div className="mx-auto flex size-12 items-center justify-center bg-primary text-primary-foreground">
                   <item.icon className="size-6" />
                 </div>
-                <h3 className="mt-4 font-heading text-lg font-semibold">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {item.description}
-                </p>
+                <h3 className="mt-4 font-heading text-lg font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
               </div>
             ))}
           </div>

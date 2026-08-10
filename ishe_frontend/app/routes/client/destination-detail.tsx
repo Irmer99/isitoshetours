@@ -12,7 +12,8 @@ export async function loader({ params }: Route.LoaderArgs) {
     const itinerariesResult = await Promise.allSettled([
       apiClient.get<Itinerary[]>(`/content/destinations/${params.slug}/itineraries`),
     ]);
-    const itineraries = itinerariesResult[0].status === "fulfilled" ? itinerariesResult[0].value.data : [];
+    const itineraries =
+      itinerariesResult[0].status === "fulfilled" ? itinerariesResult[0].value.data : [];
     return { destination: res.data, itineraries };
   } catch {
     throw redirect("/destinations");
@@ -21,7 +22,15 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 export function meta({ loaderData }: Route.MetaArgs) {
   const name = loaderData?.destination?.name;
-  return [{ title: name ? `${name} — Isitoshe Tours` : "Destination — Isitoshe Tours" }];
+  return [
+    { title: name ? `${name} — Isitoshe Tours` : "Destination — Isitoshe Tours" },
+    {
+      name: "description",
+      content:
+        loaderData?.destination?.description ||
+        `Explore ${name} on a guided Isitoshe Tours safari.`,
+    },
+  ];
 }
 
 export default function DestinationDetail({ loaderData }: Route.ComponentProps) {
@@ -39,9 +48,7 @@ export default function DestinationDetail({ loaderData }: Route.ComponentProps) 
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <h1 className="font-heading text-3xl font-bold text-foreground">
-              {destination.name}
-            </h1>
+            <h1 className="font-heading text-3xl font-bold text-foreground">{destination.name}</h1>
 
             {destination.description && (
               <p className="mt-4 text-muted-foreground leading-relaxed">
@@ -51,9 +58,7 @@ export default function DestinationDetail({ loaderData }: Route.ComponentProps) 
 
             {destination.highlights && destination.highlights.length > 0 && (
               <div className="mt-8">
-                <h2 className="font-heading text-xl font-semibold text-foreground">
-                  Highlights
-                </h2>
+                <h2 className="font-heading text-xl font-semibold text-foreground">Highlights</h2>
                 <ul className="mt-4 space-y-2">
                   {destination.highlights.map((h) => (
                     <li key={h} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -67,9 +72,7 @@ export default function DestinationDetail({ loaderData }: Route.ComponentProps) 
 
             {destination.images && destination.images.length > 0 && (
               <div className="mt-8">
-                <h2 className="font-heading text-xl font-semibold text-foreground">
-                  Gallery
-                </h2>
+                <h2 className="font-heading text-xl font-semibold text-foreground">Gallery</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {destination.images.map((url, i) => (
                     <div key={i} className="overflow-hidden border border-border bg-muted">

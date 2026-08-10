@@ -12,7 +12,14 @@ export async function loader() {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Destinations — Isitoshe Tours" }];
+  return [
+    { title: "Destinations — Isitoshe Tours" },
+    {
+      name: "description",
+      content:
+        "Explore the stunning destinations our Uganda tours visit, from Bwindi Impenetrable Forest to Murchison Falls.",
+    },
+  ];
 }
 
 export default function Destinations({ loaderData }: Route.ComponentProps) {
@@ -22,9 +29,7 @@ export default function Destinations({ loaderData }: Route.ComponentProps) {
     <div className="py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="font-heading text-3xl font-bold text-foreground">
-            Destinations
-          </h1>
+          <h1 className="font-heading text-3xl font-bold text-foreground">Destinations</h1>
           <p className="mt-2 text-muted-foreground">
             Explore the stunning locations our tours visit across Uganda.
           </p>
