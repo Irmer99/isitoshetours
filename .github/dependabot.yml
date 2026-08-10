@@ -1,0 +1,66 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /ishe_backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      prisma:
+        patterns:
+          - "@prisma/*"
+          - "prisma"
+      express:
+        patterns:
+          - "express"
+          - "express-*"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+          - "typescript-eslint"
+          - "globals"
+          - "prettier"
+          - "eslint-config-prettier"
+
+  - package-ecosystem: npm
+    directory: /ishe_frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      react-router:
+        patterns:
+          - "react-router"
+          - "@react-router/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+          - "typescript-eslint"
+          - "globals"
+          - "prettier"
+          - "eslint-config-prettier"
+
+  - package-ecosystem: docker
+    directory: /ishe_backend
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /ishe_frontend
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
