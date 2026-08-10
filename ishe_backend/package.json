@@ -9,6 +9,7 @@
     "seed": "node seed.js",
     "db:migrate": "node scripts/db-migrate.js",
     "db:seed": "node scripts/db-seed.js",
+    "db:rehash-admin": "node scripts/db-rehash-admin.js",
     "db:setup": "npm run db:migrate && npm run db:seed",
     "lint": "eslint .",
     "format": "prettier --write .",
