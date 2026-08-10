@@ -394,7 +394,7 @@ Internet → Nginx (SSL) → /uploads (static)
 
 | Credential | Current value | Action |
 |-----------|---------------|--------|
-| `DATABASE_URL` | PostgreSQL connection string | Verify connection string is for production database |
+| `DATABASE_URL` | Supabase pooler connection string | Verify connection string is for production database (include `sslmode=require`) |
 | `JWT_SECRET` | Hardcoded hex string in `.env` | Regenerate with `openssl rand -hex 64`, update `.env` |
 | `ADMIN_EMAIL` | `pirmerpatricia99@gmail.com` | Change to production admin email |
 | `ADMIN_PASSWORD` | `changeme` | Set strong password before seeding |
@@ -413,8 +413,8 @@ Internet → Nginx (SSL) → /uploads (static)
 
 | File | Line | Issue | Fix |
 |------|------|-------|-----|
-| `ishe_backend/test-email.js` | 8 | Hardcoded `pirmerpatricia99@gmail.com` | Use `process.env.ADMIN_EMAIL` |
-| `ishe_backend/progress.md` | 43, 160 | References dev email/password in seed docs | Update to placeholder values |
+| `ishe_backend/test-email.js` | — | Hardcoded `onboarding@resend.dev` sender | ✅ Fixed — uses `SMTP_FROM` / `ADMIN_EMAIL` env vars |
+| `ishe_backend/progress.md` | — | References dev email/password in seed docs | Update to placeholder values |
 
 ### `.env.example` files — should contain only placeholders
 
@@ -433,9 +433,9 @@ VITE_API_URL=http://localhost:3000/api
 
 ### PostgreSQL checklist
 
-- [ ] Verify production database connection string is correct
+- [x] Verify production database connection string is correct
+- [x] Ensure TLS is enforced for production connections (`lib/pgConfig.js`)
 - [ ] Ensure database user has appropriate permissions
-- [ ] Enable SSL mode for production connections
 - [ ] Verify backup schedule is configured
 
 ### Domain & email checklist

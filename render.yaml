@@ -34,7 +34,7 @@ services:
       - key: SMTP_FROM
         value: "Isitoshe Tours <onboarding@resend.dev>"
     healthCheckPath: /health
-    autoDeploy: true
+    autoDeploy: false
 
   - type: web
     name: ishe-frontend
@@ -48,4 +48,4 @@ services:
         value: /api
       - key: SSR_API_URL
         value: https://isitoshetours.onrender.com/api
-    autoDeploy: true
+    autoDeploy: false

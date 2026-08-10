@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Compass, Mountain, Sun, ChevronDown } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -106,27 +106,11 @@ const faqs = [
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-  }, []);
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
 
-  const prevSlide = useCallback(() => {
+  const prevSlide = () =>
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  }, []);
-
-  useEffect(() => {
-    if (isPaused) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-    timerRef.current = setInterval(nextSlide, 5000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [nextSlide, isPaused]);
 
   return (
     <>
@@ -205,13 +189,6 @@ export default function Home() {
               aria-label={`Go to slide ${i + 1}`}
             />
           ))}
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className="ml-2 bg-black/40 px-2 py-1 text-xs text-white transition-colors hover:bg-black/60"
-            aria-label={isPaused ? "Resume carousel" : "Pause carousel"}
-          >
-            {isPaused ? "▶" : "❚❚"}
-          </button>
         </div>
       </section>
 

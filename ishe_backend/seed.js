@@ -2,9 +2,10 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
+const getPgConfig = require('./lib/pgConfig');
 
 async function seed() {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(getPgConfig());
   const prisma = new PrismaClient({ adapter });
   await prisma.$connect();
   console.log('Connected to PostgreSQL');

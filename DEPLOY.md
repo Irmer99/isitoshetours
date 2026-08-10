@@ -1,141 +1,167 @@
-# Deploying to Render
+# Deploying to a DigitalOcean Droplet
 
-## Architecture
+The app runs as a Docker Compose stack on a single DigitalOcean droplet:
 
-On Render, the app runs as **two separate Web Services** (no Nginx — Render handles SSL natively):
+```
+Internet → Nginx :80/:443
+             ├─ /api/        → backend:3000
+             ├─ /uploads/    → served as static files
+             └─ /*           → frontend:5173 (React Router SSR)
+```
 
 | Service | What it runs | Port |
 |---|---|---|
-| `ishe-backend` | Express/Node.js API + PostgreSQL connection | 3000 |
-| `ishe-frontend` | React Router SSR (server + client) | 5173 |
+| `nginx` | Reverse proxy, TLS (future), rate limiting, security headers | 80 / 443 |
+| `frontend` | React Router SSR (server + client) | 5173 |
+| `backend` | Express/Node.js API + PostgreSQL (Supabase) | 3000 |
+| `certbot` | Let's Encrypt renewal (only with `--profile ssl`) | — |
 
-The frontend connects to the backend via the `SSR_API_URL` environment variable at runtime.
-
----
-
-## Prerequisites
-
-1. A [Render account](https://render.com)
-2. A PostgreSQL database (Render PostgreSQL, Supabase, or any PostgreSQL provider)
-3. Your code pushed to a Git repository (GitHub, GitLab, or Bitbucket)
+The frontend connects to the backend via the `SSR_API_URL` env var (server-side) and nginx routes (client-side). The database is **Supabase Postgres** — no database runs on the droplet.
 
 ---
 
-## Step 1 — Prepare PostgreSQL Database
+## Current phase: HTTP on droplet IP (no domain yet)
 
-1. Create a PostgreSQL database (if using Render, create a PostgreSQL service)
-2. Get your connection string in the format: `postgresql://user:password@host:port/dbname`
-3. The application will run migrations automatically on first startup
+Until a domain is pointed at the droplet, the site runs over plain HTTP using the
+HTTP-only nginx config (`nginx.dev.conf`), swapped in via `docker-compose.dev.yml`.
+SSL/certbot is disabled. This is a temporary phase — see "Domain & SSL" below.
 
----
+## Phase 1 — Provision the droplet
 
-## Step 2 — Deploy via Blueprint (render.yaml)
+1. Create a **Basic 2GB / 2 vCPU** droplet (Ubuntu 24.04 + Docker marketplace image, or plain Ubuntu then install Docker).
+   - 2GB is recommended so `docker compose up --build` does not OOM during Node/Prisma builds.
+2. Add your **SSH key** at creation time.
+3. Create a **cloud firewall**: allow inbound on 22, 80 (and 443 once SSL is enabled).
 
-1. Push your code to Git (including the new `render.yaml`)
-2. Go to [Render Dashboard](https://dashboard.render.com) → **"New"** → **"Blueprint"**
-3. Connect your Git repository
-4. Render detects `render.yaml` and proposes two services
-5. Click **"Apply"** — Render creates both services
+## Phase 2 — First deploy
 
----
+```bash
+VPS_HOST=root@<droplet-ip> ./deploy.sh   # one-time; script clones nothing — run steps below first
+```
 
-## Step 3 — Set Environment Variables
+The script only runs `git pull` + `docker compose up`, so set up the server once:
 
-After the blueprint is applied, go to each service's **"Environment"** tab and set the values marked `sync: false` in `render.yaml`:
+```bash
+# 1. Clone the repo
+git clone git@github.com:<you>/ishetours.git /opt/ishe-tours
+cd /opt/ishe-tours
 
-### Backend (`ishe-backend`)
+# 2. Create the backend env file (gitignored — NOT in the repo)
+nano ishe_backend/.env
+
+# 3. Create the uploads directory and copy existing uploads
+mkdir -p uploads
+scp -r ./ishe_backend/uploads/* root@<droplet-ip>:/opt/ishe-tours/uploads/
+
+# 4. Build and start (HTTP phase)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
+```
+
+On startup the backend runs `prisma migrate deploy` and seeds the admin user
+(idempotent — safe against the shared Supabase DB).
+
+### Backend env (`/opt/ishe-tours/ishe_backend/.env`)
 
 | Variable | Value |
 |---|---|
-| `DATABASE_URL` | Your PostgreSQL connection string |
-| `CORS_ORIGIN` | `https://ishe-frontend.onrender.com` (your frontend URL) |
-| `FRONTEND_URL` | `https://ishe-frontend.onrender.com` |
-| `ADMIN_EMAIL` | Your admin email |
-| `ADMIN_PASSWORD` | Your admin password |
-| `SMTP_EMAIL` | (leave blank or set) |
-| `SMTP_PASSWORD` | (leave blank or set) |
-| `RESEND_API_KEY` | Your Resend API key |
+| `DATABASE_URL` | Supabase pooler URL (port 6543, include `?sslmode=require`) |
+| `DIRECT_DATABASE_URL` | Supabase direct URL (port 5432, for Prisma migrations) |
+| `JWT_SECRET` | `openssl rand -hex 64` |
+| `JWT_EXPIRES_IN` | `14d` |
+| `NODE_ENV` | `production` |
+| `PORT` | `3000` |
+| `CORS_ORIGIN` | `http://<droplet-ip>` |
+| `FRONTEND_URL` | `http://<droplet-ip>` |
+| `ADMIN_EMAIL` | Production admin email |
+| `ADMIN_PASSWORD` | Strong password (rotate — the old one is exposed in `render.yaml`) |
+| `ADMIN_ROLE` | `superadmin` |
+| `RESEND_API_KEY` | Production Resend key |
+| `SMTP_FROM` | Verified sender (after domain DNS verification) |
 
-> `JWT_SECRET` is auto-generated by Render. `PORT` is set to `3000` by the blueprint.
+> `VITE_API_URL=/api` and `PORT=5173` are already set in `docker-compose.yml` for the frontend.
 
-### Frontend (`ishe-frontend`)
+## Phase 3 — Verify
 
-| Variable | Value |
-|---|---|
-| `SSR_API_URL` | `https://ishe-backend.onrender.com/api` |
+```bash
+curl http://<droplet-ip>/health                 # {"status":"ok"}
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+```
 
-> `VITE_API_URL` is set to `/api` by the blueprint (relative URL for client-side requests).
+- Visit `http://<droplet-ip>` — site loads with SSR data
+- Login at `http://<droplet-ip>/admin/login`
+- Upload an image in admin; confirm it appears in `/uploads/`
+- Test a password reset email
 
----
+## Deploying updates
 
-## Step 4 — Verify
+```bash
+VPS_HOST=root@<droplet-ip> ./deploy.sh
+```
 
-1. Check the **backend logs** — you should see `"Server running"` and database connection
-2. Check the **frontend logs** — you should see the server start
-3. Visit `https://ishe-frontend.onrender.com` — the site should load
-4. Test an API call: `https://ishe-backend.onrender.com/health`
+`deploy.sh` runs `git pull`, rebuilds images, and restarts the stack. The `.env`
+and `uploads/` directory are not in git — they persist on the droplet.
 
----
+## Keeping the Render free tier alive
 
-## How the API URL Works
+The Render deployment is left running so it stays on the free tier (750 instance
+hours/month shared across services; free services sleep after 15 min idle and only
+accrue hours while serving traffic — with the droplet as primary, Render stays at
+~0 hours).
 
-The frontend (`app/lib/api-client.ts`) switches the API base URL based on environment:
-
-| Environment | Client-side (browser) | Server-side (SSR) |
-|---|---|---|
-| Local dev | `http://localhost:3000/api` | `http://backend:3000/api` |
-| Docker Compose | `/api` (via Nginx) | `http://backend:3000/api` |
-| Render | `/api` (Render routing) | `SSR_API_URL` env var |
-
-- **Client-side**: Always uses `/api` (relative). Render's frontend service routes `/api` requests to the backend service.
-- **Server-side (SSR)**: Uses the `SSR_API_URL` environment variable. Falls back to `http://backend:3000/api` for Docker.
-
----
-
-## Updating the Backend Dockerfile
-
-The existing `ishe_backend/Dockerfile` works on Render as-is. The key settings:
-
-- `PORT=3000` (matches the Dockerfile `EXPOSE 3000`)
-- Uses `tini` for proper signal handling
-- Runs as non-root `node` user
-- Health check endpoint at `/health`
+- `autoDeploy` is set to `false` in `render.yaml`, so pushes to `main` no longer
+  rebuild Render.
+- Both environments share the same Supabase database. The `migrate.yml` GitHub
+  Action still runs Prisma migrations via `DIRECT_DATABASE_URL`.
+- First hit to the Render URL after idle is slow (cold start) — expected.
 
 ---
 
-## File Storage
+## Domain & SSL (next phase)
 
-Render's filesystem is **ephemeral** — uploaded files are lost on redeploy. For persistent file storage, you'll need to add a cloud storage solution (e.g., S3, Cloudinary) in the future. For testing, the current setup is fine.
+1. Point an A record (`@` and `www`) at the droplet IP.
+2. Set `DOMAIN=yourdomain.com` in `docker-compose.yml` (nginx service environment)
+   so the `nginx.conf` template resolves the cert paths.
+3. Issue the initial certificate:
+   ```bash
+   docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d yourdomain.com -d www.yourdomain.com
+   ```
+4. Restart with the production nginx config (drops the dev override):
+   ```bash
+   docker compose up --build -d --profile ssl
+   ```
+   (certbot renews automatically on a 12h loop; nginx auto-renews via reload).
+5. Update `CORS_ORIGIN`/`FRONTEND_URL`/`SSR_API_URL` to `https://yourdomain.com`.
 
 ---
+
+## File storage
+
+Uploads live on the droplet at `/opt/ishe-tours/uploads` (bind-mounted into the
+backend and nginx containers). Unlike Render, they **persist across redeploys**,
+but they are not backed up — schedule a periodic `rsync` to another host or DO
+Spaces.
 
 ## Troubleshooting
 
-### Backend won't connect to PostgreSQL
-- Verify `DATABASE_URL` is set correctly in Render environment
-- Verify the PostgreSQL service is running and accessible
-- Check that the connection string format is correct
+### Backend won't connect to Supabase
+- Verify `DATABASE_URL` is set and reachable (the Supabase pooler requires TLS).
+- Check `docker compose logs backend` for the migration/seed output.
 
 ### Frontend can't reach the backend
-- Verify `SSR_API_URL` is set to `https://ishe-backend.onrender.com/api`
-- Check the backend is running: visit `https://ishe-backend.onrender.com/health`
+- Confirm nginx is running: `curl http://<droplet-ip>/api/content/site-settings`
+- Confirm `SSR_API_URL` is set (server-side calls) — falls back to `http://backend:3000/api`.
 
 ### CORS errors
-- Verify `CORS_ORIGIN` on the backend includes `https://ishe-frontend.onrender.com`
+- `CORS_ORIGIN` must include the exact origin you browse from (`http://<droplet-ip>`, later `https://yourdomain.com`).
 
-### Cold starts / slow loading
-- Render free tier services spin down after inactivity. First request after idle takes 30-60s to boot.
+### Rebuilding takes long / OOM
+- Docker builds Node 24 + Prisma; if the build dies, add swap or move to the 2GB droplet plan.
 
 ---
 
 ## Costs
 
-- **Render Free Tier**: 750 hours/month (enough for one service). Two services need the paid tier ($7/mo each minimum) or a paid plan.
-- **PostgreSQL Database**: Varies by provider (Render PostgreSQL starts at $7/mo, Supabase has a free tier)
-- **Total for testing**: ~$14-21/mo (two Render Starter instances + database)
-
----
-
-## Alternative: Single Service (Monorepo)
-
-If you want to stay on Render's free tier (1 service), you can bundle everything into a single Dockerfile with Nginx — similar to the current VPS setup. This requires a custom root Dockerfile that builds both frontend and backend. Let me know if you want this approach instead.
+- **Droplet**: Basic 2GB/2 vCPU ≈ $12/mo (1GB/1vCPU ≈ $6 if traffic stays low)
+- **Database**: Supabase free tier (or paid plan as needed)
+- **Render free tier**: $0 (dormant)
+- **Total**: ~$12–18/mo

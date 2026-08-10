@@ -1,12 +1,13 @@
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
+const getPgConfig = require('./pgConfig');
 const logger = require('./logger');
 
 let prisma;
 
 function getPrisma() {
   if (!prisma) {
-    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+    const adapter = new PrismaPg(getPgConfig());
     prisma = new PrismaClient({ adapter });
   }
   return prisma;

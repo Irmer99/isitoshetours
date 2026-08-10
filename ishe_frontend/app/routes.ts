@@ -14,6 +14,7 @@ export default [
     route("destinations/:slug", "routes/client/destination-detail.tsx"),
     route("blog", "routes/client/blog.tsx"),
     route("blog/:slug", "routes/client/blog-detail.tsx"),
+    route("disability", "routes/client/disability.tsx"),
     route("terms", "routes/client/terms.tsx"),
     route("contact", "routes/client/contact.tsx"),
   ]),

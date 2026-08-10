@@ -12,6 +12,7 @@ const navLinks = [
   { to: "/itineraries", label: "Itineraries" },
   { to: "/destinations", label: "Destinations" },
   { to: "/blog", label: "Blog" },
+  { to: "/disability", label: "Accessibility" },
   { to: "/contact", label: "Contact" },
 ];
 
