@@ -11,7 +11,7 @@ jobs:
   make-public:
     runs-on: ubuntu-latest
     steps:
-      - name: List and set container packages public
+      - name: Try candidate names and endpoints
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -34,26 +34,33 @@ jobs:
             except urllib.error.HTTPError as e:
               return e.code, json.loads(e.read().decode() or "{}")
 
-          discovered = []
-          for url in [
-            "https://api.github.com/user/packages?package_type=container",
-            "https://api.github.com/users/irmer99/packages?package_type=container",
-          ]:
-            code, data = call(url)
-            if code == 200:
-              for p in data:
-                discovered.append((p.get("name"), p.get("visibility"), p.get("html_url")))
-            else:
-              print(f"[list] HTTP {code}: {data.get('message')}")
+          images = ["isitoshetours-backend", "isitoshetours-frontend"]
+          owners = ["irmer99/isitoshetours-backend", "irmer99/isitoshetours-frontend"]
+          base_urls = ["https://api.github.com/user/packages/container",
+                       "https://api.github.com/users/irmer99/packages/container"]
 
-          if not discovered:
-            print("ERROR: no container packages discovered")
+          # First try to fetch each package to learn its canonical name.
+          for url in base_urls:
+            for cand in images + owners:
+              enc = urllib.parse.quote(cand, safe="")
+              code, data = call(f"{url}/{enc}")
+              if code == 200:
+                print(f"GET ok: name={data.get('name')!r} visibility={data.get('visibility')!r} via {url}")
+              else:
+                print(f"GET {code}: {cand} via {url}")
+
+          print("--- set visibility public ---")
+          ok = False
+          for url in base_urls:
+            for cand in images + owners:
+              enc = urllib.parse.quote(cand, safe="")
+              target = f"{url}/{enc}/visibility"
+              code, data = call(target, method="POST", body={"visibility": "public"})
+              if code in (204, 200):
+                print(f"SUCCESS: {cand} via {url}: HTTP {code}")
+                ok = True
+              else:
+                print(f"POST {code}: {cand} via {url}: {data.get('message','?')}")
+          if not ok:
             raise SystemExit(1)
-
-          for name, vis, url in discovered:
-            print(f"- name={name!r} visibility={vis} url={url}")
-            encoded = urllib.parse.quote(name, safe="")
-            target = f"https://api.github.com/user/packages/container/{encoded}/visibility"
-            code, data = call(target, method="POST", body={"visibility": "public"})
-            print(f"  -> set public: HTTP {code}: {data.get('message', 'ok')}")
           EOF
