@@ -33,7 +33,8 @@ exports.login = async (req, res) => {
     { expiresIn: process.env.JWT_EXPIRES_IN || '14d' },
   );
 
-  const { password: _, ...adminData } = admin;
+  const adminData = { ...admin };
+  delete adminData.password;
   res.json({ token, admin: adminData });
 };
 
@@ -51,9 +52,10 @@ exports.refresh = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '14d' },
     );
 
-    const { password: _, ...adminData } = admin;
+    const adminData = { ...admin };
+    delete adminData.password;
     res.json({ token: newToken, admin: adminData });
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 };

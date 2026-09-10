@@ -2,7 +2,6 @@ import { Dialog } from "@base-ui/react/dialog";
 import type {
   DialogRootProps,
   DialogTriggerProps,
-  DialogPortalProps,
   DialogBackdropProps,
   DialogPopupProps,
   DialogCloseProps,
@@ -19,10 +18,6 @@ function Root(props: DialogRootProps) {
 
 function Trigger({ className, ...props }: DialogTriggerProps) {
   return <Dialog.Trigger className={cn(className)} {...props} />;
-}
-
-function Portal({ className, ...props }: DialogPortalProps) {
-  return <Dialog.Portal className={cn(className)} {...props} />;
 }
 
 function Backdrop({ className, ...props }: DialogBackdropProps) {

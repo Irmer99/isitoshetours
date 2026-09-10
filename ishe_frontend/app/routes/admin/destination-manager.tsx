@@ -9,6 +9,7 @@ import { Label, FieldRoot } from "~/components/ui/label";
 import { ImageUpload } from "~/components/admin/image-upload";
 import apiClient from "~/lib/api-client";
 import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
+import { slugify } from "~/lib/slug";
 import type { Destination } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
@@ -149,27 +150,30 @@ export default function DestinationManager() {
             <p className="mb-4 text-sm text-destructive">{formError}</p>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
-            <FieldRoot>
-              <Label>Name</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => { setForm({ ...form, name: e.target.value }); setFieldErrors({ ...fieldErrors, name: "" }); }}
-                placeholder="e.g. Bwindi Impenetrable Forest"
-                className={fieldErrors.name ? "border-destructive" : ""}
-              />
-              {fieldErrors.name && <p className="text-xs text-destructive">{fieldErrors.name}</p>}
-            </FieldRoot>
-            <FieldRoot>
-              <Label>Slug</Label>
-              <Input
-                value={form.slug}
-                disabled={!creating}
-                onChange={(e) => { setForm({ ...form, slug: e.target.value }); setFieldErrors({ ...fieldErrors, slug: "" }); }}
-                placeholder="e.g. bwindi-impenetrable-forest"
-                className={fieldErrors.slug ? "border-destructive" : ""}
-              />
-              {fieldErrors.slug && <p className="text-xs text-destructive">{fieldErrors.slug}</p>}
-            </FieldRoot>
+             <FieldRoot>
+               <Label>Name</Label>
+               <Input
+                 value={form.name}
+                 onChange={(e) => {
+                   const name = e.target.value;
+                   setForm({ ...form, name, slug: creating ? slugify(name) : form.slug });
+                   setFieldErrors({ ...fieldErrors, name: "" });
+                 }}
+                 placeholder="e.g. Bwindi Impenetrable Forest"
+                 className={fieldErrors.name ? "border-destructive" : ""}
+               />
+               {fieldErrors.name && <p className="text-xs text-destructive">{fieldErrors.name}</p>}
+             </FieldRoot>
+             <FieldRoot>
+               <Label>Slug</Label>
+               <Input
+                 value={form.slug}
+                 readOnly
+                 placeholder="Auto-generated from name"
+                 className={fieldErrors.slug ? "border-destructive" : ""}
+               />
+               {fieldErrors.slug && <p className="text-xs text-destructive">{fieldErrors.slug}</p>}
+             </FieldRoot>
             <FieldRoot className="sm:col-span-2">
               <Label>Description</Label>
               <textarea
@@ -195,6 +199,8 @@ export default function DestinationManager() {
               <ImageUpload
                 images={form.images}
                 onChange={(images) => setForm({ ...form, images })}
+                maxDimensions={{ width: 1280, height: 720 }}
+                context="destination"
               />
             </FieldRoot>
           </div>

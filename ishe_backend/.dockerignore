@@ -1,0 +1,10 @@
+node_modules
+.env
+.env.local
+.env.*.local
+build
+coverage
+Dockerfile
+README.md
+__tests__
+uploads

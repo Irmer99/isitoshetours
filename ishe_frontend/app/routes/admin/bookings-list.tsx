@@ -2,7 +2,7 @@ import type { Route } from "./+types/bookings-list";
 import { Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Download, Plus, Save, X } from "lucide-react";
+import { Download, Plus, Save } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";

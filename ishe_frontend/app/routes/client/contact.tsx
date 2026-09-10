@@ -8,16 +8,16 @@ import { Label, FieldRoot } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
 import { createClientSchema } from "~/schemas/clientSchema";
 import { validateWithSchema } from "~/lib/validate";
+import { seoMeta } from "~/lib/seo";
 import { useSiteContact } from "~/hooks/useSiteContact";
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Contact Us — Isitoshe Tours" },
-    {
-      name: "description",
-      content: "Get in touch with Isitoshe Tours.",
-    },
-  ];
+  return seoMeta({
+    title: "Contact Us — Isitoshe Tours",
+    path: "/contact",
+    description:
+      "Contact Isitoshe Tours to plan your Uganda safari. Email, phone, or send a message — our team responds quickly to every enquiry.",
+  });
 }
 
 export async function action({ request }: Route.ActionArgs) {

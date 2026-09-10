@@ -1,18 +1,27 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/disability";
+import { seoMeta } from "~/lib/seo";
+import apiClient from "~/lib/api-client";
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Disability-Inclusive Travel — Isitoshe Tours" },
-    {
-      name: "description",
-      content:
-        "Accessible, disability-inclusive safaris in Uganda. Wheelchair-friendly itineraries, adaptive vehicles, and experienced support for travellers with disabilities.",
-    },
-  ];
+  return seoMeta({
+    title: "Disability-Inclusive Travel — Isitoshe Tours",
+    path: "/disability",
+    description:
+      "Accessible, disability-inclusive safaris in Uganda. Wheelchair-friendly itineraries, adaptive vehicles, and experienced support for travellers with disabilities.",
+  });
 }
 
-export default function Disability() {
+export async function loader() {
+  try {
+    const res = await apiClient.get("/content/site-settings");
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
+function FallbackContent() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
       <h1 className="font-heading text-3xl font-bold text-foreground">
@@ -115,6 +124,31 @@ export default function Disability() {
         </section>
       </div>
 
+      <div className="mt-12 text-center">
+        <Link to="/" className="text-sm font-semibold text-primary hover:underline">
+          &larr; Back to Home
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function Disability({ loaderData }: Route.ComponentProps) {
+  const page = loaderData?.data?.disabilityPage as { title?: string; content?: string } | undefined;
+
+  if (!page?.content) {
+    return <FallbackContent />;
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      <h1 className="font-heading text-3xl font-bold text-foreground">
+        {page.title || "Disability-Inclusive Travel"}
+      </h1>
+      <div
+        className="mt-4 text-sm leading-relaxed text-muted-foreground"
+        dangerouslySetInnerHTML={{ __html: page.content }}
+      />
       <div className="mt-12 text-center">
         <Link to="/" className="text-sm font-semibold text-primary hover:underline">
           &larr; Back to Home

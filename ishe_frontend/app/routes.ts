@@ -21,6 +21,7 @@ export default [
   route("admin/login", "routes/admin/login.tsx"),
   route("admin/forgot-password", "routes/admin/forgot-password.tsx"),
   route("admin/reset-password", "routes/admin/reset-password.tsx"),
+  route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("admin", "routes/admin-layout.tsx", [
     index("routes/admin/dashboard.tsx"),
     route("bookings", "routes/admin/bookings-list.tsx"),
@@ -31,6 +32,7 @@ export default [
     route("discounts", "routes/admin/discount-manager.tsx"),
     route("notifications", "routes/admin/notifications.tsx"),
     route("blogs", "routes/admin/blog-manager.tsx"),
+    route("disability", "routes/admin/disability-manager.tsx"),
     route("settings", "routes/admin/settings-manager.tsx"),
   ]),
 ] satisfies RouteConfig;

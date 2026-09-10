@@ -1,11 +1,14 @@
 const { getPrisma } = require('../lib/db');
+const { generateUniqueSlug, slugify } = require('../lib/slug');
 
 function formatItinerary(itinerary) {
   if (!itinerary) return itinerary;
   const { pricingFrom, pricingCurrency, ...rest } = itinerary;
   return {
     ...rest,
-    pricing: pricingFrom != null ? { from: pricingFrom, currency: pricingCurrency } : undefined,
+    pricing: pricingFrom !== null && pricingFrom !== undefined
+      ? { from: pricingFrom, currency: pricingCurrency }
+      : undefined,
   };
 }
 
@@ -18,7 +21,8 @@ function mapPricingInput(data) {
       pricingCurrency: pricing.currency ?? 'MAD',
     };
   }
-  const { pricing, ...rest } = data;
+  const rest = { ...data };
+  delete rest.pricing;
   return rest;
 }
 
@@ -26,6 +30,10 @@ exports.createItinerary = async (req, res) => {
   const prisma = getPrisma();
   const { days, ...rawData } = req.body;
   const data = mapPricingInput(rawData);
+  if (!data.slug) {
+    const base = slugify(data.title || 'itinerary');
+    data.slug = await generateUniqueSlug(prisma, 'itinerary', base);
+  }
   const itinerary = await prisma.itinerary.create({
     data: {
       ...data,
@@ -83,6 +91,10 @@ exports.updateItinerary = async (req, res) => {
 
 exports.createDestination = async (req, res) => {
   const prisma = getPrisma();
+  if (!req.body.slug) {
+    const base = slugify(req.body.name || 'destination');
+    req.body.slug = await generateUniqueSlug(prisma, 'destination', base);
+  }
   const dest = await prisma.destination.create({ data: req.body });
   res.status(201).json(dest);
 };
@@ -184,6 +196,10 @@ exports.updateSiteSettings = async (req, res) => {
 
 exports.createBlog = async (req, res) => {
   const prisma = getPrisma();
+  if (!req.body.slug) {
+    const base = slugify(req.body.title || 'blog');
+    req.body.slug = await generateUniqueSlug(prisma, 'blog', base);
+  }
   const blog = await prisma.blog.create({ data: req.body });
   res.status(201).json(blog);
 };

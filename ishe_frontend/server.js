@@ -63,13 +63,17 @@ app.use(
   })
 );
 
-app.all(
-  "/{*splat}",
-  createRequestHandler({
-    build: buildModule,
-    mode: process.env.NODE_ENV,
-  })
-);
+const requestHandler = createRequestHandler({
+  build: buildModule,
+  mode: process.env.NODE_ENV,
+});
+
+app.all("/{*splat}", (req, res, next) => {
+  if (req.method === "GET" && !req.path.startsWith("/admin")) {
+    res.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=60");
+  }
+  requestHandler(req, res, next);
+});
 
 const server = app.listen(port, "0.0.0.0", () => {
   const address =

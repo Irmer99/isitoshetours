@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const { imageSize } = require('image-size');
 const contentController = require('../controllers/content.controller');
 const authMiddleware = require('../middleware/authMiddleware');
 const requireRole = require('../middleware/requireRole');
@@ -6,6 +7,8 @@ const validateBody = require('../middleware/validateBody');
 const asyncHandler = require('../middleware/asyncHandler');
 const upload = require('../middleware/upload');
 const { uploadLimiter } = require('../middleware/rateLimit');
+const { getLimit, isOverLimit } = require('../lib/imageLimits');
+const { uploadImage } = require('../lib/storage');
 const {
   createItinerarySchema,
   updateItinerarySchema,
@@ -87,11 +90,33 @@ router.get('/itineraries/:slug', asyncHandler(contentController.getItinerary));
  */
 router.patch('/itineraries/:slug', authMiddleware, validateBody(updateItinerarySchema), asyncHandler(contentController.updateItinerary));
 
-router.post('/upload', authMiddleware, uploadLimiter, upload.single('file'), (req, res) => {
+router.post('/upload', authMiddleware, uploadLimiter, upload.single('file'), asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const url = `/uploads/${req.file.filename}`;
+
+  const context = (req.body && req.body.context) || 'default';
+  const isSvg = /svg/i.test(req.file.mimetype) || /\.svg$/i.test(req.file.originalname);
+  if (!isSvg) {
+    try {
+      const dimensions = imageSize(req.file.buffer);
+      if (dimensions && dimensions.width && dimensions.height) {
+        const limit = getLimit(context);
+        if (isOverLimit(dimensions, limit)) {
+          return res.status(400).json({
+            error: `Image exceeds the ${limit.width}×${limit.height}px limit for this section`,
+          });
+        }
+      }
+    } catch {
+      // Unsupported/unknown format — fall through to storage attempt.
+    }
+  }
+
+  const { url } = await uploadImage(req.file.buffer, {
+    contentType: req.file.mimetype,
+    originalName: req.file.originalname,
+  });
   res.json({ url });
-});
+}));
 
 /**
  * @swagger

@@ -1,8 +1,14 @@
 const logger = require('../lib/logger');
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
   logger.error({ err, url: req.url, method: req.method }, 'Unhandled error');
 
+  if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'File too large', details: 'Maximum file size is 500KB' });
+    }
+    return res.status(400).json({ error: 'Upload error', details: err.message });
+  }
   if (err.name === 'ZodError' || err.name === 'PrismaClientValidationError') {
     return res.status(400).json({ error: 'Validation error', details: err.message });
   }

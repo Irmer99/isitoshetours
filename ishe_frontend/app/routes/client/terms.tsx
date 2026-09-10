@@ -1,11 +1,13 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/terms";
+import { seoMeta } from "~/lib/seo";
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Terms & Conditions — Isitoshe Tours" },
-    { name: "description", content: "Isitoshe Tours terms and conditions for safari bookings." },
-  ];
+  return seoMeta({
+    title: "Terms & Conditions — Isitoshe Tours",
+    path: "/terms",
+    description: "Isitoshe Tours terms and conditions for safari bookings.",
+  });
 }
 
 export default function Terms() {

@@ -1,5 +1,5 @@
 import type { Route } from "./+types/itinerary-detail";
-import { Link, redirect } from "react-router";
+import { Link, data } from "react-router";
 import { useState } from "react";
 import { Check, ChevronDown, ChevronUp, Send } from "lucide-react";
 
@@ -7,10 +7,11 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import * as Dialog from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { Label, FieldRoot, ErrorMessage } from "~/components/ui/label";
+import { Label, FieldRoot } from "~/components/ui/label";
 import apiClient from "~/lib/api-client";
 import { createClientSchema } from "~/schemas/clientSchema";
 import { validateWithSchema } from "~/lib/validate";
+import { absoluteUrl, seoMeta } from "~/lib/seo";
 import { useSiteContact } from "~/hooks/useSiteContact";
 import type { Itinerary } from "~/types";
 
@@ -18,19 +19,28 @@ export async function loader({ params }: Route.LoaderArgs) {
   try {
     const res = await apiClient.get(`/content/itineraries/${params.slug}`);
     return { itinerary: res.data as Itinerary };
-  } catch {
-    throw redirect("/itineraries");
+  } catch (err: unknown) {
+    const status =
+      err && typeof err === "object" && "response" in err
+        ? (err as { response: { status: number } }).response?.status
+        : null;
+    if (status === 404) throw data(null, { status: 404 });
+    throw err;
   }
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
-  return [
-    { title: `${loaderData?.itinerary?.title || "Itinerary"} — Isitoshe Tours` },
-    {
-      name: "description",
-      content: loaderData?.itinerary?.subtitle || "",
-    },
-  ];
+  const itinerary = loaderData?.itinerary;
+  const title = itinerary?.title || "Itinerary";
+  return seoMeta({
+    title: `${title} — Isitoshe Tours`,
+    path: itinerary?.slug ? `/itineraries/${itinerary.slug}` : "/itineraries",
+    description:
+      itinerary?.subtitle ||
+      `${title} — a Uganda safari by Isitoshe Tours. Enquire for pricing and availability.`,
+    image: itinerary?.images?.[0],
+    type: "website",
+  });
 }
 
 const tripJsonLd = (itinerary: Itinerary) => ({
@@ -38,7 +48,23 @@ const tripJsonLd = (itinerary: Itinerary) => ({
   "@type": "TouristTrip",
   name: itinerary.title,
   description: itinerary.subtitle || undefined,
-  image: itinerary.images?.[0],
+  image: itinerary.images?.[0] ? absoluteUrl(itinerary.images[0]) : undefined,
+  tourOperator: {
+    "@type": "TravelAgency",
+    name: "Isitoshe Tours",
+    url: "https://isitoshetours.com",
+  },
+  ...(itinerary.pricing?.from != null
+    ? {
+        offers: {
+          "@type": "Offer",
+          price: itinerary.pricing.from,
+          priceCurrency: itinerary.pricing.currency,
+          availability: "https://schema.org/InStock",
+          url: `https://isitoshetours.com/itineraries/${itinerary.slug}`,
+        },
+      }
+    : {}),
   itinerary: {
     "@type": "ItemList",
     itemListElement: (itinerary.days || []).map((day, i) => ({
@@ -47,6 +73,26 @@ const tripJsonLd = (itinerary: Itinerary) => ({
       name: day.title || `Day ${day.day}`,
     })),
   },
+});
+
+const breadcrumbJsonLd = (itinerary: Itinerary) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://isitoshetours.com/" },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Itineraries",
+      item: "https://isitoshetours.com/itineraries",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: itinerary.title,
+      item: `https://isitoshetours.com/itineraries/${itinerary.slug}`,
+    },
+  ],
 });
 
 export default function ItineraryDetail({ loaderData }: Route.ComponentProps) {
@@ -105,7 +151,9 @@ export default function ItineraryDetail({ loaderData }: Route.ComponentProps) {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(tripJsonLd(itinerary)) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([tripJsonLd(itinerary), breadcrumbJsonLd(itinerary)]),
+        }}
       />
       <div className="grid gap-12 lg:grid-cols-3">
         <div className="lg:col-span-2">

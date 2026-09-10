@@ -252,6 +252,8 @@ export default function SettingsManager() {
                   <ImageUpload
                     images={slide.image ? [slide.image] : []}
                     onChange={(imgs) => updateSlide(i, { image: imgs[0] || "" })}
+                    maxDimensions={{ width: 1920, height: 1080 }}
+                    context="hero"
                   />
                 </FieldRoot>
                 <FieldRoot>
@@ -315,6 +317,8 @@ export default function SettingsManager() {
             <ImageUpload
               images={homepage.aboutImages}
               onChange={(imgs) => setHomepage({ ...homepage, aboutImages: imgs })}
+              maxDimensions={{ width: 1200, height: 1500 }}
+              context="about"
             />
           </div>
         </div>

@@ -90,6 +90,38 @@ describe('Error Handler', () => {
     });
   });
 
+  it('should handle Multer LIMIT_FILE_SIZE as 400', () => {
+    const err = {
+      name: 'MulterError',
+      code: 'LIMIT_FILE_SIZE',
+      message: 'File too large',
+      field: 'file',
+    };
+    const res = mockRes();
+    errorHandler(err, mockReq, res, mockNext);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'File too large',
+      details: 'Maximum file size is 500KB',
+    });
+  });
+
+  it('should handle other MulterError codes as 400', () => {
+    const err = {
+      name: 'MulterError',
+      code: 'LIMIT_UNEXPECTED_FILE',
+      message: 'Unexpected field',
+      field: 'file',
+    };
+    const res = mockRes();
+    errorHandler(err, mockReq, res, mockNext);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Upload error',
+      details: 'Unexpected field',
+    });
+  });
+
   it('should return 500 for unknown errors', () => {
     const err = {
       message: 'Something went wrong',

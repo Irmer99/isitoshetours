@@ -13,15 +13,14 @@ import {
 
 import { Button } from "~/components/ui/button";
 import { useHomepageContent } from "~/hooks/useHomepageContent";
+import { seoMeta } from "~/lib/seo";
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Isitoshe Tours — Discover Uganda" },
-    {
-      name: "description",
-      content: "Explore Uganda with expertly curated safaris and unforgettable experiences.",
-    },
-  ];
+  return seoMeta({
+    title: "Isitoshe Tours — Discover Uganda",
+    description:
+      "Explore Uganda with expertly curated safaris and unforgettable experiences. Disability-inclusive tours, gorilla trekking, and wildlife adventures.",
+  });
 }
 
 const organizationJsonLd = {
@@ -29,11 +28,14 @@ const organizationJsonLd = {
   "@type": "TravelAgency",
   name: "Isitoshe Tours",
   url: "https://isitoshetours.com",
+  logo: "https://isitoshetours.com/isitoshetours.png",
+  image: "https://isitoshetours.com/isitoshetours.png",
   email: "info@isitoshetours.com",
   telephone: "+256787699744",
   description:
     "Disability-inclusive Ugandan tour operator offering curated safari itineraries, gorilla trekking, and unforgettable wildlife experiences.",
   areaServed: "Uganda",
+  priceRange: "$$",
   address: {
     "@type": "PostalAddress",
     addressLocality: "Kyaliwajjala, Kampala",
@@ -103,6 +105,19 @@ const faqs = [
   },
 ];
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+};
+
 export default function Home() {
   const { heroSlides, aboutTitle, aboutParagraphs, aboutImages } = useHomepageContent();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -133,7 +148,7 @@ export default function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationJsonLd, faqJsonLd]) }}
       />
       <section
         aria-label="Image carousel"

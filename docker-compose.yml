@@ -15,14 +15,15 @@ services:
     restart: unless-stopped
 
   frontend:
-    build: ./ishe_frontend
+    image: ghcr.io/irmer99/isitoshetours-frontend:latest
     environment:
       - PORT=5173
       - VITE_API_URL=/api
+      - NODE_ENV=production
     restart: unless-stopped
 
   backend:
-    build: ./ishe_backend
+    image: ghcr.io/irmer99/isitoshetours-backend:latest
     env_file:
       - ./ishe_backend/.env
     environment:

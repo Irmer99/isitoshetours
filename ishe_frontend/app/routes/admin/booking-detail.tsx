@@ -1,4 +1,3 @@
-import type { Route } from "./+types/booking-detail";
 import { useParams, useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";

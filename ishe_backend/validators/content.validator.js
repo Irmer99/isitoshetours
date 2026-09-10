@@ -6,10 +6,7 @@ const imageUrl = z.string().url('Must be a valid URL').optional();
 
 const createItinerarySchema = z.object({
   title: z.string().min(1),
-  slug: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with dashes'),
+  slug: z.string().optional(),
   subtitle: z.string().optional(),
   difficulty: z.enum(['easy', 'moderate', 'hard']).default('moderate'),
   duration: z.string().optional(),
@@ -65,10 +62,7 @@ const updateItinerarySchema = z.object({
 });
 
 const createDestinationSchema = z.object({
-  slug: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with dashes'),
+  slug: z.string().optional(),
   name: z.string().min(1),
   description: z.string().optional(),
   images: optionalImageUrls,
@@ -123,10 +117,7 @@ const updateSiteSettingsSchema = z.object({
 
 const createBlogSchema = z.object({
   title: z.string().min(1),
-  slug: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with dashes'),
+  slug: z.string().optional(),
   excerpt: z.string().optional(),
   content: z.string().optional(),
   coverImage: imageUrl,

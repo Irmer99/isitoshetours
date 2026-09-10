@@ -99,6 +99,8 @@ export interface Destination {
   description?: string;
   images?: string[];
   highlights?: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TeamMember {

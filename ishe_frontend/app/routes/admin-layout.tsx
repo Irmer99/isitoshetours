@@ -12,10 +12,10 @@ import {
   X,
   BookOpen,
   Bell,
+  Accessibility,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
-import { Button } from "~/components/ui/button";
 import { SessionToast } from "~/components/ui/toast";
 import { cn } from "~/lib/utils";
 import { useAuth } from "~/contexts/AuthContext";
@@ -42,6 +42,7 @@ const sidebarLinks = [
   { to: "/admin/destinations", label: "Destinations", icon: MapPin },
   { to: "/admin/discounts", label: "Discounts", icon: Percent },
   { to: "/admin/blogs", label: "Blogs", icon: BookOpen },
+  { to: "/admin/disability", label: "Disability", icon: Accessibility },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

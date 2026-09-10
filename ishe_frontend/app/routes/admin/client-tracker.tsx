@@ -1,7 +1,7 @@
 import type { Route } from "./+types/client-tracker";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, ChevronDown, ChevronUp, Plus, Pencil, Save, X } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, Plus, Pencil, Save } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";

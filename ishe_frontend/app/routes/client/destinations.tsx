@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
 import apiClient from "~/lib/api-client";
+import { seoMeta } from "~/lib/seo";
 import type { Destination } from "~/types";
 
 export async function loader() {
@@ -12,14 +13,12 @@ export async function loader() {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Destinations — Isitoshe Tours" },
-    {
-      name: "description",
-      content:
-        "Explore the stunning destinations our Uganda tours visit, from Bwindi Impenetrable Forest to Murchison Falls.",
-    },
-  ];
+  return seoMeta({
+    title: "Uganda Destinations — Isitoshe Tours",
+    path: "/destinations",
+    description:
+      "Explore the destinations our Uganda tours visit — Bwindi Impenetrable Forest, Murchison Falls, Queen Elizabeth National Park, and more.",
+  });
 }
 
 export default function Destinations({ loaderData }: Route.ComponentProps) {

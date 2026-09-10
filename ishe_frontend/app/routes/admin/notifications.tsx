@@ -5,7 +5,6 @@ import { Link } from "react-router";
 import { Bell, CheckCheck, Mail, MailOpen } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import apiClient from "~/lib/api-client";
 import type { Notification, PaginatedResponse } from "~/types";
 

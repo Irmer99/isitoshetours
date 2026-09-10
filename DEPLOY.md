@@ -77,6 +77,9 @@ On startup the backend runs `prisma migrate deploy` and seeds the admin user
 | `ADMIN_ROLE` | `superadmin` |
 | `RESEND_API_KEY` | Production Resend key |
 | `SMTP_FROM` | Verified sender (after domain DNS verification) |
+| `SUPABASE_URL` | Supabase project URL (Project Settings → API) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only secret for Supabase Storage uploads |
+| `SUPABASE_STORAGE_BUCKET` | Public bucket for image uploads (default `images`) |
 
 > `VITE_API_URL=/api` and `PORT=5173` are already set in `docker-compose.yml` for the frontend.
 
@@ -136,10 +139,30 @@ accrue hours while serving traffic — with the droplet as primary, Render stays
 
 ## File storage
 
-Uploads live on the droplet at `/opt/ishe-tours/uploads` (bind-mounted into the
-backend and nginx containers). Unlike Render, they **persist across redeploys**,
-but they are not backed up — schedule a periodic `rsync` to another host or DO
-Spaces.
+New admin uploads are stored in a **public Supabase Storage bucket** (`images` by
+default) via the backend relay endpoint (`POST /api/content/upload`), so they
+persist and are served directly from `supabase.co` URLs. The upload endpoint
+enforces per-context pixel limits (hero 1920×1080, about 1200×1500, itinerary/
+destination/blog 1280×720) and a 10MB file-size cap.
+
+Legacy files live on the droplet at `/opt/ishe-tours/uploads` (bind-mounted into
+the backend and nginx containers) and keep serving old `/uploads/...` URLs from
+existing records — do not delete the volume while old records reference it.
+They are not backed up — schedule a periodic `rsync` to another host or DO
+Spaces if historical uploads matter.
+
+### Verify the bucket (one-time setup + smoke test)
+
+1. In the Supabase dashboard create a **public** storage bucket named `images`
+   (public so uploaded URLs load without signed tokens; the service-role key used
+   by the backend bypasses RLS).
+2. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` in
+   the backend `.env` (or Render env vars) and restart the backend.
+3. Smoke test: log into `/admin`, upload a 1920×1080 JPEG in the homepage hero —
+   expect success returning a `https://<project>.supabase.co/...` URL. Upload the
+   same file in the about section (> 1200×1500 would be rejected) and upload a
+   very wide image — expect a 400 with the pixel-limit message, and a client-side
+   rejection before the request is sent.
 
 ## Troubleshooting
 
@@ -161,7 +184,46 @@ Spaces.
 
 ## Costs
 
-- **Droplet**: Basic 2GB/2 vCPU ≈ $12/mo (1GB/1vCPU ≈ $6 if traffic stays low)
-- **Database**: Supabase free tier (or paid plan as needed)
+- **Droplet**: Basic 1GB/1 vCPU (`ubuntu-s-1vcpu-512mb-10gb-ams3`) ≈ $4/mo
+- **Database**: Supabase free tier ($0) — DB + Storage (see "Current data & scaling" below)
 - **Render free tier**: $0 (dormant)
-- **Total**: ~$12–18/mo
+- **Total**: ~$4/mo
+
+## Current data & scaling plan
+
+The site is low-traffic (~30 visitors/week at peak) and the database is expected to
+stay under ~100MB, so the current setup is deliberately minimal:
+
+| Resource | Where it lives | Limit that matters |
+|---|---|---|
+| Database (Postgres) | Supabase free tier | 500MB DB, ~100MB expected → plenty of headroom |
+| Image storage | Supabase Storage buckets + legacy `./uploads/` | 1GB storage, 5GB egress |
+| App code | Droplet 178.62.200.63 (Docker Compose: nginx + frontend + backend) | 512MB RAM / 1 vCPU |
+
+**The database is hosted externally on Supabase's free tier — no Postgres runs on the
+droplet.** The free tier has a hard cap that can never *bill* you (no card on file means
+overages block the service rather than charge), and a 7-day inactivity auto-pause that is
+prevented by a keep-alive cron on the droplet hitting `/health` (which runs `SELECT 1`)
+every 5 minutes.
+
+### Going forward
+
+These decisions are documented here so we don't re-derive them:
+
+- **Stay on Supabase free tier.** At this traffic and data size the free limits are far
+  from being hit, and it keeps the monthly cost at ~$4.
+- **Re-evaluate before the Supabase plan expires (~1 year).** If the free plan ends, the
+  options, in order of preference for this scale, are:
+  1. **Upgrade Supabase to Pro** (~$25/mo) — zero code change, still fully managed.
+  2. **Self-host Postgres on the droplet** — requires resizing the droplet up (Postgres'
+     ~200MB baseline won't fit on 512MB alongside nginx + Node SSR + backend; a 2GB/1vCPU
+     ≈ $14/mo or 2GB/2vCPU ≈ $24/mo is the practical minimum). Then point
+     `DATABASE_URL`/`DIRECT_DATABASE_URL` at local Postgres and `prisma migrate deploy`
+     (fresh DB is fine — start from migrations + seed). Image uploads would move from
+     Supabase Storage to local disk in `./uploads/` (swap `lib/storage.js` to write files
+     locally; nginx already serves `/uploads/`).
+  3. **DO Managed Postgres** (~$15/mo) + **DO Spaces** (~$5/mo) for images — fully
+     managed, no expiry, but the highest managed cost.
+- **Scaling triggers** (adopt only when needed): if DB exceeds ~400MB, storage exceeds
+  ~80% of 1GB, or egress approaches 5GB/mo, move to one of the options above rather than
+  waiting for the plan to end.

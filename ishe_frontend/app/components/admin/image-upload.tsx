@@ -3,12 +3,45 @@ import { useMutation } from "@tanstack/react-query";
 import { Upload, X, Link as LinkIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import apiClient from "~/lib/api-client";
 
 interface ImageUploadProps {
   images: string[];
   onChange: (images: string[]) => void;
+  maxDimensions?: { width: number; height: number };
+  context?: string;
+}
+
+function checkImageDimensions(
+  file: File,
+  maxDimensions: { width: number; height: number } | undefined
+): Promise<string | null> {
+  if (!maxDimensions) return Promise.resolve(null);
+  if (file.type === "image/svg+xml" || /\.svg$/i.test(file.name)) {
+    return Promise.resolve(null);
+  }
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      if (
+        img.naturalWidth > maxDimensions.width ||
+        img.naturalHeight > maxDimensions.height
+      ) {
+        resolve(
+          `Image is ${img.naturalWidth}×${img.naturalHeight}px. Maximum is ${maxDimensions.width}×${maxDimensions.height}px.`
+        );
+      } else {
+        resolve(null);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve("Could not read image dimensions. Try a different file.");
+    };
+    img.src = url;
+  });
 }
 
 function convertGoogleDriveUrl(url: string): string {
@@ -23,14 +56,39 @@ function convertGoogleDriveUrl(url: string): string {
   return url;
 }
 
-export function ImageUpload({ images, onChange }: ImageUploadProps) {
+function placeholderInfo(
+  maxDimensions: { width: number; height: number } | undefined
+): { label: string; note: string; aspect: string } {
+  if (!maxDimensions) {
+    return { label: "Upload images", note: "max 500KB", aspect: "aspect-video" };
+  }
+  const { width, height } = maxDimensions;
+  const isPortrait = Math.abs(width / height - 0.8) < 0.01;
+  const ratio = isPortrait ? "4:5" : "16:9";
+  return {
+    label: `${width}×${height}px`,
+    note: `${ratio} · max 500KB`,
+    aspect: isPortrait ? "aspect-[4/5]" : "aspect-video",
+  };
+}
+
+export function ImageUpload({
+  images,
+  onChange,
+  maxDimensions,
+  context,
+}: ImageUploadProps) {
   const [urlInput, setUrlInput] = useState("");
   const [uploadError, setUploadError] = useState("");
+  const placeholder = placeholderInfo(maxDimensions);
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
+      if (context) {
+        formData.append("context", context);
+      }
       return apiClient.post<{ url: string }>("/content/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -53,11 +111,17 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
     onChange(images.filter((_, i) => i !== index));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        setUploadError("File must be under 10MB");
+      if (file.size > 500 * 1024) {
+        setUploadError("File must be under 500KB");
+        e.target.value = "";
+        return;
+      }
+      const dimensionError = await checkImageDimensions(file, maxDimensions);
+      if (dimensionError) {
+        setUploadError(dimensionError);
         e.target.value = "";
         return;
       }
@@ -94,6 +158,18 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {images.length === 0 && (
+        <div
+          className={`flex items-center justify-center border border-dashed border-muted-foreground/40 bg-muted/50 ${placeholder.aspect} w-full`}
+        >
+          <div className="flex flex-col items-center py-6 text-center">
+            <Upload className="mb-2 size-5 text-muted-foreground" />
+            <p className="font-medium text-sm">{placeholder.label}</p>
+            <p className="text-xs text-muted-foreground">{placeholder.note}</p>
+          </div>
         </div>
       )}
 
@@ -134,7 +210,14 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
         <p className="text-xs text-muted-foreground">Uploading...</p>
       )}
       {(uploadMutation.isError || uploadError) && (
-        <p className="text-xs text-destructive">{uploadError || "Upload failed. Try a different file."}</p>
+        <p className="text-xs text-destructive">
+          {uploadError ||
+            (uploadMutation.error &&
+              "response" in uploadMutation.error &&
+              (uploadMutation.error as { response?: { data?: { message?: string } } })
+                .response?.data?.message) ||
+            "Upload failed. Try a different file."}
+        </p>
       )}
     </div>
   );

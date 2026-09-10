@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import type { Route } from "./+types/blog";
 
 import apiClient from "~/lib/api-client";
+import { seoMeta } from "~/lib/seo";
 import type { Blog } from "~/types";
 
 export async function loader() {
@@ -10,10 +11,12 @@ export async function loader() {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Blog — Isitoshe Tours" },
-    { name: "description", content: "Stories, tips, and updates from Isitoshe Tours." },
-  ];
+  return seoMeta({
+    title: "Blog — Isitoshe Tours",
+    path: "/blog",
+    description:
+      "Stories, travel tips, and expert advice from Isitoshe Tours — Uganda safaris, gorilla trekking, and accessible travel.",
+  });
 }
 
 export default function BlogList({ loaderData }: Route.ComponentProps) {

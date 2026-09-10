@@ -3,9 +3,9 @@ import type { Route } from "./+types/itineraries";
 import { Link, useSearchParams } from "react-router";
 import { Search } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import apiClient from "~/lib/api-client";
+import { seoMeta } from "~/lib/seo";
 import type { Itinerary } from "~/types";
 
 export async function loader() {
@@ -14,10 +14,12 @@ export async function loader() {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Itineraries — Isitoshe Tours" },
-    { name: "description", content: "Browse our curated tour itineraries." },
-  ];
+  return seoMeta({
+    title: "Uganda Safari Itineraries — Isitoshe Tours",
+    path: "/itineraries",
+    description:
+      "Browse Uganda safari itineraries from Isitoshe Tours — gorilla trekking, wildlife safaris, and disability-inclusive tours across Bwindi, Murchison Falls, and beyond.",
+  });
 }
 
 const difficulties = ["easy", "moderate", "hard"] as const;

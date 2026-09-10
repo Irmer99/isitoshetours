@@ -1,9 +1,9 @@
 import type { Route } from "./+types/destination-detail";
-import { Link, redirect } from "react-router";
+import { Link, data } from "react-router";
 import { MapPin, Check, ArrowRight } from "lucide-react";
 
-import { Badge } from "~/components/ui/badge";
 import apiClient from "~/lib/api-client";
+import { absoluteUrl, seoMeta } from "~/lib/seo";
 import type { Destination, Itinerary } from "~/types";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -15,29 +15,73 @@ export async function loader({ params }: Route.LoaderArgs) {
     const itineraries =
       itinerariesResult[0].status === "fulfilled" ? itinerariesResult[0].value.data : [];
     return { destination: res.data, itineraries };
-  } catch {
-    throw redirect("/destinations");
+  } catch (err: unknown) {
+    const status =
+      err && typeof err === "object" && "response" in err
+        ? (err as { response: { status: number } }).response?.status
+        : null;
+    if (status === 404) throw data(null, { status: 404 });
+    throw err;
   }
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
   const name = loaderData?.destination?.name;
-  return [
-    { title: name ? `${name} — Isitoshe Tours` : "Destination — Isitoshe Tours" },
-    {
-      name: "description",
-      content:
-        loaderData?.destination?.description ||
-        `Explore ${name} on a guided Isitoshe Tours safari.`,
-    },
-  ];
+  const slug = loaderData?.destination?.slug;
+  return seoMeta({
+    title: name ? `${name} — Isitoshe Tours` : "Destination — Isitoshe Tours",
+    path: slug ? `/destinations/${slug}` : "/destinations",
+    description:
+      loaderData?.destination?.description ||
+      (name ? `Explore ${name} on a guided Isitoshe Tours safari in Uganda.` : undefined),
+    image: loaderData?.destination?.images?.[0],
+    type: "website",
+  });
 }
+
+const destinationJsonLd = (dest: Destination) => ({
+  "@context": "https://schema.org",
+  "@type": "TouristDestination",
+  name: dest.name,
+  description: dest.description || undefined,
+  image: dest.images?.[0] ? absoluteUrl(dest.images[0]) : undefined,
+  url: `https://isitoshetours.com/destinations/${dest.slug}`,
+});
+
+const destinationBreadcrumbJsonLd = (dest: Destination) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://isitoshetours.com/" },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Destinations",
+      item: "https://isitoshetours.com/destinations",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: dest.name,
+      item: `https://isitoshetours.com/destinations/${dest.slug}`,
+    },
+  ],
+});
 
 export default function DestinationDetail({ loaderData }: Route.ComponentProps) {
   const { destination, itineraries } = loaderData;
 
   return (
     <div className="py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            destinationJsonLd(destination),
+            destinationBreadcrumbJsonLd(destination),
+          ]),
+        }}
+      />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           to="/destinations"

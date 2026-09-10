@@ -1,28 +1,86 @@
-import { Link } from "react-router";
+import { Link, data } from "react-router";
 import type { Route } from "./+types/blog-detail";
 import DOMPurify from "dompurify";
 
 import apiClient from "~/lib/api-client";
+import { absoluteUrl, seoMeta } from "~/lib/seo";
 import type { Blog } from "~/types";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const res = await apiClient.get<Blog>(`/content/blogs/${params.slug}`);
-  return { post: res.data };
+  try {
+    const res = await apiClient.get<Blog>(`/content/blogs/${params.slug}`);
+    return { post: res.data };
+  } catch (err: unknown) {
+    const status =
+      err && typeof err === "object" && "response" in err
+        ? (err as { response: { status: number } }).response?.status
+        : null;
+    if (status === 404) throw data(null, { status: 404 });
+    throw err;
+  }
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
   const post = loaderData?.post;
-  return [
-    { title: post ? `${post.title} — Isitoshe Tours` : "Blog — Isitoshe Tours" },
-    { name: "description", content: post?.excerpt || "Blog post from Isitoshe Tours." },
-  ];
+  return seoMeta({
+    title: post ? `${post.title} — Isitoshe Tours` : "Blog — Isitoshe Tours",
+    path: post?.slug ? `/blog/${post.slug}` : "/blog",
+    description: post?.excerpt || "Blog post from Isitoshe Tours.",
+    image: post?.coverImage,
+    type: "article",
+  });
 }
+
+const articleJsonLd = (post: Blog) => ({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.title,
+  description: post.excerpt || undefined,
+  image: post.coverImage ? absoluteUrl(post.coverImage) : undefined,
+  datePublished: post.createdAt,
+  dateModified: post.updatedAt,
+  author: {
+    "@type": "Organization",
+    name: "Isitoshe Tours",
+    url: "https://isitoshetours.com",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Isitoshe Tours",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://isitoshetours.com/isitoshetours.png",
+    },
+  },
+  mainEntityOfPage: post.slug ? `https://isitoshetours.com/blog/${post.slug}` : undefined,
+});
+
+const breadcrumbJsonLd = (post: Blog) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://isitoshetours.com/" },
+    { "@type": "ListItem", position: 2, name: "Blog", item: "https://isitoshetours.com/blog" },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: post.title,
+      item: `https://isitoshetours.com/blog/${post.slug}`,
+    },
+  ],
+});
 
 export default function BlogDetail({ loaderData }: Route.ComponentProps) {
   const { post } = loaderData;
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([articleJsonLd(post), breadcrumbJsonLd(post)]),
+        }}
+      />
       <Link
         to="/blog"
         className="text-sm font-semibold text-primary hover:underline"

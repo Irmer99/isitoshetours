@@ -27,6 +27,7 @@ import { Label, FieldRoot } from "~/components/ui/label";
 import { ImageUpload } from "~/components/admin/image-upload";
 import apiClient from "~/lib/api-client";
 import { parseApiError, parseFieldErrors } from "~/lib/api-errors";
+import { slugify } from "~/lib/slug";
 import type { Blog } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
@@ -226,31 +227,29 @@ export default function BlogManager() {
           </div>
           {formError && <p className="mb-4 text-sm text-destructive">{formError}</p>}
           <div className="grid gap-4 sm:grid-cols-2">
-            <FieldRoot>
-              <Label>Title</Label>
-              <Input
-                value={form.title}
-                onChange={(e) => {
-                  setForm({ ...form, title: e.target.value });
-                  setFieldErrors({ ...fieldErrors, title: "" });
-                }}
-                className={fieldErrors.title ? "border-destructive" : ""}
-              />
-              {fieldErrors.title && <p className="text-xs text-destructive">{fieldErrors.title}</p>}
-            </FieldRoot>
-            <FieldRoot>
-              <Label>Slug</Label>
-              <Input
-                value={form.slug}
-                disabled={!creating}
-                onChange={(e) => {
-                  setForm({ ...form, slug: e.target.value });
-                  setFieldErrors({ ...fieldErrors, slug: "" });
-                }}
-                className={fieldErrors.slug ? "border-destructive" : ""}
-              />
-              {fieldErrors.slug && <p className="text-xs text-destructive">{fieldErrors.slug}</p>}
-            </FieldRoot>
+             <FieldRoot>
+               <Label>Title</Label>
+               <Input
+                 value={form.title}
+                 onChange={(e) => {
+                   const title = e.target.value;
+                   setForm({ ...form, title, slug: creating ? slugify(title) : form.slug });
+                   setFieldErrors({ ...fieldErrors, title: "" });
+                 }}
+                 className={fieldErrors.title ? "border-destructive" : ""}
+               />
+               {fieldErrors.title && <p className="text-xs text-destructive">{fieldErrors.title}</p>}
+             </FieldRoot>
+             <FieldRoot>
+               <Label>Slug</Label>
+               <Input
+                 value={form.slug}
+                 readOnly
+                 placeholder="Auto-generated from title"
+                 className={fieldErrors.slug ? "border-destructive" : ""}
+               />
+               {fieldErrors.slug && <p className="text-xs text-destructive">{fieldErrors.slug}</p>}
+             </FieldRoot>
             <FieldRoot className="sm:col-span-2">
               <Label>Excerpt</Label>
               <Input
@@ -264,6 +263,8 @@ export default function BlogManager() {
               <ImageUpload
                 images={form.coverImage ? [form.coverImage] : []}
                 onChange={(imgs) => setForm({ ...form, coverImage: imgs[0] || "" })}
+                maxDimensions={{ width: 1280, height: 720 }}
+                context="blog"
               />
             </FieldRoot>
             <FieldRoot>
