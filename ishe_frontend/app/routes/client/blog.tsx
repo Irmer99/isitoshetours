@@ -3,6 +3,7 @@ import type { Route } from "./+types/blog";
 
 import apiClient from "~/lib/api-client";
 import { seoMeta } from "~/lib/seo";
+import { CARD_WIDTHS, responsiveSrcset, unsplashSrc } from "~/lib/img";
 import type { Blog } from "~/types";
 
 export async function loader() {
@@ -46,11 +47,14 @@ export default function BlogList({ loaderData }: Route.ComponentProps) {
             <div className="aspect-[16/9] bg-muted flex items-center justify-center text-muted-foreground">
               {post.coverImage ? (
                 <img
-                  src={post.coverImage}
+                  src={unsplashSrc(post.coverImage, 640)}
+                  srcSet={responsiveSrcset(post.coverImage, CARD_WIDTHS)}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   alt={post.title}
                   loading="lazy"
                   width={640}
                   height={360}
+                  decoding="async"
                   className="size-full object-cover"
                 />
               ) : (

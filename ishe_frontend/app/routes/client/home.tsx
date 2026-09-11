@@ -14,6 +14,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { useHomepageContent } from "~/hooks/useHomepageContent";
 import { seoMeta } from "~/lib/seo";
+import { HERO_WIDTHS, responsiveSrcset, unsplashSrc } from "~/lib/img";
 
 export function meta({}: Route.MetaArgs) {
   return seoMeta({
@@ -138,9 +139,26 @@ export default function Home() {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
-    timerRef.current = setInterval(nextSlide, 5000);
+    const start = () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(nextSlide, 5000);
+    };
+    const stop = () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+    const handleVisibility = () => {
+      if (document.hidden) stop();
+      else if (!isPaused) start();
+    };
+    start();
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("blur", stop);
+    window.addEventListener("focus", start);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("blur", stop);
+      window.removeEventListener("focus", start);
     };
   }, [nextSlide, isPaused]);
 
@@ -155,24 +173,37 @@ export default function Home() {
         aria-live="off"
         className="relative h-[60vh] min-h-[400px] overflow-hidden sm:h-[80vh]"
       >
-        {heroSlides.map((slide, i) => (
-          <div
-            key={i}
-            aria-hidden={i !== currentSlide}
-            className="absolute inset-0 transition-opacity duration-1000"
-            style={{ opacity: i === currentSlide ? 1 : 0 }}
-          >
-            <img
-              src={slide.image}
-              alt={slide.tagline}
-              width={1920}
-              height={1080}
-              className="size-full object-cover"
-              loading={i === 0 ? "eager" : "lazy"}
-            />
-            <div className="absolute inset-0 bg-black/40" />
-          </div>
-        ))}
+        {heroSlides.map((slide, i) => {
+          const active = i === currentSlide;
+          const adjacent = Math.abs(i - currentSlide) <= 1;
+          return (
+            <div
+              key={i}
+              aria-hidden={!active}
+              className="absolute inset-0"
+              style={{
+                opacity: active ? 1 : 0,
+                visibility: adjacent ? "visible" : "hidden",
+                transition: "opacity 600ms ease",
+              }}
+            >
+              {adjacent && (
+                <img
+                  src={unsplashSrc(slide.image, 1024)}
+                  srcSet={responsiveSrcset(slide.image, HERO_WIDTHS)}
+                  sizes="100vw"
+                  alt={slide.tagline}
+                  width={1920}
+                  height={1080}
+                  decoding="async"
+                  loading={i <= 1 ? "eager" : "lazy"}
+                  className="size-full object-cover"
+                />
+              )}
+              <div className="absolute inset-0 bg-black/40" />
+            </div>
+          );
+        })}
 
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="mx-auto max-w-3xl px-4 text-center">
@@ -271,11 +302,14 @@ export default function Home() {
                   className={`aspect-[4/5] bg-muted overflow-hidden ${i % 2 === 1 ? "mt-8" : ""}`}
                 >
                   <img
-                    src={image}
+                    src={unsplashSrc(image, 600)}
+                    srcSet={responsiveSrcset(image, [320, 480, 600, 800])}
+                    sizes="(min-width: 1024px) 300px, (min-width: 480px) 48vw, 90vw"
                     alt={`${aboutTitle} image ${i + 1}`}
                     loading="lazy"
                     width={600}
                     height={750}
+                    decoding="async"
                     className="size-full object-cover"
                   />
                 </div>

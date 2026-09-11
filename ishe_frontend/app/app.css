@@ -140,4 +140,7 @@
   p {
     font-size: calc(1rem + 2px);
   }
+  img {
+    content-visibility: auto;
+  }
 }

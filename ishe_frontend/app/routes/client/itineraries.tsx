@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import apiClient from "~/lib/api-client";
 import { seoMeta } from "~/lib/seo";
+import { CARD_WIDTHS, responsiveSrcset, unsplashSrc } from "~/lib/img";
 import type { Itinerary } from "~/types";
 
 export async function loader() {
@@ -106,11 +107,14 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
             <div className="aspect-[16/9] bg-muted flex items-center justify-center text-muted-foreground">
               {it.images?.[0] ? (
                 <img
-                  src={it.images[0]}
+                  src={unsplashSrc(it.images[0], 640)}
+                  srcSet={responsiveSrcset(it.images[0], CARD_WIDTHS)}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   alt={it.title}
                   loading="lazy"
                   width={640}
                   height={360}
+                  decoding="async"
                   className="size-full object-cover"
                 />
               ) : (

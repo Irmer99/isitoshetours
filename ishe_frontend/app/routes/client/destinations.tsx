@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import apiClient from "~/lib/api-client";
 import { seoMeta } from "~/lib/seo";
+import { CARD_WIDTHS, responsiveSrcset, unsplashSrc } from "~/lib/img";
 import type { Destination } from "~/types";
 
 export async function loader() {
@@ -49,11 +50,14 @@ export default function Destinations({ loaderData }: Route.ComponentProps) {
                 {dest.images?.[0] ? (
                   <div className="aspect-[16/9] overflow-hidden bg-muted">
                     <img
-                      src={dest.images[0]}
+                      src={unsplashSrc(dest.images[0], 640)}
+                      srcSet={responsiveSrcset(dest.images[0], CARD_WIDTHS)}
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                       alt={dest.name}
                       loading="lazy"
                       width={640}
                       height={360}
+                      decoding="async"
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>

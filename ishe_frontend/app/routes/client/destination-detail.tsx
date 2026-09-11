@@ -4,6 +4,7 @@ import { MapPin, Check, ArrowRight } from "lucide-react";
 
 import apiClient from "~/lib/api-client";
 import { absoluteUrl, seoMeta } from "~/lib/seo";
+import { responsiveSrcset, unsplashSrc } from "~/lib/img";
 import type { Destination, Itinerary } from "~/types";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -121,11 +122,14 @@ export default function DestinationDetail({ loaderData }: Route.ComponentProps) 
                   {destination.images.map((url, i) => (
                     <div key={i} className="overflow-hidden border border-border bg-muted">
                       <img
-                        src={url}
+                        src={unsplashSrc(url, 800)}
+                        srcSet={responsiveSrcset(url, [480, 800, 1280])}
+                        sizes="(min-width: 1024px) 50vw, 100vw"
                         alt={`${destination.name} ${i + 1}`}
                         loading="lazy"
                         width={640}
                         height={360}
+                        decoding="async"
                         className="aspect-video w-full object-cover"
                       />
                     </div>

@@ -4,6 +4,7 @@ import DOMPurify from "dompurify";
 
 import apiClient from "~/lib/api-client";
 import { absoluteUrl, seoMeta } from "~/lib/seo";
+import { responsiveSrcset, unsplashSrc } from "~/lib/img";
 import type { Blog } from "~/types";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -91,11 +92,14 @@ export default function BlogDetail({ loaderData }: Route.ComponentProps) {
       {post.coverImage && (
         <div className="mt-6 aspect-[16/9] bg-muted flex items-center justify-center overflow-hidden">
           <img
-            src={post.coverImage}
+            src={unsplashSrc(post.coverImage, 1200)}
+            srcSet={responsiveSrcset(post.coverImage, [480, 768, 1200, 1600])}
+            sizes="(min-width: 1024px) 1024px, 100vw"
             alt={post.title}
             loading="lazy"
             width={1200}
             height={675}
+            decoding="async"
             className="size-full object-cover"
           />
         </div>

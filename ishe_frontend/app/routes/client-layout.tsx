@@ -53,7 +53,7 @@ export default function ClientLayout() {
       >
         Skip to main content
       </a>
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95">
         <nav aria-label="Main navigation" className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link to="/" className="font-heading text-xl font-bold text-primary">
             Isitoshe Tours
@@ -102,11 +102,12 @@ export default function ClientLayout() {
           aria-modal="true"
           aria-label="Mobile navigation"
           className={cn(
-            "overflow-hidden transition-all duration-300 md:hidden",
-            mobileOpen ? "max-h-64" : "max-h-0"
+            "grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out md:hidden",
+            mobileOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           )}
         >
-          <div className="flex flex-col gap-2 px-4 pb-4">
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-2 px-4 pb-4">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -130,6 +131,7 @@ export default function ClientLayout() {
               {theme === "light" ? <Moon className="size-4" /> : <Sun className="size-4" />}
               {theme === "light" ? "Dark Mode" : "Light Mode"}
             </button>
+          </div>
           </div>
         </div>
       </header>

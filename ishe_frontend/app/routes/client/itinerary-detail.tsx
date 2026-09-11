@@ -12,6 +12,7 @@ import apiClient from "~/lib/api-client";
 import { createClientSchema } from "~/schemas/clientSchema";
 import { validateWithSchema } from "~/lib/validate";
 import { absoluteUrl, seoMeta } from "~/lib/seo";
+import { responsiveSrcset, unsplashSrc } from "~/lib/img";
 import { useSiteContact } from "~/hooks/useSiteContact";
 import type { Itinerary } from "~/types";
 
@@ -181,11 +182,14 @@ export default function ItineraryDetail({ loaderData }: Route.ComponentProps) {
               {itinerary.images.map((url, i) => (
                 <div key={i} className="overflow-hidden border border-border bg-muted">
                   <img
-                    src={url}
+                    src={unsplashSrc(url, 800)}
+                    srcSet={responsiveSrcset(url, [480, 800, 1280])}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     alt={`${itinerary.title} ${i + 1}`}
                     loading="lazy"
                     width={640}
                     height={360}
+                    decoding="async"
                     className="aspect-video w-full object-cover"
                   />
                 </div>
