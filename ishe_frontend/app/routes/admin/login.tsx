@@ -60,7 +60,7 @@ export default function AdminLogin() {
   }, [actionData, navigate, setAuth]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm border border-border bg-card p-8">
         <div className="text-center">
           <h1 className="font-heading text-2xl font-bold text-foreground">

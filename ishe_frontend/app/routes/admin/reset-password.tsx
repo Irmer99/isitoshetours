@@ -47,7 +47,7 @@ export default function ResetPassword() {
 
   if (actionData?.success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="flex min-h-dvh items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm border border-border bg-card p-8 text-center">
           <Lock className="mx-auto size-10 text-primary" />
           <h1 className="mt-4 font-heading text-2xl font-bold text-foreground">
@@ -69,7 +69,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm border border-border bg-card p-8">
         <div className="text-center">
           <h1 className="font-heading text-2xl font-bold text-foreground">

@@ -171,7 +171,7 @@ export default function Home() {
       <section
         aria-label="Image carousel"
         aria-live="off"
-        className="relative h-[60vh] min-h-[400px] overflow-hidden sm:h-[80vh]"
+        className="relative h-[60dvh] min-h-[360px] overflow-hidden sm:h-[80dvh]"
       >
         {heroSlides.map((slide, i) => {
           const active = i === currentSlide;

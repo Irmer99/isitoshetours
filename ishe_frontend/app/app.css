@@ -131,6 +131,10 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    overflow-x: clip;
+  }
   body {
     @apply bg-background text-foreground;
   }
@@ -139,8 +143,5 @@
   }
   p {
     font-size: calc(1rem + 2px);
-  }
-  img {
-    content-visibility: auto;
   }
 }
