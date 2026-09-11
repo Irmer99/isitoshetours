@@ -217,7 +217,7 @@ export default function Home() {
               Expertly curated safaris through lush forests, vast savannahs, and stunning national
               parks.
             </p>
-            <div className="mt-8 flex items-center justify-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link to="/itineraries">
                 <Button variant="secondary" size="lg">
                   Explore Tours
@@ -274,14 +274,14 @@ export default function Home() {
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
+            <div className="min-w-0">
               <h2 className="font-heading text-3xl font-bold text-foreground">{aboutTitle}</h2>
               {aboutParagraphs.map((paragraph, i) => (
                 <p key={i} className="mt-4 text-muted-foreground leading-relaxed">
                   {paragraph}
                 </p>
               ))}
-              <div className="mt-6 flex items-center gap-4">
+              <div className="mt-6 flex flex-wrap items-center gap-4">
                 <Link to="/itineraries">
                   <Button variant="default" size="lg">
                     View Our Tours
@@ -295,7 +295,7 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid min-w-0 grid-cols-2 gap-4">
               {aboutImages.map((image, i) => (
                 <div
                   key={i}
