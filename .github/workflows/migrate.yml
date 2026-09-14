@@ -1,11 +1,12 @@
 name: Deploy migrations
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'ishe_backend/prisma/**'
-      - 'ishe_backend/package.json'
-      - 'ishe_backend/package-lock.json'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (defaults to primary DB)'
+        required: false
+        default: 'production'
+        type: string
 
 concurrency:
   group: prisma-migrate-${{ github.ref }}

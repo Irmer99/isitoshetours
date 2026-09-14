@@ -28,7 +28,6 @@ services:
       - ./ishe_backend/.env
     environment:
       - PORT=3000
-      - CORS_ORIGIN=http://localhost,https://localhost
     volumes:
       - ./uploads:/app/uploads
     restart: unless-stopped
