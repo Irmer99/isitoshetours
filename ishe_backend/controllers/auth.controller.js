@@ -138,7 +138,15 @@ exports.resetPassword = async (req, res) => {
 
   await prisma.passwordReset.deleteMany({ where: { email: record.email } });
 
-  res.json({ message: 'Password reset successful' });
+  const authToken = jwt.sign(
+    { id: admin.id, email: admin.email, role: admin.role },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '14d' },
+  );
+
+  const adminData = { ...admin };
+  delete adminData.password;
+  res.json({ message: 'Password reset successful', token: authToken, admin: adminData });
 };
 
 exports.changePassword = async (req, res) => {

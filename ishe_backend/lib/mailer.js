@@ -27,7 +27,11 @@ const sendMail = async ({ to, subject, html, idempotencyKey }) => {
     },
     idempotencyKey ? { idempotencyKey } : undefined,
   );
-  logger.info('[mailer] Email sent');
+  if (result.error) {
+    logger.error({ error: result.error }, '[mailer] Resend send failed');
+    throw new Error(result.error.message || 'Resend send failed');
+  }
+  logger.info({ id: result.data?.id }, '[mailer] Email sent');
   return result;
 };
 

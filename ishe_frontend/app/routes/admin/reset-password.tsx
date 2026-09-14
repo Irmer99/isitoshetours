@@ -1,11 +1,13 @@
-import { Form, useActionData, useSearchParams, redirect } from "react-router";
-import { useState } from "react";
+import { Form, useActionData, useSearchParams, redirect, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import { Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label, FieldRoot } from "~/components/ui/label";
+import { useAuth } from "~/contexts/AuthContext";
+import type { LoginResponse } from "~/types";
 import apiClient from "~/lib/api-client";
 
 export async function clientLoader() {
@@ -23,8 +25,11 @@ export async function action({ request }: { request: Request }) {
   const password = formData.get("password") as string;
 
   try {
-    await apiClient.post("/auth/reset-password", { token, password });
-    return { success: true };
+    const res = await apiClient.post<LoginResponse>("/auth/reset-password", {
+      token,
+      password,
+    });
+    return { success: true, token: res.data.token, admin: res.data.admin };
   } catch (err: unknown) {
     const message =
       err && typeof err === "object" && "response" in err
@@ -42,8 +47,22 @@ export function meta() {
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
-  const actionData = useActionData<{ success?: boolean; error?: string }>();
+  const navigate = useNavigate();
+  const { setAuth } = useAuth();
+  const actionData = useActionData<{
+    success?: boolean;
+    token?: string;
+    admin?: LoginResponse["admin"];
+    error?: string;
+  }>();
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (actionData?.success && actionData.token && actionData.admin) {
+      setAuth(actionData.token, actionData.admin);
+      navigate("/admin", { replace: true });
+    }
+  }, [actionData, setAuth, navigate]);
 
   if (actionData?.success) {
     return (
