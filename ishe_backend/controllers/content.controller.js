@@ -47,7 +47,6 @@ exports.createItinerary = async (req, res) => {
 exports.getItineraries = async (req, res) => {
   const prisma = getPrisma();
   const where = {};
-  if (req.query.difficulty) where.difficulty = req.query.difficulty;
   if (req.query.search) where.title = { contains: req.query.search, mode: 'insensitive' };
   const itineraries = await prisma.itinerary.findMany({
     where,

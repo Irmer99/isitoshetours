@@ -25,7 +25,7 @@ export default function ItineraryManager() {
     title: "",
     subtitle: "",
     slug: "",
-    difficulty: "moderate" as Itinerary["difficulty"],
+    description: "",
     duration: "",
     pricingFrom: 0,
     pricingCurrency: CURRENCY,
@@ -86,7 +86,7 @@ export default function ItineraryManager() {
       title: "",
       subtitle: "",
       slug: "",
-      difficulty: "moderate",
+      description: "",
       duration: "",
       pricingFrom: 0,
       pricingCurrency: CURRENCY,
@@ -103,7 +103,7 @@ export default function ItineraryManager() {
       title: it.title,
       subtitle: it.subtitle || "",
       slug: it.slug,
-      difficulty: it.difficulty,
+      description: it.description || "",
       duration: it.duration || "",
       pricingFrom: it.pricing?.from || 0,
       pricingCurrency: it.pricing?.currency || CURRENCY,
@@ -127,7 +127,7 @@ export default function ItineraryManager() {
         title: form.title,
         slug: form.slug,
         subtitle: form.subtitle || undefined,
-        difficulty: form.difficulty,
+        description: form.description || undefined,
         duration: form.duration || undefined,
         pricing: {
           from: form.pricingFrom || undefined,
@@ -145,7 +145,7 @@ export default function ItineraryManager() {
       body: {
         title: form.title,
         subtitle: form.subtitle || undefined,
-        difficulty: form.difficulty,
+        description: form.description || undefined,
         duration: form.duration || undefined,
         pricing: {
           from: form.pricingFrom || undefined,
@@ -226,22 +226,15 @@ export default function ItineraryManager() {
                 placeholder="e.g. 5 days"
               />
             </FieldRoot>
-            <FieldRoot>
-              <Label>Difficulty</Label>
-              <select
-                value={form.difficulty}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    difficulty: e.target.value as Itinerary["difficulty"],
-                  })
-                }
-                className="h-10 border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-              >
-                <option value="easy">Easy</option>
-                <option value="moderate">Moderate</option>
-                <option value="hard">Hard</option>
-              </select>
+            <FieldRoot className="sm:col-span-2">
+              <Label>Detailed Description</Label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="w-full resize-none border border-input bg-background p-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+                rows={4}
+                placeholder="Describe the itinerary in detail. Shown on the itinerary page."
+              />
             </FieldRoot>
             <FieldRoot>
               <Label>Price From</Label>
@@ -338,7 +331,7 @@ export default function ItineraryManager() {
               <div>
                 <p className="text-sm font-medium">{it.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {it.slug} · {it.difficulty}
+                  {it.slug} · {it.duration || "Duration TBA"}
                   {it.pricing?.from != null &&
                     ` · From ${it.pricing.currency} ${it.pricing.from}`}
                 </p>

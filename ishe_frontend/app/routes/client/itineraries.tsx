@@ -23,21 +23,17 @@ export function meta({}: Route.MetaArgs) {
   });
 }
 
-const difficulties = ["easy", "moderate", "hard"] as const;
-
 export default function Itineraries({ loaderData }: Route.ComponentProps) {
   const { itineraries } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
-  const difficulty = searchParams.get("difficulty") || "";
 
   const filtered = useMemo(() => {
     return itineraries.filter((it) => {
-      if (difficulty && it.difficulty !== difficulty) return false;
       if (search && !it.title.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [itineraries, search, difficulty]);
+  }, [itineraries, search]);
 
   const updateParam = (key: string, value: string) => {
     setSearchParams((prev) => {
@@ -72,24 +68,6 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
             className="w-full border border-input bg-background py-2 pl-10 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
-        <div className="flex gap-2">
-          {difficulties.map((d) => (
-            <button
-              key={d}
-              onClick={() => {
-                updateParam("difficulty", d === difficulty ? "" : d);
-              }}
-              aria-pressed={difficulty === d}
-              className={`rounded-none border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-colors ${
-                difficulty === d
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-input bg-background text-muted-foreground hover:border-muted-foreground"
-              }`}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
       </div>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -123,7 +101,7 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
             </div>
             <div className="p-4">
               <div className="flex items-center justify-between">
-                <Badge variant="secondary">{it.difficulty}</Badge>
+                <Badge variant="secondary">{it.duration || "Duration TBA"}</Badge>
               </div>
               <h3 className="mt-3 font-heading text-lg font-semibold group-hover:text-primary transition-colors">
                 {it.title}
@@ -131,11 +109,6 @@ export default function Itineraries({ loaderData }: Route.ComponentProps) {
               {it.subtitle && (
                 <p className="mt-1 text-sm text-muted-foreground">
                   {it.subtitle}
-                </p>
-              )}
-              {it.duration && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {it.duration}
                 </p>
               )}
             </div>

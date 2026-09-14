@@ -37,6 +37,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
     title: `${title} — Isitoshe Tours`,
     path: itinerary?.slug ? `/itineraries/${itinerary.slug}` : "/itineraries",
     description:
+      itinerary?.description ||
       itinerary?.subtitle ||
       `${title} — a Uganda safari by Isitoshe Tours. Enquire for pricing and availability.`,
     image: itinerary?.images?.[0],
@@ -48,7 +49,7 @@ const tripJsonLd = (itinerary: Itinerary) => ({
   "@context": "https://schema.org",
   "@type": "TouristTrip",
   name: itinerary.title,
-  description: itinerary.subtitle || undefined,
+  description: itinerary.description || itinerary.subtitle || undefined,
   image: itinerary.images?.[0] ? absoluteUrl(itinerary.images[0]) : undefined,
   tourOperator: {
     "@type": "TravelAgency",
@@ -159,7 +160,7 @@ export default function ItineraryDetail({ loaderData }: Route.ComponentProps) {
       <div className="grid gap-12 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <div className="flex flex-wrap gap-1.5">
-            <Badge variant="secondary">{itinerary.difficulty}</Badge>
+            <Badge variant="secondary">{itinerary.duration || "Duration TBA"}</Badge>
             {itinerary.destinations?.map((d) => (
               <Link key={d} to={`/destinations/${d}`}>
                 <Badge
@@ -176,6 +177,17 @@ export default function ItineraryDetail({ loaderData }: Route.ComponentProps) {
           </h1>
           {itinerary.subtitle && (
             <p className="mt-2 text-lg text-muted-foreground">{itinerary.subtitle}</p>
+          )}
+          {itinerary.description && (
+            <div className="mt-4 space-y-3">
+              {itinerary.description.split("\n").map((paragraph, i) =>
+                paragraph.trim() ? (
+                  <p key={i} className="text-sm leading-relaxed text-muted-foreground">
+                    {paragraph}
+                  </p>
+                ) : null
+              )}
+            </div>
           )}
           {itinerary.images && itinerary.images.length > 0 && (
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -196,10 +208,6 @@ export default function ItineraryDetail({ loaderData }: Route.ComponentProps) {
               ))}
             </div>
           )}
-          {itinerary.duration && (
-            <p className="mt-1 text-sm text-muted-foreground">Duration: {itinerary.duration}</p>
-          )}
-
           {itinerary.includes && itinerary.includes.length > 0 && (
             <div className="mt-6">
               <h3 className="text-sm font-semibold tracking-wider uppercase">Includes</h3>

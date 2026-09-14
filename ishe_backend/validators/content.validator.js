@@ -8,7 +8,7 @@ const createItinerarySchema = z.object({
   title: z.string().min(1),
   slug: z.string().optional(),
   subtitle: z.string().optional(),
-  difficulty: z.enum(['easy', 'moderate', 'hard']).default('moderate'),
+  description: z.string().optional(),
   duration: z.string().optional(),
   pricing: z
     .object({
@@ -36,7 +36,7 @@ const createItinerarySchema = z.object({
 const updateItinerarySchema = z.object({
   title: z.string().min(1).optional(),
   subtitle: z.string().optional(),
-  difficulty: z.enum(['easy', 'moderate', 'hard']).optional(),
+  description: z.string().optional(),
   duration: z.string().optional(),
   pricing: z
     .object({

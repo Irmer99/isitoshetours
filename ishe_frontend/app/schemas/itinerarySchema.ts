@@ -11,7 +11,7 @@ export const itineraryDaySchema = z.object({
 export const updateItinerarySchema = z.object({
   title: z.string().min(1).optional(),
   subtitle: z.string().optional(),
-  difficulty: z.enum(["easy", "moderate", "hard"]).optional(),
+  description: z.string().optional(),
   duration: z.string().optional(),
   pricing: z
     .object({

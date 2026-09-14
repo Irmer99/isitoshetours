@@ -83,7 +83,7 @@ function FallbackContent() {
             <li>Whether you&apos;ll travel with a companion or carer</li>
           </ul>
           <p className="mt-3">
-            We rate every itinerary&apos;s physical difficulty honestly, and we will tell
+            We understand each itinerary&apos;s accessibility demands, and we will tell
             you straight if a particular park or activity won&apos;t suit your needs —
             then we&apos;ll offer a workable alternative.
           </p>

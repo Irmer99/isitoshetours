@@ -63,7 +63,7 @@ model Itinerary {
   slug         String   @unique
   title        String
   subtitle     String?
-  difficulty   String   @default("moderate") // "easy" | "moderate" | "hard"
+  description  String?
   duration     String?
   pricingFrom  Float?   @map("pricing_from")
   pricingCurrency String @default("MAD") @map("pricing_currency")

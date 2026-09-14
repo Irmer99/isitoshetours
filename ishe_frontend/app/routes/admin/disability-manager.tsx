@@ -39,7 +39,7 @@ const DEFAULT_CONTENT = `<p>Uganda's wild beauty belongs to everyone. Isitoshe T
 <li>Any medication, equipment, or dietary requirements</li>
 <li>Whether you'll travel with a companion or carer</li>
 </ul>
-<p>We rate every itinerary's physical difficulty honestly, and we will tell you straight if a particular park or activity won't suit your needs — then we'll offer a workable alternative.</p>
+<p>We understand each itinerary's accessibility demands and will tell you straight if a particular park or activity won't suit your needs — then we'll offer a workable alternative.</p>
 <h2>Travelling With a Companion or Carer</h2>
 <p>Companions and carers are welcome. Let us know when booking and we'll arrange adjacent rooms, shared transport, and a single point of contact for your whole group.</p>
 <h2>Let's Plan Together</h2>

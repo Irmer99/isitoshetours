@@ -149,7 +149,7 @@ const options = {
             slug: { type: 'string' },
             title: { type: 'string' },
             subtitle: { type: 'string' },
-            difficulty: { type: 'string', enum: ['easy', 'moderate', 'hard'] },
+            description: { type: 'string', nullable: true },
             duration: { type: 'string' },
             pricing: {
               type: 'object',

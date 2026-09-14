@@ -11,7 +11,7 @@ export interface Itinerary {
   slug: string;
   title: string;
   subtitle?: string;
-  difficulty: "easy" | "moderate" | "hard";
+  description?: string;
   duration?: string;
   pricing: {
     from?: number;
